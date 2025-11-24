@@ -8,370 +8,315 @@
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Tekno&display=swap" rel="stylesheet">
     <style>
         :root {
-            --imperial-black: #050505;
-            --imperial-grey: #1a1a1a;
-            --imperial-light-grey: #a0a0a0;
-            --imperial-red: #cf0a0a;
-            --imperial-red-dim: #7a0000;
-            --holo-blue: #00e5ff;
-            --holo-blue-dim: #005f6b;
-            --text-main: #f0f0f0;
-            --card-bg: #0d0d0d;
+            --imperial-black: #020202;
+            --imperial-grey: #121212;
+            --imperial-light-grey: #b0b0b0;
+            --imperial-red: #ff1a1a;
+            --imperial-red-dim: #660000;
+            --imperial-red-dark: #330000;
+            --holo-blue: #00f2ff;
+            --holo-blue-dim: #004d52;
+            --text-main: #e0e0e0;
+            --card-bg: #0a0a0a;
             --border-color: #333;
-            --scanline-color: rgba(0, 0, 0, 0.5);
+            
+            /* Faction Colors */
+            --faction-hardliner: #ff3333;
+            --faction-traditionalist: #4488ff;
+            --faction-ultranationalist: #ffaa00;
+            --faction-reformer: #00cc66;
+            --faction-progressive: #aa66cc;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            cursor: crosshair; /* Tactical cursor */
+            cursor: crosshair;
         }
 
         /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #000;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--imperial-red-dim);
-            border-radius: 0;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--imperial-red);
-        }
+        ::-webkit-scrollbar { width: 6px; background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--imperial-red-dim); border: 1px solid var(--imperial-red); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--imperial-red); }
 
         body {
             background-color: var(--imperial-black);
             color: var(--text-main);
             font-family: 'Exo 2', sans-serif;
             height: 100vh;
-            overflow: hidden; /* Main body hidden, scroll internal divs */
+            overflow: hidden;
             display: flex;
         }
 
-        /* Background Effects */
+        /* --- BACKGROUND FX --- */
         .bg-grid {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             background-image: 
-                linear-gradient(rgba(50, 0, 0, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(50, 0, 0, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
+                linear-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
             z-index: 0;
             pointer-events: none;
         }
-
-        /* CRT Overlay */
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, #000 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
         .crt-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
+            background: repeating-linear-gradient(
+                0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px
+            );
             z-index: 100;
             pointer-events: none;
-            animation: flicker 0.15s infinite;
+            opacity: 0.6;
         }
 
-        @keyframes flicker {
-            0% { opacity: 0.95; }
-            50% { opacity: 0.9; }
-            100% { opacity: 0.95; }
-        }
-
-        /* BOOT SEQUENCE */
+        /* --- BOOT SEQUENCE --- */
         #boot-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Share Tech Mono', monospace;
-            color: var(--imperial-red);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red);
         }
-        .boot-text {
-            font-size: 1.2rem;
-            margin: 5px;
-            text-align: left;
-            width: 300px;
-        }
+        .boot-text { font-size: 1.4rem; margin: 5px; text-align: left; width: 400px; text-shadow: 0 0 5px var(--imperial-red); }
 
-        /* SIDEBAR (System Logs) */
+        /* --- LAYOUT --- */
         aside {
-            width: 300px;
-            background: #080808;
-            border-right: 1px solid var(--imperial-red-dim);
-            display: flex;
-            flex-direction: column;
-            padding: 1rem;
-            z-index: 10;
-            font-family: 'Share Tech Mono', monospace;
-            display: none; /* Hidden on mobile */
+            width: 320px; background: #050505; border-right: 2px solid var(--imperial-red-dim);
+            display: flex; flex-direction: column; padding: 1.5rem; z-index: 10;
+            font-family: 'Share Tech Mono', monospace; display: none; 
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
         }
-
-        @media(min-width: 1000px) {
-            aside { display: flex; }
-        }
+        @media(min-width: 1100px) { aside { display: flex; } }
 
         .log-header {
-            color: var(--imperial-red);
-            font-size: 1.2rem;
-            border-bottom: 1px solid var(--imperial-red);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
+            color: var(--imperial-red); font-size: 1.1rem; border-bottom: 2px solid var(--imperial-red);
+            padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 0 8px var(--imperial-red);
         }
+        .log-content { flex-grow: 1; overflow-y: hidden; font-size: 0.7rem; color: #666; display: flex; flex-direction: column; justify-content: flex-end; }
+        .log-entry { margin-bottom: 6px; border-left: 2px solid transparent; padding-left: 8px; transition: all 0.3s; }
+        .log-entry.new { color: var(--holo-blue); border-left-color: var(--holo-blue); text-shadow: 0 0 5px var(--holo-blue); }
+        .log-entry.alert { color: var(--imperial-red); font-weight: bold; border-left-color: var(--imperial-red); }
 
-        .log-content {
-            flex-grow: 1;
-            overflow-y: hidden;
-            font-size: 0.75rem;
-            color: #555;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
+        main { flex-grow: 1; overflow-y: auto; position: relative; z-index: 5; padding: 2rem 3rem; display: flex; flex-direction: column; }
 
-        .log-entry {
-            margin-bottom: 4px;
-            opacity: 0.7;
-        }
-        .log-entry.new { color: var(--holo-blue); opacity: 1; }
-        .log-entry.alert { color: var(--imperial-red); font-weight: bold; }
-
-        /* MAIN CONTENT */
-        main {
-            flex-grow: 1;
-            overflow-y: auto;
-            position: relative;
-            z-index: 5;
-            padding: 2rem;
-        }
-
-        /* Header */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            border-bottom: 2px solid var(--imperial-red);
-            padding-bottom: 1rem;
-            margin-bottom: 3rem;
-            position: relative;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 2px solid var(--imperial-red); padding-bottom: 1.5rem; margin-bottom: 3rem;
+            position: relative; background: linear-gradient(90deg, transparent 0%, rgba(207, 10, 10, 0.05) 50%, transparent 100%);
         }
+        header::after { content: ''; position: absolute; bottom: -6px; right: 0; width: 30%; height: 4px; background: var(--imperial-red-dim); }
 
         .header-title h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            color: var(--text-main);
-            text-shadow: 0 0 10px rgba(207, 10, 10, 0.5);
+            font-family: 'Orbitron', sans-serif; font-size: 3rem; text-transform: uppercase; letter-spacing: 6px;
+            color: #fff; text-shadow: 0 0 15px rgba(207, 10, 10, 0.8); margin-bottom: 5px;
         }
-
         .header-title .subtitle {
-            font-family: 'Share Tech Mono', monospace;
-            color: var(--imperial-red);
-            font-size: 1rem;
-            letter-spacing: 2px;
-            margin-top: 0.5rem;
+            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 1.1rem; letter-spacing: 3px;
+            display: flex; align-items: center;
         }
+        .header-title .subtitle::before { content: ''; display: inline-block; width: 10px; height: 10px; background: var(--imperial-red); margin-right: 10px; box-shadow: 0 0 8px var(--imperial-red); }
+        .header-stats { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--imperial-light-grey); border-right: 2px solid var(--imperial-red); padding-right: 15px; line-height: 1.4; }
 
-        .header-stats {
-            text-align: right;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.8rem;
-            color: var(--imperial-light-grey);
-            display: none;
-        }
-        @media(min-width: 768px) { .header-stats { display: block; } }
+        /* --- CARDS --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2.5rem; padding-bottom: 6rem; }
 
-        /* Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
-            padding-bottom: 4rem;
-        }
-
-        /* Advanced Card Styles */
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            clip-path: polygon(
-                20px 0, 100% 0, 
-                100% calc(100% - 20px), calc(100% - 20px) 100%, 
-                0 100%, 0 20px
-            );
+            background-color: rgba(15, 15, 15, 0.95); border: 1px solid #333; position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+            cursor: pointer;
         }
-
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 15px rgba(207, 10, 10, 0.3);
-            border-color: var(--imperial-red);
-            z-index: 10;
+            transform: translateY(-5px) scale(1.02); border-color: var(--imperial-red);
+            box-shadow: 0 0 25px rgba(207, 10, 10, 0.3); z-index: 10; background-color: rgba(25, 20, 20, 1);
         }
-
-        /* Tech borders on card */
         .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 20px; height: 2px;
-            background: var(--imperial-red);
-            transition: width 0.3s;
+            content: ''; position: absolute; top: 0; left: 0; width: 30px; height: 30px;
+            border-top: 2px solid var(--imperial-red); border-left: 2px solid var(--imperial-red);
+            opacity: 0.5; transition: all 0.3s;
         }
-        .card:hover::before { width: 100%; }
+        .card:hover::before { width: 100%; height: 100%; opacity: 1; box-shadow: inset 0 0 20px rgba(207, 10, 10, 0.1); }
 
-        .card-inner {
-            display: flex;
-            flex-direction: row;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        /* Image Section */
+        .card-inner { display: flex; flex-direction: row; height: 100%; pointer-events: none; }
+        
         .card-visual {
-            width: 120px;
-            background: linear-gradient(180deg, #151515 0%, #0a0a0a 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid #333;
-            padding: 1rem;
-            position: relative;
+            width: 130px; background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-right: 1px solid #333; padding: 1rem; position: relative; overflow: hidden;
+        }
+        .card-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.6; filter: grayscale(100%) contrast(120%); transition: all 0.3s; }
+        .card:hover .card-visual img { opacity: 0.9; filter: grayscale(0%) contrast(110%); }
+        .imperial-crest { width: 70px; height: 70px; fill: #333; z-index: 1; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); transition: all 0.5s ease; }
+        .card:hover .imperial-crest { fill: #fff; filter: drop-shadow(0 0 8px var(--imperial-red)); transform: scale(1.1); }
+
+        .card-data { flex-grow: 1; padding: 1.2rem; display: flex; flex-direction: column; position: relative; }
+        .data-header { border-bottom: 1px solid #333; margin-bottom: 0.8rem; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .org-stack { display: flex; flex-direction: column; gap: 4px; }
+        .card-org { font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(207, 10, 10, 0.1); padding: 2px 5px; border-radius: 2px; align-self: flex-start; }
+        
+        .faction-tag {
+            font-family: 'Exo 2'; font-weight: 800; font-size: 0.65rem; text-transform: uppercase;
+            padding: 2px 6px; border-radius: 2px; color: #000; letter-spacing: 0.5px; margin-top: 4px; display: inline-block; width: fit-content;
         }
 
-        .imperial-crest {
-            width: 60px;
-            height: 60px;
-            fill: #444;
-            transition: fill 0.3s;
-        }
-        .card:hover .imperial-crest { fill: var(--imperial-red); }
-
-        .rank-pips {
-            margin-top: 1rem;
-            display: flex;
-            gap: 2px;
-        }
-        .pip { width: 8px; height: 12px; background: #333; }
-        .pip.red { background: var(--imperial-red-dim); }
-        .pip.blue { background: var(--holo-blue-dim); }
-        .pip.gold { background: #b8860b; }
-
-        /* Data Section */
-        .card-data {
-            flex-grow: 1;
-            padding: 1.2rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .data-header {
-            border-bottom: 1px solid #333;
-            margin-bottom: 0.8rem;
-            padding-bottom: 0.5rem;
-        }
-
-        .card-org {
-            font-family: 'Share Tech Mono', monospace;
-            color: var(--imperial-red);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .card-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff;
-            margin-top: 2px;
-        }
-
-        .card-title {
-            font-size: 0.85rem;
-            color: var(--imperial-light-grey);
-            font-weight: 300;
-        }
-
-        .card-body {
-            font-size: 0.8rem;
-            color: #888;
-            line-height: 1.4;
-            flex-grow: 1;
-            margin-bottom: 1rem;
-        }
-
-        /* Tech Specs Grid */
-        .tech-specs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.65rem;
-            color: #555;
-            background: rgba(0,0,0,0.3);
-            padding: 5px;
-            border: 1px solid #222;
-        }
-
-        .spec-row { display: flex; justify-content: space-between; }
-        .spec-label { color: #444; }
-        .spec-val { color: var(--holo-blue); }
-
-        .status-light {
-            width: 8px; height: 8px;
-            background: #0f0;
-            border-radius: 50%;
-            box-shadow: 0 0 5px #0f0;
-            display: inline-block;
-            margin-right: 5px;
-        }
+        .card-name { font-family: 'Orbitron', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 5px; letter-spacing: 1px; }
+        .card-title { font-size: 0.85rem; color: var(--imperial-light-grey); font-weight: 300; margin-bottom: 10px; }
+        
+        .stats-bars { margin-bottom: 1rem; }
+        .stat-line { display: flex; align-items: center; margin-bottom: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #555; }
+        .stat-label { width: 70px; text-align: right; margin-right: 8px; }
+        .stat-track { flex-grow: 1; height: 4px; background: #222; position: relative; }
+        .stat-fill { height: 100%; background: var(--imperial-red); box-shadow: 0 0 5px var(--imperial-red); }
+        .card-body { font-size: 0.8rem; color: #999; line-height: 1.5; flex-grow: 1; margin-bottom: 1rem; font-family: 'Exo 2', sans-serif; height: 3.2em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;}
+        .tech-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; }
+        .spec-item { background: #0d0d0d; padding: 6px 10px; display: flex; justify-content: space-between; }
+        .spec-val { color: var(--holo-blue); text-shadow: 0 0 3px var(--holo-blue-dim); }
+        .status-light { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-light.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
         .status-light.idle { background: #fb0; box-shadow: 0 0 5px #fb0; }
         .status-light.alert { background: #f00; box-shadow: 0 0 5px #f00; }
 
-        /* Footer */
-        .main-footer {
-            margin-top: auto;
-            border-top: 1px solid #333;
-            padding-top: 1rem;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.7rem;
-            color: #444;
-            display: flex;
-            justify-content: space-between;
-        }
+        /* --- MODAL --- */
+        #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        #modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
+        .modal-container { width: 90%; max-width: 1000px; height: 70vh; background: #0d0d0d; border: 2px solid var(--imperial-red); display: flex; box-shadow: 0 0 50px rgba(207, 10, 10, 0.4); position: relative; animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-corner { position: absolute; width: 50px; height: 50px; border: 4px solid var(--imperial-red); transition: all 0.5s; }
+        .tl { top: -2px; left: -2px; border-bottom: none; border-right: none; }
+        .tr { top: -2px; right: -2px; border-bottom: none; border-left: none; }
+        .bl { bottom: -2px; left: -2px; border-top: none; border-right: none; }
+        .br { bottom: -2px; right: -2px; border-top: none; border-left: none; }
+        
+        .modal-left { width: 40%; background: #000; position: relative; overflow: hidden; border-right: 2px solid var(--imperial-red-dim); display: flex; align-items: center; justify-content: center; }
+        .modal-img-container { width: 100%; height: 100%; position: relative; }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; filter: grayscale(50%); }
+        .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; border: 1px solid rgba(255, 25, 25, 0.3); pointer-events: none; }
+        .reticle::before, .reticle::after { content: ''; position: absolute; width: 20px; height: 2px; background: var(--imperial-red); top: 50%; }
+        .reticle::before { left: -10px; } .reticle::after { right: -10px; }
+        .scan-line-anim { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(255, 0, 0, 0.5); box-shadow: 0 0 10px red; animation: scanDown 3s infinite linear; }
 
+        .modal-right { width: 60%; padding: 3rem; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+        .modal-close { position: absolute; top: 20px; right: 20px; font-family: 'Orbitron'; color: var(--imperial-red); font-size: 2rem; cursor: pointer; transition: 0.3s; }
+        .modal-close:hover { text-shadow: 0 0 10px red; transform: scale(1.1); }
+        .dossier-label { color: #555; font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-bottom: 5px; }
+        .modal-name { font-family: 'Orbitron'; font-size: 2.5rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        .modal-title { color: var(--imperial-red); font-size: 1.2rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; display: inline-block; }
+        
+        .faction-display { margin-bottom: 2rem; border: 1px solid #333; background: #090909; padding: 15px; position: relative; }
+        .faction-display::before { content: 'POLITICAL ALIGNMENT'; position: absolute; top: -8px; left: 10px; background: #0d0d0d; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: #777; padding: 0 5px; }
+        .faction-name { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #999; font-size: 0.9rem; border-left: 2px solid #333; padding-left: 10px; }
+
+        .modal-desc { font-family: 'Share Tech Mono'; color: var(--text-main); line-height: 1.6; font-size: 1rem; border-left: 3px solid var(--imperial-red-dim); padding-left: 1rem; margin-bottom: 2rem; min-height: 100px; white-space: pre-wrap; }
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: auto; }
+        .m-stat-box { background: #111; padding: 10px; border: 1px solid #333; }
+        .m-stat-label { color: #666; font-size: 0.7rem; font-family: 'Share Tech Mono'; display: block; margin-bottom: 5px; }
+        .m-stat-val { color: var(--holo-blue); font-size: 1.1rem; font-family: 'Orbitron'; }
+
+        /* --- TICKER --- */
+        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 35px; background: #000; border-top: 2px solid var(--imperial-red); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.9rem; text-transform: uppercase; }
+        .ticker-title { background: var(--imperial-red); color: #000; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 2rem; }
+
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalOpen { 0% { transform: scaleY(0.01) scaleX(0); } 50% { transform: scaleY(0.01) scaleX(1); } 100% { transform: scaleY(1) scaleX(1); } }
+        @keyframes scanDown { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        @media(max-width: 900px) {
+            .modal-container { flex-direction: column; height: 90vh; overflow-y: auto; }
+            .modal-left { width: 100%; height: 250px; border-right: none; border-bottom: 2px solid var(--imperial-red-dim); }
+            .modal-right { width: 100%; padding: 1.5rem; }
+            .modal-name { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
 
     <div class="bg-grid"></div>
+    <div class="vignette"></div>
     <div class="crt-overlay"></div>
 
-    <!-- BOOT SEQUENCE OVERLAY -->
+    <!-- BOOT SEQUENCE -->
     <div id="boot-screen">
-        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL...</div>
-        <div class="boot-text" id="boot-2">LOADING SECURITY PROTOCOLS...</div>
-        <div class="boot-text" id="boot-3">DECRYPTING HIGH COMMAND MANIFEST...</div>
-        <div class="boot-text" id="boot-4" style="color:white">ACCESS GRANTED.</div>
+        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL 6.2...</div>
+        <div class="boot-text" id="boot-2">VERIFYING BIOMETRIC SIGNATURE...</div>
+        <div class="boot-text" id="boot-3">DECRYPTING FACTIONAL INTELLIGENCE...</div>
+        <div class="boot-text" id="boot-4" style="color:white; font-weight:bold;">ACCESS GRANTED. ERA: 5 ABY.</div>
     </div>
 
-    <!-- SIDEBAR LOGS -->
-    <aside>
-        <div class="log-header">System Stream</div>
-        <div class="log-content" id="system-log">
-            <!-- Logs injected via JS -->
+    <!-- MODAL OVERLAY -->
+    <div id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-corner tl"></div>
+            <div class="modal-corner tr"></div>
+            <div class="modal-corner bl"></div>
+            <div class="modal-corner br"></div>
+            
+            <div class="modal-close" onclick="closeModal()">×</div>
+
+            <div class="modal-left">
+                <div class="modal-img-container">
+                    <img id="m-img" class="modal-img" src="" alt="Personnel Image">
+                    <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#111;">
+                        <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512"><path id="m-svg-path" d=""/></svg>
+                    </div>
+                    <div class="reticle"><div class="scan-line-anim"></div></div>
+                </div>
+            </div>
+
+            <div class="modal-right">
+                <div class="dossier-label">IMPERIAL DOSSIER // TOP SECRET</div>
+                <h2 id="m-name" class="modal-name">NAME</h2>
+                <div id="m-title" class="modal-title">TITLE</div>
+
+                <!-- FACTION DATA BLOCK -->
+                <div class="faction-display">
+                    <div id="m-faction-name" class="faction-name">FACTION</div>
+                    <div id="m-faction-quote" class="faction-quote">"Quote"</div>
+                </div>
+                
+                <div class="dossier-label">BIOGRAPHICAL DATA SUMMARY</div>
+                <p id="m-desc" class="modal-desc">Description text...</p>
+
+                <div class="modal-stats-grid">
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">CURRENT STATUS</span>
+                        <span id="m-status" class="m-stat-val">ACTIVE</span>
+                    </div>
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">LOCATION</span>
+                        <span id="m-loc" class="m-stat-val">CORUSCANT</span>
+                    </div>
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">LOYALTY RATING</span>
+                        <span id="m-loyalty" class="m-stat-val" style="color:var(--imperial-red)">98%</span>
+                    </div>
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">CLEARANCE</span>
+                        <span class="m-stat-val">ULTRA</span>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <aside>
+        <div class="log-header">System Operations</div>
+        <div class="log-content" id="system-log"></div>
     </aside>
 
-    <!-- MAIN INTERFACE -->
     <main>
         <header>
             <div class="header-title">
@@ -379,182 +324,262 @@
                 <h1>High Command</h1>
             </div>
             <div class="header-stats">
-                <div>SECTOR: CORUSCANT PRIME</div>
-                <div>DATE: <span id="stardate"></span></div>
+                <div>ERA: 5 ABY (Post-Endor)</div>
+                <div>CYCLE: <span id="stardate"></span></div>
                 <div>ENCRYPTION: ULTRA-CLASS</div>
             </div>
         </header>
 
-        <div class="grid" id="cardGrid">
-            <!-- Cards injected via JS -->
-        </div>
-
-        <div class="main-footer">
-            <span>IMPERIAL DEPARTMENT OF MILITARY RESEARCH</span>
-            <span>RESTRICTED ACCESS // PUNISHABLE BY DEATH</span>
-        </div>
+        <div class="grid" id="cardGrid"></div>
     </main>
 
-<script>
-    // Imperial Crest SVG Path
-    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
+    <div class="ticker-wrap">
+        <div class="ticker-title">HOLONET NEWS</div>
+        <div class="ticker">
+            <div class="ticker-item">EMPEROR DISSOLVES SENATE: "REGIONAL GOVERNORS NOW HAVE DIRECT CONTROL"</div>
+            <div class="ticker-item">MINING DISASTER ON JEDHA CITY ATTRIBUTED TO REBEL SABOTAGE</div>
+            <div class="ticker-item">LORD VADER ARRIVES IN DEATH STAR SECTOR</div>
+            <div class="ticker-item">COMPNOR REPORTS 15% INCREASE IN ACADEMY ENROLLMENT</div>
+            <div class="ticker-item">FLEET ADMIRAL OZZEL CRITICIZED FOR "CLUMSY" TACTICS</div>
+            <div class="ticker-item">NEW TIE DEFENDER PROTOTYPES SPOTTED NEAR LOTHAL</div>
+            <div class="ticker-item">REWARD ISSUED FOR SKYWALKER, LUKE. 500,000 CREDITS.</div>
+        </div>
+    </div>
 
-    // Data Source
-    const personnelData = [
+<script>
+    /* DATA SOURCE - Updated with "Imperial Factions" and "Imperial State Bodies" lore.
+    Factions: Hardliner, Traditionalist, Ultranationalist, Reformer, Progressive.
+    */
+    const personnelConfig = [
         {
-            name: "Grand Vizier [REDACTED]",
+            name: "Grand Vizier Mas Amedda",
             title: "Imperial Throne",
-            org: "Executive Office",
-            desc: "The Emperor’s supreme legal and political executor. Ensures senior officials adhere to Imperial doctrine and the sovereign’s vision. Oversees the Imperial Throne corporate and its many extralegal instrumentalities.",
-            status: "active", location: "Imperial Palace"
+            org: "EXEC",
+            faction: "Traditionalist",
+            image: "", 
+            desc: "Administrator of the Imperial Throne, Household, Court, and Privy Council. A key Traditionalist figure, Amedda believes in the stability of the pre-Endor order. He currently plays second fiddle to the military junta, administering the Emperor's private estates and the ceremonial apparatus of the state while trying to maintain continuity amid the chaos.",
+            status: "active", location: "Imperial Palace", loyalty: 100, influence: 98
         },
         {
-            name: "Supreme Commander Fenn",
-            title: "Galactic Empire",
-            org: "High Command",
-            desc: "Head of State. The apex of Imperial authority, uniting political sovereignty and military supremacy. Commands the Empire’s destiny through decree, war direction, and strategic will.",
-            status: "active", location: "The Executor"
+            name: "Sup. Cmdr. Fenn",
+            title: "Chairman, Joint Chiefs of Staff",
+            org: "CMD",
+            faction: "Hardliner",
+            image: "",
+            desc: "The political leader of the Imperial military and Chairman of the Joint Chiefs of Staff. As Head of State, Fenn represents the 'Hardliner' belief that the Empire survives only through uniformed force. She dominates the War Ministry and reduced it to a rubber stamp, ensuring the military remains the heart of the state during the crisis.",
+            status: "active", location: "The Executor", loyalty: 99, influence: 100
         },
         {
             name: "Prime Minister [REDACTED]",
             title: "Council of Ministers",
-            org: "Civil Admin",
-            desc: "Administrative head of the executive government. Coordinates ministries and communicates high-level directives across the bureaucratic machine.",
-            status: "idle", location: "Coruscant Admin"
+            org: "ADMIN",
+            faction: "Traditionalist",
+            image: "",
+            desc: "Leader of the Council of Ministers and the highest level of civilian government. A staunch Traditionalist, the Prime Minister oversees the gargantuan ministries that keep the machinery of the Empire running—finance, industry, and infrastructure. He fights to preserve civilian governance against the encroachment of the Hardliner military junta.",
+            status: "idle", location: "Coruscant", loyalty: 85, influence: 70
         },
         {
             name: "Minister Strickland",
             title: "Minister of Security",
-            org: "Council of Ministers",
-            desc: "Senior custodian of internal order, overseeing state security infrastructures and political stability. Directs the mechanisms that guard the Empire from subversion.",
-            status: "alert", location: "ISB Central"
+            org: "SEC",
+            faction: "Hardliner",
+            image: "",
+            desc: "A key Hardliner controlling the Ministry of Security. Strickland directs the mechanisms that guard the Empire from subversion, coordinating between security bureaus and provincial enforcement. He supports the suspension of civil liberties and the subordination of civilian authority to the uniformed services.",
+            status: "alert", location: "ISB Central", loyalty: 95, influence: 85
         },
         {
             name: "Minister Albescu",
             title: "Minister of War",
-            org: "Council of Ministers",
-            desc: "Political architect of the Imperial war machine. Oversees military resource allocation, strategic readiness, and operational coordination.",
-            status: "active", location: "Anaxes Base"
+            org: "WAR",
+            faction: "Hardliner",
+            image: "",
+            desc: "Political architect of the Imperial war machine. Though the Ministry of War has been somewhat sidelined by the Joint Chiefs, Albescu remains a powerful Hardliner figure, overseeing military resource allocation and strategic readiness. He ensures the Empire’s forces remain capable, disciplined, and relentless.",
+            status: "active", location: "Anaxes Base", loyalty: 92, influence: 90
         },
         {
             name: "Minister [REDACTED]",
             title: "Minister of Justice",
-            org: "Council of Ministers",
-            desc: "Guardian of Imperial law and state legality. Supervises legal institutions and high courts while ensuring justice operates as an instrument of Imperial authority.",
-            status: "idle", location: "Supreme Court"
+            org: "JUSTICE",
+            faction: "Hardliner",
+            image: "",
+            desc: "Guardian of Imperial law and state legality. As a Hardliner, the Minister of Justice views the courts not as independent arbiters but as instruments of Imperial authority. He supervises legal institutions to ensure justice operates swiftly and brutally to maintain order.",
+            status: "idle", location: "Supreme Court", loyalty: 88, influence: 65
         },
         {
             name: "Lord President [REDACTED]",
             title: "Imperial Ruling Council",
-            org: "Political Directorate",
-            desc: "Senior master of the Ruling Council. Controls Council functions parallel to formal state structures. Operates as a power broker within the Empire’s highest political strata.",
-            status: "active", location: "Imperial Palace"
+            org: "POL",
+            faction: "Traditionalist",
+            image: "",
+            desc: "Senior master of the Ruling Council, a body of the richest men and nobles in the galaxy. A Traditionalist powerbroker, he maneuvers to maintain the status quo and protects the interests of the aristocracy. The Council now self-perpetuates, appointing new members in bitter contests of wealth and influence.",
+            status: "active", location: "Imperial Palace", loyalty: 94, influence: 92
         },
         {
             name: "Chairman Vorne",
             title: "Select Committee of COMPNOR",
             org: "COMPNOR",
-            desc: "Wields sweeping authority to enforce the Emperor’s will via social, political, and ideological channels. Oversees COMPNOR’s vast apparatus and its many subsidiaries.",
-            status: "alert", location: "COMPNOR HQ"
+            faction: "Traditionalist",
+            image: "",
+            desc: "Chairman of the Select Committee of COMPNOR. While COMPNOR contains many fanatics, Vorne represents the Traditionalist wing of the bureaucracy, using the organization's vast reach to maintain societal cohesion and regime loyalty. He judges the worthiness of citizens in the eyes of the New Order.",
+            status: "alert", location: "COMPNOR HQ", loyalty: 98, influence: 88
         },
         {
             name: "Gen-Sec Teegeeack",
             title: "New Order Party",
-            org: "Political Party",
-            desc: "High priest of New Order ideology and enforcer of doctrinal purity. Shapes the ideological center of Imperial politics.",
-            status: "idle", location: "Ralltiir"
+            org: "NOP",
+            faction: "Ultranationalist",
+            image: "",
+            desc: "General-Secretary of the New Order Party Central Committee. An Ultranationalist ideologue, Teegeeack believes the Empire is the end of history and that doubt is treason. He organizes rallies and enforces ideological purity, viewing Traditionalists as weak and Hardliners as mere tools. 'The galaxy obeys, or the galaxy burns.'",
+            status: "idle", location: "Ralltiir", loyalty: 90, influence: 75
         },
         {
             name: "Vice Chief Cassius",
-            title: "Operations (Navy)",
-            org: "Naval Command",
-            desc: "Administrative and operational commander of the Imperial Navy’s daily functioning. Oversees fleet development and naval readiness.",
-            status: "active", location: "Kuat Yards"
+            title: "Naval Operations",
+            org: "NAVY",
+            faction: "Hardliner",
+            image: "",
+            desc: "Administrative commander of the Imperial Navy. As a Hardliner within High Command, Cassius focuses on fleet readiness and operational discipline. He supports the view that the military is the only institution capable of holding the Empire together during the current crisis.",
+            status: "active", location: "Kuat Yards", loyalty: 91, influence: 80
         },
         {
             name: "Vice Chairman Retloc",
-            title: "Joint Chiefs of Staff",
-            org: "Armed Forces",
-            desc: "The attack dog of the Imperial Armed Forces. Effective co-ruler of the Empire with Synnove Fenn. Uniformed political chief of the Imperial defense apparatus.",
-            status: "active", location: "Bastion"
+            title: "Vice Chair, Joint Chiefs",
+            org: "ARMY",
+            faction: "Hardliner",
+            image: "",
+            desc: "The 'attack dog' of the Imperial Armed Forces and Vice Chairman of the Joint Chiefs. Retloc is an aggressive Hardliner and effective co-ruler of the Empire alongside Supreme Commander Fenn. He is responsible for cracking High Command into shape and ensuring the military establishment remains dominant.",
+            status: "active", location: "Bastion", loyalty: 93, influence: 88
         },
         {
             name: "Chief of Staff Veers",
             title: "Army General Staff",
-            org: "Army Command",
-            desc: "Leads all ground forces across the Empire. Directs doctrine, personnel, strategy, and operational planning for the Army.",
-            status: "active", location: "Carida"
+            org: "ARMY",
+            faction: "Hardliner",
+            image: "",
+            desc: "Leader of all ground forces. Elevated post-Endor to restore Army effectiveness, Veers is a practical Hardliner who believes in overwhelming capability. He directs doctrine and strategy, ensuring the Army remains the spine of Imperial order.",
+            status: "active", location: "Carida", loyalty: 96, influence: 82
         },
         {
             name: "Dean Kaine",
             title: "College of Moffs",
-            org: "Regional Gov",
-            desc: "Chief steward of sector governors, providing guidance, oversight, and arbitration. Ensures Moffs uphold Imperial doctrine and maintain local stability.",
-            status: "idle", location: "Coruscant"
+            org: "GOV",
+            faction: "Traditionalist",
+            image: "",
+            desc: "Dean of the College of Moffs, the formal administrative corporation of sector governors. A Traditionalist, Kaine protects the collective interests, privileges, and networks of the Moffs. He favors a return to stable provincial governance and opposes the radical upheaval of the Ultranationalists.",
+            status: "idle", location: "Coruscant", loyalty: 89, influence: 78
         },
         {
             name: "Chairman Kessler",
-            title: "Committee of Grand Moffs",
-            org: "Oversector Control",
-            desc: "Ensures Grand Moffs enforce Imperial policy, ensure stability, enshrine prosperity, and develop their portfolios in line with Imperial doctrine.",
-            status: "active", location: "Eriadu"
+            title: "Central Committee of Grand Moffs",
+            org: "GOV",
+            faction: "Traditionalist",
+            image: "",
+            desc: "Chairman of the exclusive Central Committee of Grand Moffs. He coordinates the vast influence of the Grand Moffs, who often rival the military in authority. Kessler seeks to maintain the feudal power of the Grand Moffs against the centralizing attempts of the Hardliner military junta.",
+            status: "active", location: "Eriadu", loyalty: 94, influence: 95
         },
         {
             name: "Gov-Superior Randd",
             title: "Diet of Governors",
-            org: "Provincial Admin",
-            desc: "Leads the assembly of planetary governors, both Moff and non-Moff. Coordinates regional administration and enforces compliance with central policy.",
-            status: "idle", location: "Sector 0"
+            org: "GOV",
+            faction: "Traditionalist",
+            image: "",
+            desc: "Leader of the Diet of Governors, coordinating regional administration for both Moffs and non-Moff governors. Randd acts as the supreme provincial arbiter, enforcing compliance with central policy while trying to maintain the political status quo of the Empire.",
+            status: "idle", location: "Sector 0", loyalty: 80, influence: 60
         },
         {
             name: "Director Isard",
             title: "Imperial Intelligence",
-            org: "Intelligence",
-            desc: "Machiavellian head of the vast and secretive Imperial Intelligence Community. Directs all intelligence, surveillance, and counterintelligence efforts.",
-            status: "alert", location: "Classified"
+            org: "INTEL",
+            faction: "Hardliner",
+            image: "",
+            desc: "Director of the Imperial Intelligence Service Ubiqtorate. A ruthless Hardliner, Isard operates almost completely independently of the War Ministry. She directs espionage, covert operations, and foreign destabilization, believing that intelligence and enforcement are the keys to Imperial survival.",
+            status: "alert", location: "Classified", loyalty: 99, influence: 96
         },
         {
             name: "Director Krask",
             title: "Imperial Security Bureau",
-            org: "Internal Security",
-            desc: "Chief security officer of the Empire. Directs, guides, and monitors the Imperial Security Bureau and all other internal civil intelligence and police agencies.",
-            status: "alert", location: "ISB Central"
+            org: "ISB",
+            faction: "Hardliner",
+            image: "",
+            desc: "Director of the ISB and chief security officer of the Empire. Krask embodies the Hardliner agenda of 'law and order.' The ISB under his command safeguards loyalty, suppresses dissent, and roots out treason with omnipresent surveillance and terror.",
+            status: "alert", location: "ISB Central", loyalty: 97, influence: 90
         },
         {
             name: "Director [REDACTED]",
-            title: "Bureau of Judicial Forces",
-            org: "Law Enforcement",
-            desc: "Leads the Empire’s uniformed federal police and judicial enforcement units. Serves as law enforcement’s representative within the intelligence-security triad.",
-            status: "idle", location: "Coruscant"
+            title: "Judicial Forces",
+            org: "LAW",
+            faction: "Hardliner",
+            image: "",
+            desc: "Leader of the Bureau of Judicial Forces. As a uniformed law enforcement chief, he aligns with the Hardliners, ensuring that the federal police units maintain order through disciplined legal force and support the security-intelligence triad.",
+            status: "idle", location: "Coruscant", loyalty: 85, influence: 50
         },
         {
             name: "Grandmaster [REDACTED]",
             title: "Secret Order",
-            org: "Esoteric Division",
-            desc: "Unseen grand cleric of the late Emperor’s arcane and esoteric adepts. Acts as the sovereign’s hand, prophet, and instrument in esoteric affairs.",
-            status: "alert", location: "Byss"
+            org: "SITH",
+            faction: "Ultranationalist",
+            image: "",
+            desc: "Unseen grand cleric of the late Emperor’s arcane adepts. An Ultranationalist extremist, the Grandmaster views the Empire as a spiritual doctrine made manifest. They operate in the shadows, extending the Empire's reach into the mystical and unknowable, feared even by High Command.",
+            status: "alert", location: "Byss", loyalty: 100, influence: 99
         },
         {
             name: "Lord [REDACTED]",
             title: "Imperial Court",
-            org: "Inner Circle",
-            desc: "Ceremonial and political figure within the Emperor’s inner circle. Manages courtly traditions, diplomacy, and elite social order.",
-            status: "idle", location: "Imperial Palace"
+            org: "COURT",
+            faction: "Traditionalist",
+            image: "",
+            desc: "A ceremonial figure within the Emperor’s inner circle and Privy Council. A Traditionalist courtier, he manages the traditions and elite social order of the Palace, trying to preserve Imperial prestige even as the real power shifts to the military.",
+            status: "idle", location: "Imperial Palace", loyalty: 90, influence: 85
         },
         {
             name: "Grand Inquisitor Selzen",
-            title: "Imperial Inquisition",
-            org: "Inquisitorius",
-            desc: "The Empire’s foremost authority on force-sensitive control. Wields an unlimited charter to hunt, regulate, and contain force users.",
-            status: "alert", location: "Nur"
+            title: "Inquisitorius",
+            org: "INQ",
+            faction: "Ultranationalist",
+            image: "",
+            desc: "Foremost authority on force-sensitive control. The Inquisition is a niche but terrifying organization. Selzen aligns with the Ultranationalists, enforcing absolute purity and hunting down any who threaten the Emperor's dark vision. He answers to no one but the Throne.",
+            status: "alert", location: "Nur", loyalty: 98, influence: 80
         }
     ];
 
-    // Helper: Random Rank Pips Generator
+    // Faction Styles & Quotes Map
+    const factionData = {
+        "Hardliner": {
+            color: "var(--faction-hardliner)",
+            quote: "Total commitment, or total annihilation.",
+            desc: "Believes the Empire survives only through uniformed force and martial law."
+        },
+        "Traditionalist": {
+            color: "var(--faction-traditionalist)",
+            quote: "This too shall pass.",
+            desc: "Seeks to maintain the status quo and preserve civilian governance."
+        },
+        "Ultranationalist": {
+            color: "var(--faction-ultranationalist)",
+            quote: "The galaxy obeys, or the galaxy burns.",
+            desc: "Extremist believers in Imperial supremacy and ideological purity."
+        },
+        "Reformer": {
+            color: "var(--faction-reformer)",
+            quote: "An Empire that cannot rule justly will not rule at all.",
+            desc: "Seeks to correct flaws and improve accountable governance."
+        },
+        "Progressive": {
+            color: "var(--faction-progressive)",
+            quote: "The Emperor is not the Empire.",
+            desc: "Advocates for ending autocracy and restoring lawful governance."
+        }
+    };
+
+    // Imperial Crest SVG Path
+    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
+
+    // --- RENDER LOGIC ---
+
     function getPips() {
         const types = ['red', 'blue', 'gold'];
         let html = '';
-        const count = Math.floor(Math.random() * 4) + 3; // 3 to 6 pips
+        const count = Math.floor(Math.random() * 4) + 3;
         for(let i=0; i<count; i++) {
             const type = types[Math.floor(Math.random() * types.length)];
             html += `<div class="pip ${type}"></div>`;
@@ -562,154 +587,202 @@
         return html;
     }
 
-    // Helper: Random Tech ID
-    function getTechID() {
-        return Math.floor(10000 + Math.random() * 90000);
-    }
+    function getTechID() { return Math.floor(10000 + Math.random() * 90000); }
 
     function renderCards() {
         const grid = document.getElementById('cardGrid');
+        grid.innerHTML = ""; // Clear existing
         
-        personnelData.forEach((person, index) => {
+        personnelConfig.forEach((person, index) => {
             const card = document.createElement('div');
             card.className = 'card';
+            card.onclick = () => openModal(index);
             
-            const statusClass = person.status;
-            const statusLight = `<div class="status-light ${statusClass}"></div>`;
-            const pips = getPips();
             const techID = getTechID();
+            const pips = getPips();
+            
+            // Faction Styling
+            const fData = factionData[person.faction] || { color: "#fff", quote: "" };
+
+            // Image handling logic
+            let imgContent = '';
+            if (person.image && person.image.trim() !== "") {
+                imgContent = `<img src="${person.image}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`;
+            }
+            // Always include fallback SVG, hidden if image loads successfully
+            const fallbackStyle = (person.image && person.image.trim() !== "") ? 'display:none' : 'display:block';
             
             card.innerHTML = `
                 <div class="card-inner">
                     <div class="card-visual">
-                        <svg class="imperial-crest" viewBox="0 0 512 512">
+                        ${imgContent}
+                        <svg class="imperial-crest" style="${fallbackStyle}" viewBox="0 0 512 512">
                             <path d="${imperialCrestPath}"/>
                         </svg>
                         <div class="rank-pips">${pips}</div>
                     </div>
                     <div class="card-data">
                         <div class="data-header">
-                            <div class="card-org">${person.org}</div>
-                            <div class="card-name">${person.name}</div>
-                            <div class="card-title">${person.title}</div>
+                            <div class="org-stack">
+                                <div class="card-org">${person.org}</div>
+                                <div class="faction-tag" style="background:${fData.color}; box-shadow: 0 0 5px ${fData.color};">${person.faction}</div>
+                            </div>
+                            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.7rem;">ID-${techID}</div>
+                        </div>
+                        <div class="card-name">${person.name}</div>
+                        <div class="card-title">${person.title}</div>
+                        
+                        <div class="stats-bars">
+                            <div class="stat-line">
+                                <span class="stat-label">LOYALTY</span>
+                                <div class="stat-track"><div class="stat-fill" style="width: ${person.loyalty}%"></div></div>
+                            </div>
+                            <div class="stat-line">
+                                <span class="stat-label">INFLUENCE</span>
+                                <div class="stat-track"><div class="stat-fill" style="width: ${person.influence}%"></div></div>
+                            </div>
                         </div>
                         <div class="card-body">${person.desc}</div>
-                        
                         <div class="tech-specs">
-                            <div class="spec-row">
-                                <span class="spec-label">STATUS</span>
-                                <span class="spec-val">${statusLight} ${person.status.toUpperCase()}</span>
-                            </div>
-                            <div class="spec-row">
-                                <span class="spec-label">LOC</span>
-                                <span class="spec-val">${person.location}</span>
-                            </div>
-                            <div class="spec-row">
-                                <span class="spec-label">COM-ID</span>
-                                <span class="spec-val">IMP-${techID}</span>
-                            </div>
+                            <div class="spec-item"><span style="color:#666">STATUS</span><span class="spec-val"><span class="status-light ${person.status}"></span>${person.status.toUpperCase()}</span></div>
+                            <div class="spec-item"><span style="color:#666">LOC</span><span class="spec-val" style="color:#fff">${person.location}</span></div>
                         </div>
                     </div>
                 </div>
             `;
-            
             grid.appendChild(card);
         });
     }
 
-    // System Log Logic
+    // --- MODAL LOGIC ---
+    let typeWriterInterval;
+
+    function openModal(index) {
+        const data = personnelConfig[index];
+        const fData = factionData[data.faction] || { color: "#fff", quote: "Unknown", desc: "" };
+        
+        document.getElementById('m-name').innerText = data.name;
+        document.getElementById('m-title').innerText = data.title;
+        document.getElementById('m-status').innerText = data.status.toUpperCase();
+        document.getElementById('m-loc').innerText = data.location;
+        document.getElementById('m-loyalty').innerText = data.loyalty + "%";
+
+        // Faction Modal Updates
+        const fNameEl = document.getElementById('m-faction-name');
+        const fQuoteEl = document.getElementById('m-faction-quote');
+        fNameEl.innerText = data.faction;
+        fNameEl.style.color = fData.color;
+        fNameEl.style.textShadow = `0 0 10px ${fData.color}`;
+        fQuoteEl.innerText = `"${fData.quote}"`;
+
+        // Image handling for Modal
+        const imgEl = document.getElementById('m-img');
+        const svgContainer = document.getElementById('m-svg-container');
+        const svgPath = document.getElementById('m-svg-path');
+        
+        if (data.image && data.image.trim() !== "") {
+            imgEl.style.display = 'block';
+            svgContainer.style.display = 'none';
+            imgEl.src = data.image;
+            imgEl.onerror = () => {
+                imgEl.style.display = 'none';
+                svgContainer.style.display = 'flex';
+                svgPath.setAttribute('d', imperialCrestPath);
+            };
+        } else {
+            imgEl.style.display = 'none';
+            svgContainer.style.display = 'flex';
+            svgPath.setAttribute('d', imperialCrestPath);
+        }
+
+        // Typewriter Effect
+        const descEl = document.getElementById('m-desc');
+        descEl.innerText = "";
+        clearInterval(typeWriterInterval);
+        
+        let i = 0;
+        typeWriterInterval = setInterval(() => {
+            if (i < data.desc.length) {
+                descEl.innerText += data.desc.charAt(i);
+                i++;
+            } else {
+                clearInterval(typeWriterInterval);
+            }
+        }, 10);
+
+        document.getElementById('modal-overlay').classList.add('active');
+        addLog(`Accessing file: ${data.name} [${data.faction.toUpperCase()}]...`);
+    }
+
+    function closeModal() {
+        document.getElementById('modal-overlay').classList.remove('active');
+        clearInterval(typeWriterInterval);
+    }
+
+    // --- SYSTEM LOGS & BOOT ---
     const logs = [
-        "Scanning Sub-Sector 4...",
-        "Encrypted Transmission Received.",
-        "Unit 774-A reporting in.",
-        "Holonet relay stabilized.",
-        "Rebel activity detected in Sector 9.",
-        "TIE Squadron deployed.",
-        "Background radiation normal.",
-        "Updating manifest...",
-        "Connection secured.",
-        "Auth token refreshed."
+        "Scanning Sector 4...", "Encrypted Transmission: VERIFIED", "Unit 774-A reporting in.",
+        "Holonet relay stabilized.", "Rebel activity detected in Sector 9.", "TIE Squadron deployed.",
+        "Background radiation: NORMAL", "Updating personnel manifest...", "Connection secured (Sub-channel 9)",
+        "Auth token refreshed.", "Compiling analytics...", "Hyperdrive diagnostic complete."
     ];
 
-    function addLog() {
+    function addLog(specificText = null) {
         const logContainer = document.getElementById('system-log');
         const logEntry = document.createElement('div');
         logEntry.className = 'log-entry new';
         
-        // Random log text
-        const text = logs[Math.floor(Math.random() * logs.length)];
+        const text = specificText || logs[Math.floor(Math.random() * logs.length)];
         const time = new Date().toLocaleTimeString([], {hour12: false});
         logEntry.innerText = `[${time}] ${text}`;
         
-        // Sometimes make it an alert
-        if(Math.random() > 0.8) {
+        if(!specificText && Math.random() > 0.85) {
             logEntry.className += ' alert';
             logEntry.innerText = `[${time}] ALERT: ${text.toUpperCase()}`;
         }
 
         logContainer.appendChild(logEntry);
-        
-        // Auto scroll
         logContainer.scrollTop = logContainer.scrollHeight;
-
-        // Remove "new" class effect after a moment
-        setTimeout(() => {
-            logEntry.classList.remove('new');
-        }, 500);
-
-        // Keep list short
-        if(logContainer.children.length > 20) {
-            logContainer.removeChild(logContainer.firstChild);
-        }
+        setTimeout(() => logEntry.classList.remove('new'), 500);
+        if(logContainer.children.length > 25) logContainer.removeChild(logContainer.firstChild);
     }
 
-    // Boot Sequence Logic
     function runBootSequence() {
         const bootScreen = document.getElementById('boot-screen');
         const lines = [
-            document.getElementById('boot-1'),
-            document.getElementById('boot-2'),
-            document.getElementById('boot-3'),
-            document.getElementById('boot-4')
+            document.getElementById('boot-1'), document.getElementById('boot-2'),
+            document.getElementById('boot-3'), document.getElementById('boot-4')
         ];
 
         let delay = 0;
-        lines.forEach((line, index) => {
+        lines.forEach((line) => {
             line.style.display = 'none';
-            setTimeout(() => {
-                line.style.display = 'block';
-            }, delay);
-            delay += 600; // time between lines
+            setTimeout(() => { line.style.display = 'block'; }, delay);
+            delay += 800;
         });
 
-        // Hide boot screen after all lines
         setTimeout(() => {
             bootScreen.style.opacity = '0';
-            setTimeout(() => {
-                bootScreen.style.display = 'none';
-            }, 500);
-        }, delay + 800);
+            setTimeout(() => { bootScreen.style.display = 'none'; }, 600);
+        }, delay + 1000);
     }
 
-    // Init
+    // --- INIT ---
     window.onload = () => {
-        // Set Stardate
-        const now = new Date();
-        document.getElementById('stardate').innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
-
+        const day = Math.floor(Math.random() * 365);
+        const cycle = Math.floor(Math.random() * 24);
+        document.getElementById('stardate').innerText = `35:${cycle}:${day}`;
+        
         runBootSequence();
-        
-        // Delay content rendering slightly for effect
-        setTimeout(renderCards, 1000);
-
-        // Start Logging
-        setInterval(addLog, 2500);
-        
-        // Initial logs
-        for(let i=0; i<5; i++) addLog();
+        setTimeout(renderCards, 2000);
+        setInterval(() => addLog(), 2000);
+        for(let i=0; i<6; i++) addLog();
     };
 
-</script>
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") closeModal();
+    });
 
+</script>
 </body>
 </html>
