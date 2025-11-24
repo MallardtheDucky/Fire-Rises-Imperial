@@ -251,13 +251,34 @@
         .stat-track { flex-grow: 1; height: 3px; background: #222; position: relative; max-width: 120px; }
         .stat-fill { height: 100%; background: var(--imperial-red); box-shadow: 0 0 5px var(--imperial-red); }
         
-        /* The description now wraps under the floated image */
+        /* The description now wraps under the floated image and is truncated for summary view */
         .card-body {
             font-size: 0.8rem;
             color: #999;
             line-height: 1.5;
             margin-bottom: 0.5rem;
             text-align: justify;
+            height: 5.2rem; /* Fixed height for 3-4 lines of summary text */
+            overflow: hidden; /* Hide the rest of the text */
+            position: relative; /* Needed for the fade effect */
+        }
+        
+        /* Gradient mask for summary fade effect */
+        .card-body::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1.2rem; /* Height of the fade */
+            /* Match normal card background color (rgba(15, 15, 15, 0.95)) */
+            background: linear-gradient(to top, rgba(15, 15, 15, 0.95) 10%, transparent 100%);
+            pointer-events: none;
+            transition: all 0.2s;
+        }
+        .card:hover .card-body::after {
+            /* Match hover card background color (rgba(25, 20, 20, 1)) */
+            background: linear-gradient(to top, rgba(25, 20, 20, 1) 10%, transparent 100%);
         }
 
         .tech-specs {
@@ -754,6 +775,18 @@
             // Faction Styling
             const fData = factionData[person.faction] || { color: "#fff", quote: "" };
 
+            // --- TRUNCATION LOGIC: Create a summary for the card view ---
+            const rawDesc = person.desc;
+            const summaryLength = 160; 
+            let summaryDesc = rawDesc;
+
+            if (rawDesc.length > summaryLength) {
+                // Find the last space before the summary limit to avoid cutting a word
+                const cleanCut = rawDesc.substring(0, summaryLength).lastIndexOf(' ');
+                summaryDesc = rawDesc.substring(0, cleanCut > 0 ? cleanCut : summaryLength) + '...';
+            }
+            // --- END TRUNCATION LOGIC ---
+
             // Image handling logic
             let imgContent = '';
             if (person.image && person.image.trim() !== "") {
@@ -777,7 +810,7 @@
                                 <div class="card-org">${person.org}</div>
                                 <div class="faction-tag" style="background:${fData.color}; box-shadow: 0 0 5px ${fData.color};">${person.faction}</div>
                             </div>
-                            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.7rem;">ID-${techID}</div>
+                            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.7rem;">ID-${getTechID()}</div>
                         </div>
                         <div class="card-name">${person.name}</div>
                         <div class="card-title">${person.title}</div>
@@ -792,7 +825,7 @@
                                 <div class="stat-track"><div class="stat-fill" style="width: ${person.influence}%"></div></div>
                             </div>
                         </div>
-                        <div class="card-body">${person.desc}</div>
+                        <div class="card-body">${summaryDesc}</div>
                         <div class="tech-specs">
                             <div class="spec-item"><span style="color:#666">STATUS</span><span class="spec-val"><span class="status-light ${person.status}"></span>${person.status.toUpperCase()}</span></div>
                             <div class="spec-item"><span style="color:#666">LOC</span><span class="spec-val" style="color:#fff">${person.location}</span></div>
