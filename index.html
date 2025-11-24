@@ -245,7 +245,7 @@
         .card:hover .card-body::after { background: linear-gradient(to top, rgba(25, 20, 20, 1) 10%, transparent 100%); }
 
         .tech-specs {
-            clear: both; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 10px;
+            clear: both; display: grid; grid-template-columns: 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 10px;
         }
         .spec-item { background: #0d0d0d; padding: 4px 8px; display: flex; justify-content: space-between; }
         .spec-val { color: var(--holo-blue); text-shadow: 0 0 3px var(--holo-blue-dim); }
@@ -385,10 +385,7 @@
                 <p id="m-desc" class="modal-desc">Description text...</p>
 
                 <div class="modal-stats-grid">
-                    <div class="m-stat-box">
-                        <span class="m-stat-label">STATUS</span>
-                        <span id="m-status" class="m-stat-val">ACTIVE</span>
-                    </div>
+                    <!-- Removed Status and Clearance stats as per user request -->
                     <div class="m-stat-box">
                         <span class="m-stat-label">LOCATION</span>
                         <span id="m-loc" class="m-stat-val">CORUSCANT</span>
@@ -396,10 +393,6 @@
                     <div class="m-stat-box">
                         <span class="m-stat-label">LOYALTY</span>
                         <span id="m-loyalty" class="m-stat-val" style="color:var(--imperial-red)">98%</span>
-                    </div>
-                    <div class="m-stat-box">
-                        <span class="m-stat-label">CLEARANCE</span>
-                        <span id="m-clearance" class="m-stat-val">ULTRA</span>
                     </div>
                 </div>
             </div>
@@ -821,7 +814,6 @@
                         </div>
                         <div class="card-body">${summaryDesc}</div>
                         <div class="tech-specs">
-                            <div class="spec-item"><span style="color:#666">STATUS</span><span class="spec-val"><span class="status-light ${person.status}"></span>${person.status.toUpperCase()}</span></div>
                             <div class="spec-item"><span style="color:#666">LOC</span><span class="spec-val" style="color:#fff">${person.location}</span></div>
                         </div>
                     </div>
@@ -869,9 +861,10 @@
         
         document.getElementById('m-name').innerText = data.name;
         document.getElementById('m-title').innerText = data.title;
-        document.getElementById('m-status').innerText = data.status.toUpperCase();
+        // removed m-status update
         document.getElementById('m-loc').innerText = data.location;
         document.getElementById('m-loyalty').innerText = data.loyalty + "%";
+        // removed m-clearance update
         
         const fNameEl = document.getElementById('m-faction-name');
         fNameEl.innerText = data.faction;
