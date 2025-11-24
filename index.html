@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperial High Command | Galactic Database</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Tekno&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --imperial-black: #050505;
+            --imperial-grey: #1a1a1a;
+            --imperial-light-grey: #a0a0a0;
+            --imperial-red: #cf0a0a;
+            --imperial-red-dim: #7a0000;
+            --holo-blue: #00e5ff;
+            --holo-blue-dim: #005f6b;
+            --text-main: #f0f0f0;
+            --card-bg: #0d0d0d;
+            --border-color: #333;
+            --scanline-color: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            cursor: crosshair; /* Tactical cursor */
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--imperial-red-dim);
+            border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--imperial-red);
+        }
+
+        body {
+            background-color: var(--imperial-black);
+            color: var(--text-main);
+            font-family: 'Exo 2', sans-serif;
+            height: 100vh;
+            overflow: hidden; /* Main body hidden, scroll internal divs */
+            display: flex;
+        }
+
+        /* Background Effects */
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(50, 0, 0, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(50, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* CRT Overlay */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 100;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0.95; }
+        }
+
+        /* BOOT SEQUENCE */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--imperial-red);
+        }
+        .boot-text {
+            font-size: 1.2rem;
+            margin: 5px;
+            text-align: left;
+            width: 300px;
+        }
+
+        /* SIDEBAR (System Logs) */
+        aside {
+            width: 300px;
+            background: #080808;
+            border-right: 1px solid var(--imperial-red-dim);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            z-index: 10;
+            font-family: 'Share Tech Mono', monospace;
+            display: none; /* Hidden on mobile */
+        }
+
+        @media(min-width: 1000px) {
+            aside { display: flex; }
+        }
+
+        .log-header {
+            color: var(--imperial-red);
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--imperial-red);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .log-content {
+            flex-grow: 1;
+            overflow-y: hidden;
+            font-size: 0.75rem;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+        .log-entry.new { color: var(--holo-blue); opacity: 1; }
+        .log-entry.alert { color: var(--imperial-red); font-weight: bold; }
+
+        /* MAIN CONTENT */
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            position: relative;
+            z-index: 5;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--imperial-red);
+            padding-bottom: 1rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .header-title h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            text-shadow: 0 0 10px rgba(207, 10, 10, 0.5);
+        }
+
+        .header-title .subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--imperial-red);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-top: 0.5rem;
+        }
+
+        .header-stats {
+            text-align: right;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--imperial-light-grey);
+            display: none;
+        }
+        @media(min-width: 768px) { .header-stats { display: block; } }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding-bottom: 4rem;
+        }
+
+        /* Advanced Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            clip-path: polygon(
+                20px 0, 100% 0, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 
+                0 100%, 0 20px
+            );
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(207, 10, 10, 0.3);
+            border-color: var(--imperial-red);
+            z-index: 10;
+        }
+
+        /* Tech borders on card */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 20px; height: 2px;
+            background: var(--imperial-red);
+            transition: width 0.3s;
+        }
+        .card:hover::before { width: 100%; }
+
+        .card-inner {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Image Section */
+        .card-visual {
+            width: 120px;
+            background: linear-gradient(180deg, #151515 0%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #333;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .imperial-crest {
+            width: 60px;
+            height: 60px;
+            fill: #444;
+            transition: fill 0.3s;
+        }
+        .card:hover .imperial-crest { fill: var(--imperial-red); }
+
+        .rank-pips {
+            margin-top: 1rem;
+            display: flex;
+            gap: 2px;
+        }
+        .pip { width: 8px; height: 12px; background: #333; }
+        .pip.red { background: var(--imperial-red-dim); }
+        .pip.blue { background: var(--holo-blue-dim); }
+        .pip.gold { background: #b8860b; }
+
+        /* Data Section */
+        .card-data {
+            flex-grow: 1;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .data-header {
+            border-bottom: 1px solid #333;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .card-org {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--imperial-red);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            color: var(--imperial-light-grey);
+            font-weight: 300;
+        }
+
+        .card-body {
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.4;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        /* Tech Specs Grid */
+        .tech-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.65rem;
+            color: #555;
+            background: rgba(0,0,0,0.3);
+            padding: 5px;
+            border: 1px solid #222;
+        }
+
+        .spec-row { display: flex; justify-content: space-between; }
+        .spec-label { color: #444; }
+        .spec-val { color: var(--holo-blue); }
+
+        .status-light {
+            width: 8px; height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #0f0;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-light.idle { background: #fb0; box-shadow: 0 0 5px #fb0; }
+        .status-light.alert { background: #f00; box-shadow: 0 0 5px #f00; }
+
+        /* Footer */
+        .main-footer {
+            margin-top: auto;
+            border-top: 1px solid #333;
+            padding-top: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+            display: flex;
+            justify-content: space-between;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="crt-overlay"></div>
+
+    <!-- BOOT SEQUENCE OVERLAY -->
+    <div id="boot-screen">
+        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL...</div>
+        <div class="boot-text" id="boot-2">LOADING SECURITY PROTOCOLS...</div>
+        <div class="boot-text" id="boot-3">DECRYPTING HIGH COMMAND MANIFEST...</div>
+        <div class="boot-text" id="boot-4" style="color:white">ACCESS GRANTED.</div>
+    </div>
+
+    <!-- SIDEBAR LOGS -->
+    <aside>
+        <div class="log-header">System Stream</div>
+        <div class="log-content" id="system-log">
+            <!-- Logs injected via JS -->
+        </div>
+    </aside>
+
+    <!-- MAIN INTERFACE -->
+    <main>
+        <header>
+            <div class="header-title">
+                <div class="subtitle">Galactic Empire // Personnel Database</div>
+                <h1>High Command</h1>
+            </div>
+            <div class="header-stats">
+                <div>SECTOR: CORUSCANT PRIME</div>
+                <div>DATE: <span id="stardate"></span></div>
+                <div>ENCRYPTION: ULTRA-CLASS</div>
+            </div>
+        </header>
+
+        <div class="grid" id="cardGrid">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <div class="main-footer">
+            <span>IMPERIAL DEPARTMENT OF MILITARY RESEARCH</span>
+            <span>RESTRICTED ACCESS // PUNISHABLE BY DEATH</span>
+        </div>
+    </main>
+
+<script>
+    // Imperial Crest SVG Path
+    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
+
+    // Data Source
+    const personnelData = [
+        {
+            name: "Grand Vizier [REDACTED]",
+            title: "Imperial Throne",
+            org: "Executive Office",
+            desc: "The Emperor’s supreme legal and political executor. Ensures senior officials adhere to Imperial doctrine and the sovereign’s vision. Oversees the Imperial Throne corporate and its many extralegal instrumentalities.",
+            status: "active", location: "Imperial Palace"
+        },
+        {
+            name: "Supreme Commander Fenn",
+            title: "Galactic Empire",
+            org: "High Command",
+            desc: "Head of State. The apex of Imperial authority, uniting political sovereignty and military supremacy. Commands the Empire’s destiny through decree, war direction, and strategic will.",
+            status: "active", location: "The Executor"
+        },
+        {
+            name: "Prime Minister [REDACTED]",
+            title: "Council of Ministers",
+            org: "Civil Admin",
+            desc: "Administrative head of the executive government. Coordinates ministries and communicates high-level directives across the bureaucratic machine.",
+            status: "idle", location: "Coruscant Admin"
+        },
+        {
+            name: "Minister Strickland",
+            title: "Minister of Security",
+            org: "Council of Ministers",
+            desc: "Senior custodian of internal order, overseeing state security infrastructures and political stability. Directs the mechanisms that guard the Empire from subversion.",
+            status: "alert", location: "ISB Central"
+        },
+        {
+            name: "Minister Albescu",
+            title: "Minister of War",
+            org: "Council of Ministers",
+            desc: "Political architect of the Imperial war machine. Oversees military resource allocation, strategic readiness, and operational coordination.",
+            status: "active", location: "Anaxes Base"
+        },
+        {
+            name: "Minister [REDACTED]",
+            title: "Minister of Justice",
+            org: "Council of Ministers",
+            desc: "Guardian of Imperial law and state legality. Supervises legal institutions and high courts while ensuring justice operates as an instrument of Imperial authority.",
+            status: "idle", location: "Supreme Court"
+        },
+        {
+            name: "Lord President [REDACTED]",
+            title: "Imperial Ruling Council",
+            org: "Political Directorate",
+            desc: "Senior master of the Ruling Council. Controls Council functions parallel to formal state structures. Operates as a power broker within the Empire’s highest political strata.",
+            status: "active", location: "Imperial Palace"
+        },
+        {
+            name: "Chairman Vorne",
+            title: "Select Committee of COMPNOR",
+            org: "COMPNOR",
+            desc: "Wields sweeping authority to enforce the Emperor’s will via social, political, and ideological channels. Oversees COMPNOR’s vast apparatus and its many subsidiaries.",
+            status: "alert", location: "COMPNOR HQ"
+        },
+        {
+            name: "Gen-Sec Teegeeack",
+            title: "New Order Party",
+            org: "Political Party",
+            desc: "High priest of New Order ideology and enforcer of doctrinal purity. Shapes the ideological center of Imperial politics.",
+            status: "idle", location: "Ralltiir"
+        },
+        {
+            name: "Vice Chief Cassius",
+            title: "Operations (Navy)",
+            org: "Naval Command",
+            desc: "Administrative and operational commander of the Imperial Navy’s daily functioning. Oversees fleet development and naval readiness.",
+            status: "active", location: "Kuat Yards"
+        },
+        {
+            name: "Vice Chairman Retloc",
+            title: "Joint Chiefs of Staff",
+            org: "Armed Forces",
+            desc: "The attack dog of the Imperial Armed Forces. Effective co-ruler of the Empire with Synnove Fenn. Uniformed political chief of the Imperial defense apparatus.",
+            status: "active", location: "Bastion"
+        },
+        {
+            name: "Chief of Staff Veers",
+            title: "Army General Staff",
+            org: "Army Command",
+            desc: "Leads all ground forces across the Empire. Directs doctrine, personnel, strategy, and operational planning for the Army.",
+            status: "active", location: "Carida"
+        },
+        {
+            name: "Dean Kaine",
+            title: "College of Moffs",
+            org: "Regional Gov",
+            desc: "Chief steward of sector governors, providing guidance, oversight, and arbitration. Ensures Moffs uphold Imperial doctrine and maintain local stability.",
+            status: "idle", location: "Coruscant"
+        },
+        {
+            name: "Chairman Kessler",
+            title: "Committee of Grand Moffs",
+            org: "Oversector Control",
+            desc: "Ensures Grand Moffs enforce Imperial policy, ensure stability, enshrine prosperity, and develop their portfolios in line with Imperial doctrine.",
+            status: "active", location: "Eriadu"
+        },
+        {
+            name: "Gov-Superior Randd",
+            title: "Diet of Governors",
+            org: "Provincial Admin",
+            desc: "Leads the assembly of planetary governors, both Moff and non-Moff. Coordinates regional administration and enforces compliance with central policy.",
+            status: "idle", location: "Sector 0"
+        },
+        {
+            name: "Director Isard",
+            title: "Imperial Intelligence",
+            org: "Intelligence",
+            desc: "Machiavellian head of the vast and secretive Imperial Intelligence Community. Directs all intelligence, surveillance, and counterintelligence efforts.",
+            status: "alert", location: "Classified"
+        },
+        {
+            name: "Director Krask",
+            title: "Imperial Security Bureau",
+            org: "Internal Security",
+            desc: "Chief security officer of the Empire. Directs, guides, and monitors the Imperial Security Bureau and all other internal civil intelligence and police agencies.",
+            status: "alert", location: "ISB Central"
+        },
+        {
+            name: "Director [REDACTED]",
+            title: "Bureau of Judicial Forces",
+            org: "Law Enforcement",
+            desc: "Leads the Empire’s uniformed federal police and judicial enforcement units. Serves as law enforcement’s representative within the intelligence-security triad.",
+            status: "idle", location: "Coruscant"
+        },
+        {
+            name: "Grandmaster [REDACTED]",
+            title: "Secret Order",
+            org: "Esoteric Division",
+            desc: "Unseen grand cleric of the late Emperor’s arcane and esoteric adepts. Acts as the sovereign’s hand, prophet, and instrument in esoteric affairs.",
+            status: "alert", location: "Byss"
+        },
+        {
+            name: "Lord [REDACTED]",
+            title: "Imperial Court",
+            org: "Inner Circle",
+            desc: "Ceremonial and political figure within the Emperor’s inner circle. Manages courtly traditions, diplomacy, and elite social order.",
+            status: "idle", location: "Imperial Palace"
+        },
+        {
+            name: "Grand Inquisitor Selzen",
+            title: "Imperial Inquisition",
+            org: "Inquisitorius",
+            desc: "The Empire’s foremost authority on force-sensitive control. Wields an unlimited charter to hunt, regulate, and contain force users.",
+            status: "alert", location: "Nur"
+        }
+    ];
+
+    // Helper: Random Rank Pips Generator
+    function getPips() {
+        const types = ['red', 'blue', 'gold'];
+        let html = '';
+        const count = Math.floor(Math.random() * 4) + 3; // 3 to 6 pips
+        for(let i=0; i<count; i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            html += `<div class="pip ${type}"></div>`;
+        }
+        return html;
+    }
+
+    // Helper: Random Tech ID
+    function getTechID() {
+        return Math.floor(10000 + Math.random() * 90000);
+    }
+
+    function renderCards() {
+        const grid = document.getElementById('cardGrid');
+        
+        personnelData.forEach((person, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const statusClass = person.status;
+            const statusLight = `<div class="status-light ${statusClass}"></div>`;
+            const pips = getPips();
+            const techID = getTechID();
+            
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-visual">
+                        <svg class="imperial-crest" viewBox="0 0 512 512">
+                            <path d="${imperialCrestPath}"/>
+                        </svg>
+                        <div class="rank-pips">${pips}</div>
+                    </div>
+                    <div class="card-data">
+                        <div class="data-header">
+                            <div class="card-org">${person.org}</div>
+                            <div class="card-name">${person.name}</div>
+                            <div class="card-title">${person.title}</div>
+                        </div>
+                        <div class="card-body">${person.desc}</div>
+                        
+                        <div class="tech-specs">
+                            <div class="spec-row">
+                                <span class="spec-label">STATUS</span>
+                                <span class="spec-val">${statusLight} ${person.status.toUpperCase()}</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">LOC</span>
+                                <span class="spec-val">${person.location}</span>
+                            </div>
+                            <div class="spec-row">
+                                <span class="spec-label">COM-ID</span>
+                                <span class="spec-val">IMP-${techID}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        });
+    }
+
+    // System Log Logic
+    const logs = [
+        "Scanning Sub-Sector 4...",
+        "Encrypted Transmission Received.",
+        "Unit 774-A reporting in.",
+        "Holonet relay stabilized.",
+        "Rebel activity detected in Sector 9.",
+        "TIE Squadron deployed.",
+        "Background radiation normal.",
+        "Updating manifest...",
+        "Connection secured.",
+        "Auth token refreshed."
+    ];
+
+    function addLog() {
+        const logContainer = document.getElementById('system-log');
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry new';
+        
+        // Random log text
+        const text = logs[Math.floor(Math.random() * logs.length)];
+        const time = new Date().toLocaleTimeString([], {hour12: false});
+        logEntry.innerText = `[${time}] ${text}`;
+        
+        // Sometimes make it an alert
+        if(Math.random() > 0.8) {
+            logEntry.className += ' alert';
+            logEntry.innerText = `[${time}] ALERT: ${text.toUpperCase()}`;
+        }
+
+        logContainer.appendChild(logEntry);
+        
+        // Auto scroll
+        logContainer.scrollTop = logContainer.scrollHeight;
+
+        // Remove "new" class effect after a moment
+        setTimeout(() => {
+            logEntry.classList.remove('new');
+        }, 500);
+
+        // Keep list short
+        if(logContainer.children.length > 20) {
+            logContainer.removeChild(logContainer.firstChild);
+        }
+    }
+
+    // Boot Sequence Logic
+    function runBootSequence() {
+        const bootScreen = document.getElementById('boot-screen');
+        const lines = [
+            document.getElementById('boot-1'),
+            document.getElementById('boot-2'),
+            document.getElementById('boot-3'),
+            document.getElementById('boot-4')
+        ];
+
+        let delay = 0;
+        lines.forEach((line, index) => {
+            line.style.display = 'none';
+            setTimeout(() => {
+                line.style.display = 'block';
+            }, delay);
+            delay += 600; // time between lines
+        });
+
+        // Hide boot screen after all lines
+        setTimeout(() => {
+            bootScreen.style.opacity = '0';
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+            }, 500);
+        }, delay + 800);
+    }
+
+    // Init
+    window.onload = () => {
+        // Set Stardate
+        const now = new Date();
+        document.getElementById('stardate').innerText = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}`;
+
+        runBootSequence();
+        
+        // Delay content rendering slightly for effect
+        setTimeout(renderCards, 1000);
+
+        // Start Logging
+        setInterval(addLog, 2500);
+        
+        // Initial logs
+        for(let i=0; i<5; i++) addLog();
+    };
+
+</script>
+
+</body>
+</html>
