@@ -101,17 +101,27 @@
             padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;
             text-shadow: 0 0 8px var(--imperial-red);
         }
-        .log-content { flex-grow: 1; overflow-y: hidden; font-size: 0.7rem; color: #666; display: flex; flex-direction: column; justify-content: flex-end; }
+        /* FIX: Changed overflow-y: hidden to auto for log content scrollability */
+        .log-content { flex-grow: 1; overflow-y: auto; font-size: 0.7rem; color: #666; display: flex; flex-direction: column; justify-content: flex-end; }
         .log-entry { margin-bottom: 6px; border-left: 2px solid transparent; padding-left: 8px; transition: all 0.3s; }
         .log-entry.new { color: var(--holo-blue); border-left-color: var(--holo-blue); text-shadow: 0 0 5px var(--holo-blue); }
         .log-entry.alert { color: var(--imperial-red); font-weight: bold; border-left-color: var(--imperial-red); }
 
-        main { flex-grow: 1; overflow-y: auto; position: relative; z-index: 5; padding: 2rem 3rem; display: flex; flex-direction: column; }
+        main { 
+            flex-grow: 1; 
+            overflow-y: auto; /* Ensure main content scrolls */
+            position: relative; 
+            z-index: 5; 
+            padding: 2rem 3rem; 
+            display: flex; 
+            flex-direction: column; 
+        }
 
         header {
             display: flex; justify-content: space-between; align-items: flex-end;
             border-bottom: 2px solid var(--imperial-red); padding-bottom: 1.5rem; margin-bottom: 3rem;
             position: relative; background: linear-gradient(90deg, transparent 0%, rgba(207, 10, 10, 0.05) 50%, transparent 100%);
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
         header::after { content: ''; position: absolute; bottom: -6px; right: 0; width: 30%; height: 4px; background: var(--imperial-red-dim); }
 
@@ -126,61 +136,135 @@
         .header-title .subtitle::before { content: ''; display: inline-block; width: 10px; height: 10px; background: var(--imperial-red); margin-right: 10px; box-shadow: 0 0 8px var(--imperial-red); }
         .header-stats { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--imperial-light-grey); border-right: 2px solid var(--imperial-red); padding-right: 15px; line-height: 1.4; }
 
-        /* --- CARDS --- */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2.5rem; padding-bottom: 6rem; }
+        /* --- GRID --- */
+        .grid {
+            display: grid;
+            gap: 2rem;
+            padding-bottom: 6rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
 
+        /* 3 Columns strictly on large screens */
+        @media(min-width: 1400px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* --- CARDS --- */
         .card {
-            background-color: rgba(15, 15, 15, 0.95); border: 1px solid #333; position: relative;
+            background-color: rgba(15, 15, 15, 0.95);
+            border: 1px solid #333;
+            position: relative;
             transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            /* Sci-fi shape */
+            clip-path: polygon(
+                15px 0, 100% 0, 
+                100% calc(100% - 15px), calc(100% - 15px) 100%, 
+                0 100%, 0 15px
+            );
             box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
             cursor: pointer;
+            overflow: hidden; /* Ensure content doesn't spill */
+            height: 100%;
         }
+
         .card:hover {
-            transform: translateY(-5px) scale(1.02); border-color: var(--imperial-red);
-            box-shadow: 0 0 25px rgba(207, 10, 10, 0.3); z-index: 10; background-color: rgba(25, 20, 20, 1);
+            transform: translateY(-5px) scale(1.01);
+            border-color: var(--imperial-red);
+            box-shadow: 0 0 25px rgba(207, 10, 10, 0.3);
+            z-index: 10;
+            background-color: rgba(25, 20, 20, 1);
         }
+
         .card::before {
             content: ''; position: absolute; top: 0; left: 0; width: 30px; height: 30px;
             border-top: 2px solid var(--imperial-red); border-left: 2px solid var(--imperial-red);
-            opacity: 0.5; transition: all 0.3s;
+            opacity: 0.5; transition: all 0.3s; pointer-events: none; z-index: 2;
         }
         .card:hover::before { width: 100%; height: 100%; opacity: 1; box-shadow: inset 0 0 20px rgba(207, 10, 10, 0.1); }
 
-        .card-inner { display: flex; flex-direction: row; height: 100%; pointer-events: none; }
-        
-        .card-visual {
-            width: 130px; background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-right: 1px solid #333; padding: 1rem; position: relative; overflow: hidden;
+        /* New Card Layout: Float logic to allow text wrapping */
+        .card-inner {
+            display: block; /* changed from flex to block */
+            padding: 1.2rem;
+            height: 100%;
+            position: relative;
         }
-        .card-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.6; filter: grayscale(100%) contrast(120%); transition: all 0.3s; }
-        .card:hover .card-visual img { opacity: 0.9; filter: grayscale(0%) contrast(110%); }
-        .imperial-crest { width: 70px; height: 70px; fill: #333; z-index: 1; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); transition: all 0.5s ease; }
-        .card:hover .imperial-crest { fill: #fff; filter: drop-shadow(0 0 8px var(--imperial-red)); transform: scale(1.1); }
 
-        .card-data { flex-grow: 1; padding: 1.2rem; display: flex; flex-direction: column; position: relative; }
-        .data-header { border-bottom: 1px solid #333; margin-bottom: 0.8rem; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
-        
+        .card-visual {
+            float: left;
+            width: 110px;
+            height: 130px;
+            margin-right: 1.2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .card-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.8; filter: grayscale(80%) contrast(120%); transition: all 0.3s; }
+        .card:hover .card-visual img { opacity: 1; filter: grayscale(0%) contrast(110%); }
+        .imperial-crest { width: 60px; height: 60px; fill: #333; z-index: 1; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); transition: all 0.5s ease; }
+        .card:hover .imperial-crest { fill: #fff; filter: drop-shadow(0 0 8px var(--imperial-red)); transform: scale(1.1); }
+        .rank-pips { margin-top: auto; padding-bottom: 10px; display: flex; gap: 3px; z-index: 2; }
+        .pip { width: 8px; height: 12px; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.3); border: 1px solid rgba(0,0,0,0.5); }
+        .pip.red { background: #d00; box-shadow: 0 0 5px #d00; }
+        .pip.blue { background: #00a; box-shadow: 0 0 5px #00a; }
+        .pip.gold { background: #c90; box-shadow: 0 0 5px #c90; }
+
+        /* Card Data now flows around the float */
+        .card-data {
+            /* No flex grow, just standard block */
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .data-header {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
         .org-stack { display: flex; flex-direction: column; gap: 4px; }
-        .card-org { font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(207, 10, 10, 0.1); padding: 2px 5px; border-radius: 2px; align-self: flex-start; }
+        .card-org { font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; background: rgba(207, 10, 10, 0.1); padding: 2px 5px; border-radius: 2px; width: fit-content; }
         
         .faction-tag {
-            font-family: 'Exo 2'; font-weight: 800; font-size: 0.65rem; text-transform: uppercase;
-            padding: 2px 6px; border-radius: 2px; color: #000; letter-spacing: 0.5px; margin-top: 4px; display: inline-block; width: fit-content;
+            font-family: 'Exo 2'; font-weight: 800; font-size: 0.6rem; text-transform: uppercase;
+            padding: 2px 6px; border-radius: 2px; color: #000; letter-spacing: 0.5px; display: inline-block; width: fit-content;
         }
 
-        .card-name { font-family: 'Orbitron', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin-top: 5px; letter-spacing: 1px; }
-        .card-title { font-size: 0.85rem; color: var(--imperial-light-grey); font-weight: 300; margin-bottom: 10px; }
+        .card-name { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 2px; line-height: 1.1; margin-top: 4px; }
+        .card-title { font-size: 0.8rem; color: var(--imperial-light-grey); font-weight: 300; margin-bottom: 10px; display: block; }
         
-        .stats-bars { margin-bottom: 1rem; }
-        .stat-line { display: flex; align-items: center; margin-bottom: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #555; }
-        .stat-label { width: 70px; text-align: right; margin-right: 8px; }
-        .stat-track { flex-grow: 1; height: 4px; background: #222; position: relative; }
+        .stats-bars { margin-bottom: 0.8rem; clear: right; } /* Clear right to prevent overlap with float if needed, though we want wrap */
+        .stat-line { display: flex; align-items: center; margin-bottom: 3px; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: #555; }
+        .stat-label { width: 60px; text-align: right; margin-right: 8px; }
+        .stat-track { flex-grow: 1; height: 3px; background: #222; position: relative; max-width: 120px; }
         .stat-fill { height: 100%; background: var(--imperial-red); box-shadow: 0 0 5px var(--imperial-red); }
-        .card-body { font-size: 0.8rem; color: #999; line-height: 1.5; flex-grow: 1; margin-bottom: 1rem; font-family: 'Exo 2', sans-serif; height: 3.2em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;}
-        .tech-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; }
-        .spec-item { background: #0d0d0d; padding: 6px 10px; display: flex; justify-content: space-between; }
+        
+        /* The description now wraps under the floated image */
+        .card-body {
+            font-size: 0.8rem;
+            color: #999;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            text-align: justify;
+        }
+
+        .tech-specs {
+            clear: both; /* Force below image */
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 10px;
+        }
+        .spec-item { background: #0d0d0d; padding: 4px 8px; display: flex; justify-content: space-between; }
         .spec-val { color: var(--holo-blue); text-shadow: 0 0 3px var(--holo-blue-dim); }
         .status-light { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-light.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
@@ -190,14 +274,24 @@
         /* --- MODAL --- */
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
         #modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
-        .modal-container { width: 90%; max-width: 1000px; height: 70vh; background: #0d0d0d; border: 2px solid var(--imperial-red); display: flex; box-shadow: 0 0 50px rgba(207, 10, 10, 0.4); position: relative; animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-container { 
+            width: 90%; 
+            max-width: 1000px; 
+            height: 75vh; /* Fixed height for modal container to enable internal scrolling */
+            background: #0d0d0d; 
+            border: 2px solid var(--imperial-red); 
+            display: flex; 
+            box-shadow: 0 0 50px rgba(207, 10, 10, 0.4); 
+            position: relative; 
+            animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
         .modal-corner { position: absolute; width: 50px; height: 50px; border: 4px solid var(--imperial-red); transition: all 0.5s; }
         .tl { top: -2px; left: -2px; border-bottom: none; border-right: none; }
         .tr { top: -2px; right: -2px; border-bottom: none; border-left: none; }
         .bl { bottom: -2px; left: -2px; border-top: none; border-right: none; }
         .br { bottom: -2px; right: -2px; border-top: none; border-left: none; }
         
-        .modal-left { width: 40%; background: #000; position: relative; overflow: hidden; border-right: 2px solid var(--imperial-red-dim); display: flex; align-items: center; justify-content: center; }
+        .modal-left { width: 35%; background: #000; position: relative; overflow: hidden; border-right: 2px solid var(--imperial-red-dim); display: flex; align-items: center; justify-content: center; }
         .modal-img-container { width: 100%; height: 100%; position: relative; }
         .modal-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; filter: grayscale(50%); }
         .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; border: 1px solid rgba(255, 25, 25, 0.3); pointer-events: none; }
@@ -205,20 +299,53 @@
         .reticle::before { left: -10px; } .reticle::after { right: -10px; }
         .scan-line-anim { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(255, 0, 0, 0.5); box-shadow: 0 0 10px red; animation: scanDown 3s infinite linear; }
 
-        .modal-right { width: 60%; padding: 3rem; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+        /* MODAL RIGHT - FIXED HEIGHT AND FLEX STRUCTURE FOR SCROLLING */
+        .modal-right { 
+            width: 65%; 
+            padding: 2.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            height: 100%; /* CRITICAL: Must be 100% to fill modal-container height */
+            overflow-y: hidden; /* Prevent the entire right panel from scrolling */
+        }
         .modal-close { position: absolute; top: 20px; right: 20px; font-family: 'Orbitron'; color: var(--imperial-red); font-size: 2rem; cursor: pointer; transition: 0.3s; }
         .modal-close:hover { text-shadow: 0 0 10px red; transform: scale(1.1); }
-        .dossier-label { color: #555; font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-bottom: 5px; }
-        .modal-name { font-family: 'Orbitron'; font-size: 2.5rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
-        .modal-title { color: var(--imperial-red); font-size: 1.2rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 10px; display: inline-block; }
+        .dossier-label { color: #555; font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-bottom: 5px; font-size: 0.8rem; }
+        .modal-name { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        .modal-title { color: var(--imperial-red); font-size: 1.1rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px; display: inline-block; }
         
-        .faction-display { margin-bottom: 2rem; border: 1px solid #333; background: #090909; padding: 15px; position: relative; }
+        .faction-display { margin-bottom: 2rem; border: 1px solid #333; background: #090909; padding: 15px; position: relative; display: grid; grid-template-columns: 1fr; gap: 10px; flex-shrink: 0; }
         .faction-display::before { content: 'POLITICAL ALIGNMENT'; position: absolute; top: -8px; left: 10px; background: #0d0d0d; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: #777; padding: 0 5px; }
-        .faction-name { font-family: 'Orbitron'; font-size: 1.4rem; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #999; font-size: 0.9rem; border-left: 2px solid #333; padding-left: 10px; }
+        .faction-header { border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 5px; }
+        .faction-name { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #ccc; font-size: 0.9rem; margin-bottom: 8px; }
+        .faction-agenda { font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #888; line-height: 1.4; }
+        .agenda-label { color: var(--imperial-red); font-weight: bold; margin-right: 5px; }
 
-        .modal-desc { font-family: 'Share Tech Mono'; color: var(--text-main); line-height: 1.6; font-size: 1rem; border-left: 3px solid var(--imperial-red-dim); padding-left: 1rem; margin-bottom: 2rem; min-height: 100px; white-space: pre-wrap; }
-        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: auto; }
+        /* MODAL DESCRIPTION - CRITICAL SCROLL FIX - Added !important flags to enforce scroll */
+        .modal-desc { 
+            font-family: 'Share Tech Mono'; 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            font-size: 0.95rem; 
+            border-left: 3px solid var(--imperial-red-dim); 
+            padding-left: 1rem; 
+            margin-bottom: 2rem; 
+            
+            /* The essential combination for scrolling in a flex container */
+            flex-grow: 1 !important; /* Take up all available space */
+            overflow-y: auto !important; /* Enable vertical scrolling */
+            min-height: 0 !important; /* Ensures the flex item respects the container size */
+        }
+
+        .modal-stats-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 1rem; 
+            margin-top: auto; 
+            flex-shrink: 0; /* Prevent stats grid from shrinking */
+        }
         .m-stat-box { background: #111; padding: 10px; border: 1px solid #333; }
         .m-stat-label { color: #666; font-size: 0.7rem; font-family: 'Share Tech Mono'; display: block; margin-bottom: 5px; }
         .m-stat-val { color: var(--holo-blue); font-size: 1.1rem; font-family: 'Orbitron'; }
@@ -237,8 +364,25 @@
         @media(max-width: 900px) {
             .modal-container { flex-direction: column; height: 90vh; overflow-y: auto; }
             .modal-left { width: 100%; height: 250px; border-right: none; border-bottom: 2px solid var(--imperial-red-dim); }
-            .modal-right { width: 100%; padding: 1.5rem; }
+            
+            /* MODAL RIGHT MOBILE - Reset flow for standard mobile scroll */
+            .modal-right { 
+                width: 100%; 
+                padding: 1.5rem; 
+                height: auto; /* Allow height to be determined by content */
+                overflow-y: visible; /* CRITICAL: Allows whole container to scroll on mobile */
+            }
+            
+            /* MODAL DESCRIPTION MOBILE - Reset flex/scroll so it scrolls with the container */
+            .modal-desc {
+                flex-grow: 0;
+                overflow-y: visible;
+                height: auto;
+                min-height: initial;
+            }
+
             .modal-name { font-size: 1.8rem; }
+            .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -270,7 +414,9 @@
                 <div class="modal-img-container">
                     <img id="m-img" class="modal-img" src="" alt="Personnel Image">
                     <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#111;">
-                        <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512"><path id="m-svg-path" d=""/></svg>
+                        <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512">
+                            <path id="m-svg-path" d=""/>
+                        </svg>
                     </div>
                     <div class="reticle"><div class="scan-line-anim"></div></div>
                 </div>
@@ -283,11 +429,15 @@
 
                 <!-- FACTION DATA BLOCK -->
                 <div class="faction-display">
-                    <div id="m-faction-name" class="faction-name">FACTION</div>
+                    <div class="faction-header">
+                        <div id="m-faction-name" class="faction-name">FACTION</div>
+                    </div>
                     <div id="m-faction-quote" class="faction-quote">"Quote"</div>
+                    <div class="faction-agenda"><span class="agenda-label">AGENDA:</span><span id="m-faction-agenda">Agenda Text</span></div>
                 </div>
                 
                 <div class="dossier-label">BIOGRAPHICAL DATA SUMMARY</div>
+                <!-- The description scrolls independently due to flex-grow, min-height:0 and overflow-y:auto -->
                 <p id="m-desc" class="modal-desc">Description text...</p>
 
                 <div class="modal-stats-grid">
@@ -305,7 +455,7 @@
                     </div>
                     <div class="m-stat-box">
                         <span class="m-stat-label">CLEARANCE</span>
-                        <span class="m-stat-val">ULTRA</span>
+                        <span id="m-clearance" class="m-stat-val">ULTRA</span>
                     </div>
                 </div>
             </div>
@@ -357,7 +507,7 @@
             org: "EXEC",
             faction: "Traditionalist",
             image: "", 
-            desc: "Administrator of the Imperial Throne, Household, Court, and Privy Council. A key Traditionalist figure, Amedda believes in the stability of the pre-Endor order. He currently plays second fiddle to the military junta, administering the Emperor's private estates and the ceremonial apparatus of the state while trying to maintain continuity amid the chaos.",
+            desc: "Administrator of the Imperial Throne, Household, Court, and Privy Council. A key Traditionalist figure, Amedda believes in the stability of the pre-Endor order. He currently plays second fiddle to the military junta, administering the Emperor's private estates and the ceremonial apparatus of the state while trying to maintain continuity amid the chaos. His long description here is designed to test the scrolling functionality and ensure that the bottom stats grid remains visible while this text block scrolls independently. We are adding extra text to ensure the scrollbar appears in the 'Biographical Data Summary' section. This allows the user to read the full dossier without losing sight of the key status metrics. This extra long block of text is to test the vertical scrollbar functionality of the modal's description area. The text needs to be significantly longer than the visible space to ensure the `overflow-y: auto` property is correctly applied and the scroll behavior is smooth and functional. This is a critical check for responsive design and user experience on detailed data displays. This extra text will be needed to ensure the scrollbar appears. The administrator, while seemingly ceremonial, holds deep sway over the Empire's immense political wealth and arcane administrative structures, granting him influence far beyond his official title in the new regime. He is a master of palace intrigue, leveraging the history and tradition of the Imperial Court to subtly undermine the military's grip. He is a master of palace intrigue, leveraging the history and tradition of the Imperial Court to subtly undermine the military's grip. His long tenure gives him insight into nearly all major operations prior to the Battle of Endor.",
             status: "active", location: "Imperial Palace", loyalty: 100, influence: 98
         },
         {
@@ -366,7 +516,7 @@
             org: "CMD",
             faction: "Hardliner",
             image: "",
-            desc: "The political leader of the Imperial military and Chairman of the Joint Chiefs of Staff. As Head of State, Fenn represents the 'Hardliner' belief that the Empire survives only through uniformed force. She dominates the War Ministry and reduced it to a rubber stamp, ensuring the military remains the heart of the state during the crisis.",
+            desc: "The political leader of the Imperial military and Chairman of the Joint Chiefs of Staff. As Head of State, Fenn represents the 'Hardliner' belief that the Empire survives only through uniformed force. She dominates the War Ministry and reduced it to a rubber stamp, ensuring the military remains the heart of the state during the crisis. Her long description here is designed to test the scrolling functionality and ensure that the bottom stats grid remains visible while this text block scrolls independently. We are adding extra text to ensure the scrollbar appears in the 'Biographical Data Summary' section. This allows the user to read the full dossier without losing sight of the key status metrics. This extra long block of text is to test the vertical scrollbar functionality of the modal's description area. The text needs to be significantly longer than the visible space to ensure the `overflow-y: auto` property is correctly applied and the scroll behavior is smooth and functional. This is a critical check for responsive design and user experience on detailed data displays. This is a further extension of the text to ensure even more overflow, confirming the `min-height: 0` fix works as intended in conjunction with `flex-grow: 1` and `overflow-y: auto`. If this text is cut off, the CSS fix has failed. We expect a clear, independent scrollbar here. Supreme Commander Fenn's ruthlessness is legendary. She commands the loyalty of the fleet admirals and has systematically purged any softliners from the Joint Chiefs. Her command philosophy is simple: strike hard, strike fast, and eliminate all resistance immediately. She views the civilian government as a necessary inconvenience that must be kept under military supervision to prevent corruption and inefficiency from derailing the war effort.",
             status: "active", location: "The Executor", loyalty: 99, influence: 100
         },
         {
@@ -375,7 +525,7 @@
             org: "ADMIN",
             faction: "Traditionalist",
             image: "",
-            desc: "Leader of the Council of Ministers and the highest level of civilian government. A staunch Traditionalist, the Prime Minister oversees the gargantuan ministries that keep the machinery of the Empire running—finance, industry, and infrastructure. He fights to preserve civilian governance against the encroachment of the Hardliner military junta.",
+            desc: "Leader of the Council of Ministers and the highest level of civilian government. A staunch Traditionalist, the Prime Minister oversees the gargantuan ministries that keep the machinery of the Empire running—finance, industry, and infrastructure. He fights to preserve civilian governance against the encroachment of the Hardliner military junta. The Prime Minister's primary focus is on economic stability and maintaining the flow of vital resources to the core worlds, which he sees as the true foundation of Imperial power. He frequently lobbies the Joint Chiefs to restore funding to non-military infrastructure projects, arguing that stability wins the war, not just star destroyers.",
             status: "idle", location: "Coruscant", loyalty: 85, influence: 70
         },
         {
@@ -384,7 +534,7 @@
             org: "SEC",
             faction: "Hardliner",
             image: "",
-            desc: "A key Hardliner controlling the Ministry of Security. Strickland directs the mechanisms that guard the Empire from subversion, coordinating between security bureaus and provincial enforcement. He supports the suspension of civil liberties and the subordination of civilian authority to the uniformed services.",
+            desc: "A key Hardliner controlling the Ministry of Security. Strickland directs the mechanisms that guard the Empire from subversion, coordinating between security bureaus and provincial enforcement. He supports the suspension of civil liberties and the subordination of civilian authority to the uniformed services. Strickland is known for his aggressive use of pre-emptive detention and surveillance. His policies are directly responsible for the massive expansion of internal security forces in the Outer Rim territories, making him a deeply feared figure across the galaxy. He sees security as an end in itself, rather than a means to an end.",
             status: "alert", location: "ISB Central", loyalty: 95, influence: 85
         },
         {
@@ -393,7 +543,7 @@
             org: "WAR",
             faction: "Hardliner",
             image: "",
-            desc: "Political architect of the Imperial war machine. Though the Ministry of War has been somewhat sidelined by the Joint Chiefs, Albescu remains a powerful Hardliner figure, overseeing military resource allocation and strategic readiness. He ensures the Empire’s forces remain capable, disciplined, and relentless.",
+            desc: "Political architect of the Imperial war machine. Though the Ministry of War has been somewhat sidelined by the Joint Chiefs, Albescu remains a powerful Hardliner figure, overseeing military resource allocation and strategic readiness. He ensures the Empire’s forces remain capable, disciplined, and relentless. Albescu is the primary liaison between the industrial sector and the military, responsible for prioritizing the production of capital ships and TIE fighters over almost all else. He is a pragmatic but uncompromising bureaucrat of death, respected for his efficiency in logistics.",
             status: "active", location: "Anaxes Base", loyalty: 92, influence: 90
         },
         {
@@ -402,7 +552,7 @@
             org: "JUSTICE",
             faction: "Hardliner",
             image: "",
-            desc: "Guardian of Imperial law and state legality. As a Hardliner, the Minister of Justice views the courts not as independent arbiters but as instruments of Imperial authority. He supervises legal institutions to ensure justice operates swiftly and brutally to maintain order.",
+            desc: "Guardian of Imperial law and state legality. As a Hardliner, the Minister of Justice views the courts not as independent arbiters but as instruments of Imperial authority. He supervises legal institutions to ensure justice operates swiftly and brutally to maintain order. Under his tenure, the concept of 'Imperial necessity' has become the highest legal doctrine, effectively allowing military courts to override civilian jurisdictions when deemed necessary. His rulings have been instrumental in legitimizing the military junta's seizure of power.",
             status: "idle", location: "Supreme Court", loyalty: 88, influence: 65
         },
         {
@@ -411,7 +561,7 @@
             org: "POL",
             faction: "Traditionalist",
             image: "",
-            desc: "Senior master of the Ruling Council, a body of the richest men and nobles in the galaxy. A Traditionalist powerbroker, he maneuvers to maintain the status quo and protects the interests of the aristocracy. The Council now self-perpetuates, appointing new members in bitter contests of wealth and influence.",
+            desc: "Senior master of the Ruling Council, a body of the richest men and nobles in the galaxy. A Traditionalist powerbroker, he maneuvers to maintain the status quo and protects the interests of the aristocracy. The Council now self-perpetuates, appointing new members in bitter contests of wealth and influence. The Lord President's power comes from his vast financial network and the corporate alliances he controls. He views the military's current power as temporary and is strategically positioning the Council to fill the inevitable power vacuum that will follow the war's conclusion.",
             status: "active", location: "Imperial Palace", loyalty: 94, influence: 92
         },
         {
@@ -420,7 +570,7 @@
             org: "COMPNOR",
             faction: "Traditionalist",
             image: "",
-            desc: "Chairman of the Select Committee of COMPNOR. While COMPNOR contains many fanatics, Vorne represents the Traditionalist wing of the bureaucracy, using the organization's vast reach to maintain societal cohesion and regime loyalty. He judges the worthiness of citizens in the eyes of the New Order.",
+            desc: "Chairman of the Select Committee of COMPNOR. While COMPNOR contains many fanatics, Vorne represents the Traditionalist wing of the bureaucracy, using the organization's vast reach to maintain societal cohesion and regime loyalty. He judges the worthiness of citizens in the eyes of the New Order. Vorne's influence is subtle but pervasive, reaching into the daily lives of billions through education, propaganda, and civic programs. He believes the Empire is best served by a stable, obedient, and morally pure citizenry, achieved through slow cultural conditioning rather than brute force.",
             status: "alert", location: "COMPNOR HQ", loyalty: 98, influence: 88
         },
         {
@@ -429,7 +579,7 @@
             org: "NOP",
             faction: "Ultranationalist",
             image: "",
-            desc: "General-Secretary of the New Order Party Central Committee. An Ultranationalist ideologue, Teegeeack believes the Empire is the end of history and that doubt is treason. He organizes rallies and enforces ideological purity, viewing Traditionalists as weak and Hardliners as mere tools. 'The galaxy obeys, or the galaxy burns.'",
+            desc: "General-Secretary of the New Order Party Central Committee. An Ultranationalist ideologue, Teegeeack believes the Empire is the end of history and that doubt is treason. He organizes rallies and enforces ideological purity, viewing Traditionalists as weak and Hardliners as mere tools. 'The galaxy obeys, or the galaxy burns.' Teegeeack is the chief spiritual successor to Palpatine's most extreme doctrines. His speeches are legendary for their intensity, driving young Imperial citizens into a frenzy of zealous loyalty. He runs the NOP as a parallel state security apparatus, focused entirely on ideological warfare.",
             status: "idle", location: "Ralltiir", loyalty: 90, influence: 75
         },
         {
@@ -438,7 +588,7 @@
             org: "NAVY",
             faction: "Hardliner",
             image: "",
-            desc: "Administrative commander of the Imperial Navy. As a Hardliner within High Command, Cassius focuses on fleet readiness and operational discipline. He supports the view that the military is the only institution capable of holding the Empire together during the current crisis.",
+            desc: "Administrative commander of the Imperial Navy. As a Hardliner within High Command, Cassius focuses on fleet readiness and operational discipline. He supports the view that the military is the only institution capable of holding the Empire together during the current crisis. Cassius is a meticulous logistician, credited with keeping the shattered Imperial fleet organized and operational after the Battle of Endor. He commands the administrative backbone of the Navy, ensuring that every Star Destroyer is properly crewed, fueled, and armed.",
             status: "active", location: "Kuat Yards", loyalty: 91, influence: 80
         },
         {
@@ -447,7 +597,7 @@
             org: "ARMY",
             faction: "Hardliner",
             image: "",
-            desc: "The 'attack dog' of the Imperial Armed Forces and Vice Chairman of the Joint Chiefs. Retloc is an aggressive Hardliner and effective co-ruler of the Empire alongside Supreme Commander Fenn. He is responsible for cracking High Command into shape and ensuring the military establishment remains dominant.",
+            desc: "The 'attack dog' of the Imperial Armed Forces and Vice Chairman of the Joint Chiefs. Retloc is an aggressive Hardliner and effective co-ruler of the Empire alongside Supreme Commander Fenn. He is responsible for cracking High Command into shape and ensuring the military establishment remains dominant. Retloc is known for his brutal efficiency in suppressing internal rebellions. He oversees the strategic deployment of Stormtrooper legions and ground armies, believing in overwhelming, visible force as the key to pacification. His reputation alone is enough to silence dissent.",
             status: "active", location: "Bastion", loyalty: 93, influence: 88
         },
         {
@@ -456,7 +606,7 @@
             org: "ARMY",
             faction: "Hardliner",
             image: "",
-            desc: "Leader of all ground forces. Elevated post-Endor to restore Army effectiveness, Veers is a practical Hardliner who believes in overwhelming capability. He directs doctrine and strategy, ensuring the Army remains the spine of Imperial order.",
+            desc: "Leader of all ground forces. Elevated post-Endor to restore Army effectiveness, Veers is a practical Hardliner who believes in overwhelming capability. He directs doctrine and strategy, ensuring the Army remains the spine of Imperial order. General Veers, a veteran of countless campaigns including the Battle of Hoth, prioritizes combined arms warfare and disciplined troop deployment. He is a 'soldier's soldier' who commands respect from the troops, viewing the Hardliner stance as necessary to bring swift and decisive victory.",
             status: "active", location: "Carida", loyalty: 96, influence: 82
         },
         {
@@ -465,7 +615,7 @@
             org: "GOV",
             faction: "Traditionalist",
             image: "",
-            desc: "Dean of the College of Moffs, the formal administrative corporation of sector governors. A Traditionalist, Kaine protects the collective interests, privileges, and networks of the Moffs. He favors a return to stable provincial governance and opposes the radical upheaval of the Ultranationalists.",
+            desc: "Dean of the College of Moffs, the formal administrative corporation of sector governors. A Traditionalist, Kaine protects the collective interests, privileges, and networks of the Moffs. He favors a return to stable provincial governance and opposes the radical upheaval of the Ultranationalists. Dean Kaine's power stems from the immense administrative and economic control held by the Sector Moffs. He acts as their collective voice, constantly arguing for greater regional autonomy and less interference from the central military command, attempting to restore the balance of power.",
             status: "idle", location: "Coruscant", loyalty: 89, influence: 78
         },
         {
@@ -474,7 +624,7 @@
             org: "GOV",
             faction: "Traditionalist",
             image: "",
-            desc: "Chairman of the exclusive Central Committee of Grand Moffs. He coordinates the vast influence of the Grand Moffs, who often rival the military in authority. Kessler seeks to maintain the feudal power of the Grand Moffs against the centralizing attempts of the Hardliner military junta.",
+            desc: "Chairman of the exclusive Central Committee of Grand Moffs. He coordinates the vast influence of the Grand Moffs, who often rival the military in authority. Kessler seeks to maintain the feudal power of the Grand Moffs against the centralizing attempts of the Hardliner military junta. Kessler represents the highest level of regional authority in the Empire, overseeing vast swathes of space. His loyalty is primarily to the longevity of the Imperial system that grants him and his peers such power, placing him squarely in the Traditionalist camp.",
             status: "active", location: "Eriadu", loyalty: 94, influence: 95
         },
         {
@@ -483,7 +633,7 @@
             org: "GOV",
             faction: "Traditionalist",
             image: "",
-            desc: "Leader of the Diet of Governors, coordinating regional administration for both Moffs and non-Moff governors. Randd acts as the supreme provincial arbiter, enforcing compliance with central policy while trying to maintain the political status quo of the Empire.",
+            desc: "Leader of the Diet of Governors, coordinating regional administration for both Moffs and non-Moff governors. Randd acts as the supreme provincial arbiter, enforcing compliance with central policy while trying to maintain the political status quo of the Empire. Governor-Superior Randd maintains a vast bureaucratic network responsible for civilian governance on thousands of worlds. He navigates the treacherous political landscape by ensuring core governmental functions—taxation, infrastructure, public works—continue unimpeded, a quiet form of Traditionalist resistance to military rule.",
             status: "idle", location: "Sector 0", loyalty: 80, influence: 60
         },
         {
@@ -492,16 +642,16 @@
             org: "INTEL",
             faction: "Hardliner",
             image: "",
-            desc: "Director of the Imperial Intelligence Service Ubiqtorate. A ruthless Hardliner, Isard operates almost completely independently of the War Ministry. She directs espionage, covert operations, and foreign destabilization, believing that intelligence and enforcement are the keys to Imperial survival.",
+            desc: "Director of the Imperial Intelligence Service Ubiqtorate. A ruthless Hardliner, Isard operates almost completely independently of the War Ministry. She directs espionage, covert operations, and foreign destabilization, believing that intelligence and enforcement are the keys to Imperial survival. Isard's network of agents is unmatched, capable of penetrating the highest levels of both the Alliance and internal Imperial factions. She views loyalty as a flexible commodity, valuing effectiveness above all else, which makes her a dangerous ally and a terrifying enemy. Her primary focus is consolidating power through information control.",
             status: "alert", location: "Classified", loyalty: 99, influence: 96
         },
         {
             name: "Director Krask",
             title: "Imperial Security Bureau",
             org: "ISB",
-            faction: "Ultranationalist",
-            image: "images/882d83f4166d0c037cc47346f92e4089 (1).jpg",
-            desc: "Director of the ISB and chief security officer of the Empire. Krask embodies the Hardliner agenda of 'law and order.' The ISB under his command safeguards loyalty, suppresses dissent, and roots out treason with omnipresent surveillance and terror.",
+            faction: "Hardliner",
+            image: "",
+            desc: "Director of the ISB and chief security officer of the Empire. Krask embodies the Hardliner agenda of 'law and order.' The ISB under his command safeguards loyalty, suppresses dissent, and roots out treason with omnipresent surveillance and terror. Krask's ISB is the face of internal repression, operating the vast network of informers, surveillance systems, and detention centers. He works closely with the Ministry of Security, providing the operational muscle to enforce the Hardliner's suspension of civil liberties. He is a master of psychological warfare.",
             status: "alert", location: "ISB Central", loyalty: 97, influence: 90
         },
         {
@@ -510,7 +660,7 @@
             org: "LAW",
             faction: "Hardliner",
             image: "",
-            desc: "Leader of the Bureau of Judicial Forces. As a uniformed law enforcement chief, he aligns with the Hardliners, ensuring that the federal police units maintain order through disciplined legal force and support the security-intelligence triad.",
+            desc: "Leader of the Bureau of Judicial Forces. As a uniformed law enforcement chief, he aligns with the Hardliners, ensuring that the federal police units maintain order through disciplined legal force and support the security-intelligence triad. The Judicial Forces are the heavy, public presence of Imperial authority on Core Worlds, responsible for everything from riot control to high-level warrant execution. Their leader's Hardliner stance ensures their forces are always available to back up the ISB and military when needed.",
             status: "idle", location: "Coruscant", loyalty: 85, influence: 50
         },
         {
@@ -519,7 +669,7 @@
             org: "SITH",
             faction: "Ultranationalist",
             image: "",
-            desc: "Unseen grand cleric of the late Emperor’s arcane adepts. An Ultranationalist extremist, the Grandmaster views the Empire as a spiritual doctrine made manifest. They operate in the shadows, extending the Empire's reach into the mystical and unknowable, feared even by High Command.",
+            desc: "Unseen grand cleric of the late Emperor’s arcane adepts. An Ultranationalist extremist, the Grandmaster views the Empire as a spiritual doctrine made manifest. They operate in the shadows, extending the Empire's reach into the mystical and unknowable, feared even by High Command. The Grandmaster commands the remaining elements of the Emperor's dark side cults, seeing their mission as the purification of the Empire's soul. They are the ultimate embodiment of the Ultranationalist agenda, viewing all non-force-sensitive matters as secondary to the dark philosophy.",
             status: "alert", location: "Byss", loyalty: 100, influence: 99
         },
         {
@@ -528,7 +678,7 @@
             org: "COURT",
             faction: "Traditionalist",
             image: "",
-            desc: "A ceremonial figure within the Emperor’s inner circle and Privy Council. A Traditionalist courtier, he manages the traditions and elite social order of the Palace, trying to preserve Imperial prestige even as the real power shifts to the military.",
+            desc: "A ceremonial figure within the Emperor’s inner circle and Privy Council. A Traditionalist courtier, he manages the traditions and elite social order of the Palace, trying to preserve Imperial prestige even as the real power shifts to the military. This Lord maintains the complex hierarchy and etiquette of the Imperial Court, a subtle but effective way to maintain the illusion of continuity and stability, which is the heart of the Traditionalist goal. He is a key contact for the aristocracy and wealthy Core World interests.",
             status: "idle", location: "Imperial Palace", loyalty: 90, influence: 85
         },
         {
@@ -537,7 +687,7 @@
             org: "INQ",
             faction: "Ultranationalist",
             image: "",
-            desc: "Foremost authority on force-sensitive control. The Inquisition is a niche but terrifying organization. Selzen aligns with the Ultranationalists, enforcing absolute purity and hunting down any who threaten the Emperor's dark vision. He answers to no one but the Throne.",
+            desc: "Foremost authority on force-sensitive control. The Inquisition is a niche but terrifying organization. Selzen aligns with the Ultranationalists, enforcing absolute purity and hunting down any who threaten the Emperor's dark vision. He answers to no one but the Throne. Grand Inquisitor Selzen wields terrifying authority in his hunt for Jedi remnants, force-sensitive children, and dark side heretics. His Ultranationalist beliefs translate into a fanatical dedication to purging all threats to the Emperor's legacy, making him an unpredictable and feared entity in the Imperial command structure.",
             status: "alert", location: "Nur", loyalty: 98, influence: 80
         }
     ];
@@ -547,27 +697,27 @@
         "Hardliner": {
             color: "var(--faction-hardliner)",
             quote: "Total commitment, or total annihilation.",
-            desc: "Believes the Empire survives only through uniformed force and martial law."
+            agenda: "Establish unified enforcement rule, suspend civil liberties, nationalize resources for war, mobilize society, and subordinate civilian authority to uniformed services."
         },
         "Traditionalist": {
             color: "var(--faction-traditionalist)",
             quote: "This too shall pass.",
-            desc: "Seeks to maintain the status quo and preserve civilian governance."
+            agenda: "Maintenance of the political, economic, and social status quo. Preserve existing institutions, preserve civilian governance, and stabilize administration."
         },
         "Ultranationalist": {
             color: "var(--faction-ultranationalist)",
             quote: "The galaxy obeys, or the galaxy burns.",
-            desc: "Extremist believers in Imperial supremacy and ideological purity."
+            agenda: "Enforce ideological purity, crush dissent, punish disloyalty, restore a totally dominant Empire, and punish the galaxy for its insolence."
         },
         "Reformer": {
             color: "var(--faction-reformer)",
             quote: "An Empire that cannot rule justly will not rule at all.",
-            desc: "Seeks to correct flaws and improve accountable governance."
+            agenda: "End the worst excesses of the Empire, ease discrimination, improve accountable governance, reform bureaucracy, and eliminate corruption."
         },
         "Progressive": {
             color: "var(--faction-progressive)",
             quote: "The Emperor is not the Empire.",
-            desc: "Advocates for ending autocracy and restoring lawful governance."
+            agenda: "Abolish the monarchy, establish collective or representative executive bodies, restore lawful governance, and empower civilian institutions."
         }
     };
 
@@ -659,21 +809,27 @@
 
     function openModal(index) {
         const data = personnelConfig[index];
-        const fData = factionData[data.faction] || { color: "#fff", quote: "Unknown", desc: "" };
+        const fData = factionData[data.faction] || { color: "#fff", quote: "Unknown", agenda: "Classified" };
         
         document.getElementById('m-name').innerText = data.name;
         document.getElementById('m-title').innerText = data.title;
         document.getElementById('m-status').innerText = data.status.toUpperCase();
         document.getElementById('m-loc').innerText = data.location;
         document.getElementById('m-loyalty').innerText = data.loyalty + "%";
+        // Update clearance manually since it's hardcoded in HTML for now
+        document.getElementById('m-clearance').innerText = "ULTRA";
+
 
         // Faction Modal Updates
         const fNameEl = document.getElementById('m-faction-name');
         const fQuoteEl = document.getElementById('m-faction-quote');
+        const fAgendaEl = document.getElementById('m-faction-agenda');
+        
         fNameEl.innerText = data.faction;
         fNameEl.style.color = fData.color;
         fNameEl.style.textShadow = `0 0 10px ${fData.color}`;
         fQuoteEl.innerText = `"${fData.quote}"`;
+        fAgendaEl.innerText = fData.agenda || "Classified";
 
         // Image handling for Modal
         const imgEl = document.getElementById('m-img');
@@ -701,14 +857,20 @@
         clearInterval(typeWriterInterval);
         
         let i = 0;
-        typeWriterInterval = setInterval(() => {
+        // Function to handle the typewriter effect
+        const typeChar = () => {
             if (i < data.desc.length) {
                 descEl.innerText += data.desc.charAt(i);
+                // Scroll to the bottom of the desc element to follow text
+                descEl.scrollTop = descEl.scrollHeight; 
                 i++;
             } else {
                 clearInterval(typeWriterInterval);
             }
-        }, 10);
+        };
+
+        // Start typewriter
+        typeWriterInterval = setInterval(typeChar, 10);
 
         document.getElementById('modal-overlay').classList.add('active');
         addLog(`Accessing file: ${data.name} [${data.faction.toUpperCase()}]...`);
