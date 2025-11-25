@@ -5,122 +5,279 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imperial High Command | Galactic Database</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Tekno&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            /* Core Palette */
-            --imperial-black: #020202;
-            --imperial-grey: #121212;
-            --imperial-light-grey: #b0b0b0;
-            --imperial-red: #ff1a1a;
-            --imperial-red-dim: #660000;
-            --imperial-red-dark: #330000;
-            --holo-blue: #00f2ff;
-            --holo-blue-dim: #004d52;
-            --text-main: #e0e0e0;
-            --card-bg: #0a0a0a;
-            --border-color: #333;
+            /* ANDOR / HIGH COMMAND PALETTE */
+            --iso-white: #f4f4f4;       /* Main Background - Sterile White */
+            --iso-off-white: #e6e6e6;   /* Panel Backgrounds */
+            --iso-grey: #b0b0b0;        /* Secondary Text */
+            --iso-dark: #121212;        /* Primary Text / Borders - Stark Black */
+            --iso-alert: #cc0000;       /* Flat Red - No Glow */
+            --iso-amber: #ffaa00;       /* Warning / Accent */
+            --iso-teal: #4d6e7a;        /* Data / Tech Accents */
             
-            /* Faction Colors */
-            --faction-hardliner: #ff3333;
-            --faction-traditionalist: #4488ff;
-            --faction-ultranationalist: #ffaa00;
-            --faction-reformer: #00cc66;
-            --faction-progressive: #aa66cc;
+            /* Function Mappings */
+            --bg-main: var(--iso-white);
+            --bg-panel: #ffffff;
+            --border-heavy: 2px solid var(--iso-dark);
+            --border-light: 1px solid #999;
+            --text-primary: var(--iso-dark);
+            --text-secondary: #555;
+            
+            /* Faction Colors (Flatted) */
+            --faction-hardliner: #d32f2f;
+            --faction-traditionalist: #1976d2;
+            --faction-ultranationalist: #f57c00;
+            --faction-reformer: #388e3c;
         }
+
+        /* CRITICAL STATE OVERRIDE */
+        body.alert-state {
+            --bg-main: #f0f0f0;
+            --iso-dark: #3a0000; /* Dark Red text */
+            --border-heavy: 2px solid #cc0000;
+        }
+        body.alert-state .card { border-color: #cc0000; }
+        body.alert-state header { border-bottom-color: #cc0000; }
+        body.alert-state aside { border-right-color: #cc0000; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
 
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar { width: 6px; background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--imperial-red-dim); border: 1px solid var(--imperial-red); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--imperial-red); }
+        /* Scrollbar Styling - Industrial */
+        ::-webkit-scrollbar { width: 8px; background: var(--iso-off-white); border-left: 1px solid var(--iso-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--iso-dark); border: 1px solid var(--iso-off-white); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--iso-alert); }
 
         body {
-            background-color: var(--imperial-black);
-            color: var(--text-main);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             font-family: 'Exo 2', sans-serif;
             height: 100vh;
             overflow: hidden;
             display: flex;
+            transition: background-color 0.5s ease;
         }
+
+        /* --- LOGIN PAGE (High Command / Andor Style) --- */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--iso-white);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--iso-dark);
+            font-family: 'Share Tech Mono', monospace;
+            transition: opacity 1s ease-in-out;
+        }
+
+        /* Architectural Grid Background */
+        .login-grid-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(#ccc 1px, transparent 1px),
+                linear-gradient(90deg, #ccc 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            width: 450px;
+            background: rgba(255,255,255,0.95);
+            border: var(--border-heavy);
+            padding: 3rem;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.1);
+        }
+
+        .login-header {
+            font-family: 'Antonio', sans-serif; /* Tall, imposing font */
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            margin-bottom: 2.5rem;
+            text-transform: uppercase;
+            border-bottom: 4px solid var(--iso-dark);
+            padding-bottom: 10px;
+            display: block;
+            color: var(--iso-dark);
+        }
+
+        /* The Cylinder Port */
+        .cylinder-port {
+            width: 140px;
+            height: 140px;
+            border: 6px solid var(--iso-dark);
+            border-radius: 50%;
+            margin: 0 auto 2rem auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .cylinder-port:hover {
+            transform: scale(1.02);
+            border-color: var(--iso-alert);
+        }
+        
+        /* Inner mechanism visuals */
+        .cylinder-inner {
+            width: 85%;
+            height: 85%;
+            border: 2px dashed #333;
+            border-radius: 50%;
+            transition: all 0.5s;
+            position: relative;
+        }
+        .cylinder-inner::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 10px; height: 10px; background: #333; border-radius: 50%;
+        }
+
+        /* Spinning Animation Classes */
+        .spinning { animation: spinRandom 0.5s infinite linear; border-style: solid; border-color: var(--iso-amber); }
+        .access-granted-ring {
+            border-style: solid; background: var(--iso-dark); border-color: var(--iso-dark);
+            transform: scale(0.5); opacity: 0; animation: collapseIn 0.5s forwards;
+        }
+
+        @keyframes spinRandom {
+            0% { transform: rotate(0deg); } 25% { transform: rotate(120deg); }
+            50% { transform: rotate(60deg); } 75% { transform: rotate(300deg); } 100% { transform: rotate(360deg); }
+        }
+
+        @keyframes collapseIn {
+            0% { transform: scale(1.2); opacity: 0; }
+            50% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; background: var(--iso-dark); }
+        }
+
+        .login-status {
+            font-size: 1rem; letter-spacing: 2px; height: 20px; margin-bottom: 15px; font-weight: bold;
+            color: var(--iso-dark);
+        }
+
+        .login-instruction {
+            font-size: 0.75rem; color: #666; margin-top: 15px; text-transform: uppercase;
+            letter-spacing: 1px; border-top: 1px solid #ccc; padding-top: 15px;
+        }
+
+        .auth-code-display {
+            font-family: 'Share Tech Mono', monospace;
+            margin-top: 25px; padding: 15px;
+            border: 2px solid var(--iso-dark);
+            background: var(--iso-dark); color: var(--iso-white);
+            font-size: 1rem; display: none; animation: fadeIn 0.5s forwards;
+        }
+
+        /* MANUAL KEYPAD */
+        .manual-override-btn {
+            background: transparent; border: none; color: #888; text-decoration: underline;
+            font-size: 0.7rem; margin-top: 10px; cursor: pointer; font-family: 'Share Tech Mono';
+        }
+        .keypad-container {
+            display: none; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 20px;
+        }
+        .key-btn {
+            background: #eee; border: 1px solid #999; padding: 10px; font-family: 'Orbitron';
+            cursor: pointer; transition: 0.2s; font-weight: bold; color: #333;
+        }
+        .key-btn:hover { background: #333; color: #fff; }
+        .key-display { grid-column: 1/-1; background: #222; color: #0f0; padding: 8px; text-align: right; margin-bottom: 5px; font-family: monospace; letter-spacing: 3px; min-height: 35px;}
 
         /* --- BACKGROUND FX --- */
         .bg-grid {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-image: 
-                linear-gradient(rgba(255, 0, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
+                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: 0; pointer-events: none;
-            animation: gridPan 60s linear infinite;
         }
-        @keyframes gridPan { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
-
+        
         .vignette {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 40%, #000 100%);
+            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.1) 100%);
             z-index: 2; pointer-events: none;
-        }
-        .crt-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: repeating-linear-gradient(
-                0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px
-            );
-            z-index: 100; pointer-events: none; opacity: 0.4;
         }
 
         /* --- BOOT SEQUENCE --- */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red);
+            background: var(--iso-white); z-index: 9999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Share Tech Mono', monospace; color: var(--iso-dark);
         }
-        .boot-text { font-size: 1.4rem; margin: 5px; text-align: left; width: 500px; text-shadow: 0 0 5px var(--imperial-red); }
+        .boot-text { 
+            font-size: 1.2rem; margin: 5px; text-align: left; width: 500px; 
+            border-left: 5px solid var(--iso-dark); padding-left: 10px;
+        }
 
         /* --- LAYOUT --- */
         aside {
-            width: 340px; background: #050505; border-right: 2px solid var(--imperial-red-dim);
+            width: 320px; background: #fff; border-right: 2px solid var(--iso-dark);
             display: flex; flex-direction: column; padding: 0; z-index: 10;
             font-family: 'Share Tech Mono', monospace; 
-            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
-            transition: transform 0.3s ease;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.05);
+            transition: border-color 0.5s;
         }
         
-        @media(max-width: 1100px) { aside { position:fixed; height:100%; transform: translateX(-100%); } aside.active { transform: translateX(0); } }
-
-        .sidebar-section { padding: 1.5rem; border-bottom: 1px solid #222; }
+        .sidebar-section { padding: 1.5rem; border-bottom: 2px solid var(--iso-dark); }
         .sidebar-header {
-            color: var(--imperial-red); font-size: 1.1rem; 
-            text-transform: uppercase; letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--imperial-red); margin-bottom: 1rem;
+            color: var(--iso-dark); font-size: 1.2rem; 
+            text-transform: uppercase; letter-spacing: 1px;
+            font-weight: bold; margin-bottom: 1rem;
             display: flex; justify-content: space-between; align-items: center;
         }
         
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group { display: flex; flex-direction: column; gap: -1px; } /* Overlapping borders */
         .filter-btn {
-            background: transparent; border: 1px solid #333; color: #888;
-            padding: 8px 12px; font-family: 'Share Tech Mono'; text-transform: uppercase;
-            text-align: left; transition: all 0.2s; font-size: 0.8rem;
+            background: #fff; border: 1px solid #ccc; color: #555;
+            padding: 10px 12px; font-family: 'Share Tech Mono'; text-transform: uppercase;
+            text-align: left; transition: all 0.1s; font-size: 0.85rem;
             display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: -1px;
         }
-        .filter-btn:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: #666; }
+        .filter-btn:hover { background: #eee; color: #000; z-index: 2; border-color: #999; }
         .filter-btn.active { 
-            background: rgba(255, 26, 26, 0.1); border-color: var(--imperial-red); 
-            color: var(--imperial-red); box-shadow: inset 3px 0 0 var(--imperial-red);
+            background: var(--iso-dark); border-color: var(--iso-dark); 
+            color: #fff; z-index: 3;
         }
-        .filter-count { font-size: 0.7rem; opacity: 0.5; }
+        .filter-count { font-size: 0.7rem; opacity: 0.7; }
 
         .log-container { 
             flex-grow: 1; overflow-y: auto; padding: 1rem; 
-            background: #020202; border-top: 2px solid var(--imperial-red-dim);
+            background: #fcfcfc; border-top: 4px solid var(--iso-dark);
+            font-family: 'Share Tech Mono';
         }
-        .log-entry { margin-bottom: 6px; border-left: 2px solid transparent; padding-left: 8px; font-size: 0.7rem; color: #666; transition: all 0.3s; }
-        .log-entry.new { color: var(--holo-blue); border-left-color: var(--holo-blue); text-shadow: 0 0 5px var(--holo-blue); }
-        .log-entry.alert { color: var(--imperial-red); font-weight: bold; border-left-color: var(--imperial-red); }
+        .log-entry { margin-bottom: 4px; padding-left: 8px; font-size: 0.75rem; color: #444; border-left: 2px solid #ddd; }
+        .log-entry.new { color: var(--iso-dark); border-left-color: var(--iso-dark); font-weight: bold; }
+        .log-entry.alert { color: var(--iso-alert); border-left-color: var(--iso-alert); font-weight: bold; background: rgba(204, 0, 0, 0.05); }
+
+        .comms-input-container {
+            padding: 10px; background: #eee; border-top: 1px solid #ccc;
+        }
+        .comms-input {
+            width: 100%; background: #fff; border: 1px solid #999; padding: 5px;
+            font-family: 'Share Tech Mono'; font-size: 0.8rem; outline: none;
+            color: var(--iso-dark);
+        }
+        .comms-input::placeholder { color: #888; }
+        .search-input {
+            width: 100%; background: #fff; border: 1px solid #999; padding: 8px; margin-bottom: 1rem;
+            font-family: 'Share Tech Mono'; font-size: 0.8rem; outline: none; color: var(--iso-dark);
+        }
 
         /* --- MAIN CONTENT --- */
         main { 
@@ -130,203 +287,213 @@
 
         header {
             display: flex; justify-content: space-between; align-items: flex-end;
-            border-bottom: 2px solid var(--imperial-red); padding-bottom: 1.5rem; margin-bottom: 2rem;
-            position: relative; background: linear-gradient(90deg, transparent 0%, rgba(207, 10, 10, 0.05) 50%, transparent 100%);
+            border-bottom: 4px solid var(--iso-dark); padding-bottom: 1.5rem; margin-bottom: 2rem;
+            position: relative; 
             flex-shrink: 0;
+            transition: border-color 0.5s;
         }
-        header::after { content: ''; position: absolute; bottom: -6px; right: 0; width: 30%; height: 4px; background: var(--imperial-red-dim); }
 
         .header-title h1 {
-            font-family: 'Orbitron', sans-serif; font-size: 3rem; text-transform: uppercase; letter-spacing: 6px;
-            color: #fff; text-shadow: 0 0 15px rgba(207, 10, 10, 0.8); margin-bottom: 5px;
-            position: relative; display: inline-block;
+            font-family: 'Antonio', sans-serif; font-size: 3.5rem; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--iso-dark); margin-bottom: 0px; line-height: 0.9;
         }
-        .header-title h1:hover { animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; color: var(--imperial-red); }
-        @keyframes glitch { 
-            0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 
-            40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 
-            80% { transform: translate(2px, -2px) } 100% { transform: translate(0) }
-        }
-
+        
         .header-title .subtitle {
-            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 1.1rem; letter-spacing: 3px;
-            display: flex; align-items: center;
+            font-family: 'Share Tech Mono', monospace; color: #666; font-size: 0.9rem; letter-spacing: 2px;
+            display: flex; align-items: center; margin-bottom: 5px;
         }
-        .header-title .subtitle::before { content: ''; display: inline-block; width: 10px; height: 10px; background: var(--imperial-red); margin-right: 10px; box-shadow: 0 0 8px var(--imperial-red); }
-        .header-stats { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--imperial-light-grey); border-right: 2px solid var(--imperial-red); padding-right: 15px; line-height: 1.4; }
-        .stat-val { color: var(--imperial-red); font-weight: bold; }
+        .header-title .subtitle::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--iso-dark); margin-right: 10px; }
+        
+        .header-stats { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: #444; border-right: 1px solid #ccc; padding-right: 20px; line-height: 1.4; display:flex; gap: 20px; align-items: flex-end;}
+        .stat-val { color: var(--iso-dark); font-weight: bold; background: #ddd; padding: 0 4px; }
+        .stat-hover:hover { background: var(--iso-dark); color: #fff; cursor: help; }
 
-        /* --- GRID & CARDS --- */
+        /* DEFCON WIDGET */
+        .threat-level-widget {
+            display: flex; flex-direction: column; align-items: flex-end; cursor: pointer;
+        }
+        .threat-bars { display: flex; gap: 2px; margin-bottom: 4px; }
+        .t-bar { width: 12px; height: 20px; background: #ddd; border: 1px solid #999; transition: 0.2s; }
+        .threat-label { font-size: 0.7rem; font-weight: bold; color: #666; letter-spacing: 1px; }
+        
+        .threat-level-widget[data-level="1"] .t-bar:nth-child(1) { background: #4d6e7a; }
+        .threat-level-widget[data-level="2"] .t-bar:nth-child(1),
+        .threat-level-widget[data-level="2"] .t-bar:nth-child(2) { background: var(--iso-amber); }
+        .threat-level-widget[data-level="3"] .t-bar { background: var(--iso-alert); border-color: #500; }
+        .threat-level-widget[data-level="3"] .threat-label { color: var(--iso-alert); animation: blink 1s infinite; }
+        
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- GRID & CARDS (DOSSIER STYLE) --- */
         .grid {
-            display: grid; gap: 2rem; padding-bottom: 6rem;
+            display: grid; gap: 1.5rem; padding-bottom: 6rem;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         }
-        @keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card {
-            background-color: rgba(15, 15, 15, 0.95);
-            border: 1px solid #333;
+            background-color: #fff;
+            border: 2px solid var(--iso-dark);
             position: relative;
-            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
             cursor: pointer; overflow: hidden; height: 100%;
-            animation: cardEnter 0.5s ease backwards;
+            animation: cardEnter 0.4s ease backwards;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
         }
 
         .card:hover {
-            transform: translateY(-5px) scale(1.01);
-            border-color: var(--imperial-red);
-            box-shadow: 0 0 25px rgba(207, 10, 10, 0.3);
-            z-index: 10; background-color: rgba(25, 20, 20, 1);
+            transform: translateY(-3px);
+            box-shadow: 8px 8px 0px var(--iso-dark);
+            z-index: 10; 
         }
 
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 30px; height: 30px;
-            border-top: 2px solid var(--imperial-red); border-left: 2px solid var(--imperial-red);
-            opacity: 0.5; transition: all 0.3s; pointer-events: none; z-index: 2;
+        /* Corner Cutout Effect */
+        .card::after {
+            content: ''; position: absolute; top: -1px; right: -1px; 
+            border-top: 20px solid var(--iso-dark); border-left: 20px solid transparent;
         }
-        .card:hover::before { width: 100%; height: 100%; opacity: 1; box-shadow: inset 0 0 20px rgba(207, 10, 10, 0.1); }
 
-        .card-inner { display: block; padding: 1.2rem; height: 100%; position: relative; }
+        .card-inner { display: flex; padding: 1.2rem; height: 100%; position: relative; gap: 1rem; }
 
         .card-visual {
-            float: left; width: 110px; height: 130px; margin-right: 1.2rem; margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+            width: 100px; height: 120px; flex-shrink: 0;
+            background: #eee; border: 1px solid #999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 1px solid #333; position: relative; overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
         }
-        .card-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.8; filter: grayscale(80%) contrast(120%); transition: all 0.3s; }
-        .card:hover .card-visual img { opacity: 1; filter: grayscale(0%) contrast(110%); }
+        .card-visual img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%) contrast(120%); mix-blend-mode: multiply; }
+        .card:hover .card-visual img { filter: grayscale(0%); mix-blend-mode: normal; }
         
-        .imperial-crest { width: 60px; height: 60px; fill: #333; z-index: 1; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); transition: all 0.5s ease; }
-        .card:hover .imperial-crest { fill: #fff; filter: drop-shadow(0 0 8px var(--imperial-red)); transform: scale(1.1); }
+        .imperial-crest { width: 50px; height: 50px; fill: #ccc; z-index: 1; transition: all 0.5s ease; }
+        .card:hover .imperial-crest { fill: var(--iso-dark); }
         
-        .rank-pips { margin-top: auto; padding-bottom: 10px; display: flex; gap: 3px; z-index: 2; }
-        .pip { width: 8px; height: 12px; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.3); border: 1px solid rgba(0,0,0,0.5); }
-        .pip.red { background: #d00; box-shadow: 0 0 5px #d00; }
-        .pip.blue { background: #00a; box-shadow: 0 0 5px #00a; }
-        .pip.gold { background: #c90; box-shadow: 0 0 5px #c90; }
+        .rank-pips { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; height: 10px; }
+        .pip { flex-grow: 1; border-right: 1px solid #fff; }
+        .pip.red { background: #cc0000; }
+        .pip.blue { background: #003366; }
+        .pip.gold { background: #cc9900; }
 
-        .card-data { font-family: 'Exo 2', sans-serif; }
-        .data-header { margin-bottom: 0.5rem; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-data { font-family: 'Exo 2', sans-serif; flex-grow: 1; display: flex; flex-direction: column; }
         
-        .org-stack { display: flex; flex-direction: column; gap: 4px; max-width: 65%; }
+        .data-header { margin-bottom: 0.5rem; border-bottom: 1px solid #ccc; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .org-stack { display: flex; flex-direction: column; gap: 4px; }
         .card-org { 
-            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); 
-            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; 
-            background: rgba(207, 10, 10, 0.1); padding: 2px 5px; border-radius: 2px; 
-            width: fit-content; line-height: 1.1;
+            font-family: 'Share Tech Mono', monospace; color: var(--iso-dark); 
+            font-size: 0.7rem; text-transform: uppercase; font-weight: bold;
+            background: #ddd; padding: 2px 5px; width: fit-content;
         }
         .faction-tag {
             font-family: 'Exo 2'; font-weight: 800; font-size: 0.6rem; text-transform: uppercase;
-            padding: 2px 6px; border-radius: 2px; color: #000; letter-spacing: 0.5px; display: inline-block; width: fit-content;
+            padding: 2px 6px; color: #fff; display: inline-block; width: fit-content;
         }
 
-        .card-name { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 2px; line-height: 1.1; margin-top: 4px; }
-        .card-title { font-size: 0.8rem; color: var(--imperial-light-grey); font-weight: 300; margin-bottom: 10px; display: block; }
+        .card-name { font-family: 'Antonio', sans-serif; font-size: 1.4rem; font-weight: 700; color: #000; margin-bottom: 2px; line-height: 1; text-transform: uppercase; }
+        .card-title { font-size: 0.8rem; color: #666; font-weight: 500; margin-bottom: 8px; display: block; font-style: italic; }
         
-        .stats-bars { margin-bottom: 0.8rem; clear: right; }
-        .stat-line { display: flex; align-items: center; margin-bottom: 3px; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: #555; }
+        .stats-bars { margin-bottom: 0.8rem; margin-top: auto; }
+        .stat-line { display: flex; align-items: center; margin-bottom: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #333; }
         .stat-label { width: 60px; text-align: right; margin-right: 8px; }
-        .stat-track { flex-grow: 1; height: 3px; background: #222; position: relative; max-width: 120px; }
-        .stat-fill { height: 100%; background: var(--imperial-red); box-shadow: 0 0 5px var(--imperial-red); }
+        .stat-track { flex-grow: 1; height: 6px; background: #e0e0e0; border: 1px solid #999; }
+        .stat-fill { height: 100%; background: var(--iso-dark); }
         
-        .card-body {
-            font-size: 0.8rem; color: #999; line-height: 1.5; margin-bottom: 0.5rem; text-align: justify;
-            height: 5.2rem; overflow: hidden; position: relative;
-        }
-        .card-body::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1.2rem;
-            background: linear-gradient(to top, rgba(15, 15, 15, 0.95) 10%, transparent 100%);
-            pointer-events: none; transition: all 0.2s;
-        }
-        .card:hover .card-body::after { background: linear-gradient(to top, rgba(25, 20, 20, 1) 10%, transparent 100%); }
-
+        /* Tech Specs Strip at bottom */
         .tech-specs {
-            clear: both; display: grid; grid-template-columns: 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 10px;
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: var(--iso-dark); color: #fff;
+            font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+            padding: 2px 10px; display: flex; justify-content: space-between;
         }
-        .spec-item { background: #0d0d0d; padding: 4px 8px; display: flex; justify-content: space-between; }
-        .spec-val { color: var(--holo-blue); text-shadow: 0 0 3px var(--holo-blue-dim); }
-        .status-light { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .status-light.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
-        .status-light.idle { background: #fb0; box-shadow: 0 0 5px #fb0; }
-        .status-light.alert { background: #f00; box-shadow: 0 0 5px #f00; }
 
-        /* --- MODAL --- */
+        /* --- MODAL (TECHNICAL DRAWING STYLE) --- */
         #modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 1000; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: grayscale(100%); z-index: 1000; 
             display: none; align-items: center; justify-content: center; 
         }
         #modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
         
         .modal-container { 
-            width: 90%; max-width: 1000px; height: 75vh; 
-            background: #0d0d0d; border: 2px solid var(--imperial-red); 
-            display: flex; box-shadow: 0 0 50px rgba(207, 10, 10, 0.4); 
+            width: 90%; max-width: 1100px; height: 80vh; 
+            background: #fff; border: 4px solid var(--iso-dark); 
+            display: flex; box-shadow: 0 0 50px rgba(0,0,0,0.1); 
             position: relative; animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: move; /* Indicates Draggable */
         }
-        .modal-corner { position: absolute; width: 50px; height: 50px; border: 4px solid var(--imperial-red); transition: all 0.5s; }
-        .tl { top: -2px; left: -2px; border-bottom: none; border-right: none; }
-        .tr { top: -2px; right: -2px; border-bottom: none; border-left: none; }
-        .bl { bottom: -2px; left: -2px; border-top: none; border-right: none; }
-        .br { bottom: -2px; right: -2px; border-top: none; border-left: none; }
         
-        .modal-left { width: 35%; background: #000; position: relative; overflow: hidden; border-right: 2px solid var(--imperial-red-dim); display: flex; align-items: center; justify-content: center; }
-        .modal-img-container { width: 100%; height: 100%; position: relative; }
-        .modal-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; filter: grayscale(50%); }
-        .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; border: 1px solid rgba(255, 25, 25, 0.3); pointer-events: none; }
-        .reticle::before, .reticle::after { content: ''; position: absolute; width: 20px; height: 2px; background: var(--imperial-red); top: 50%; }
-        .reticle::before { left: -10px; } .reticle::after { right: -10px; }
-        .scan-line-anim { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(255, 0, 0, 0.5); box-shadow: 0 0 10px red; animation: scanDown 3s infinite linear; }
+        .modal-left { width: 40%; background: #f0f0f0; border-right: 2px solid var(--iso-dark); display: flex; align-items: center; justify-content: center; position: relative; }
+        /* Grid overlay on image */
+        .modal-left::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
+            background-image: linear-gradient(#ccc 1px, transparent 1px), linear-gradient(90deg, #ccc 1px, transparent 1px);
+            background-size: 20px 20px; pointer-events: none; opacity: 0.5; z-index: 1;
+        }
 
-        .modal-right { width: 65%; padding: 2.5rem; display: flex; flex-direction: column; position: relative; height: 100%; overflow-y: hidden; }
-        .modal-close { position: absolute; top: 20px; right: 20px; font-family: 'Orbitron'; color: var(--imperial-red); font-size: 2rem; cursor: pointer; transition: 0.3s; }
-        .modal-close:hover { text-shadow: 0 0 10px red; transform: scale(1.1); }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); mix-blend-mode: multiply; z-index: 0; }
         
-        .dossier-label { color: #555; font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-bottom: 5px; font-size: 0.8rem; }
-        .modal-name { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
-        .modal-title { color: var(--imperial-red); font-size: 1.1rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px; display: inline-block; }
+        .modal-right { width: 60%; padding: 3rem; display: flex; flex-direction: column; position: relative; overflow-y: auto; cursor: default; }
+        .modal-close { position: absolute; top: 10px; right: 20px; font-family: 'Arial'; font-weight: bold; color: var(--iso-dark); font-size: 3rem; cursor: pointer; line-height: 0.8; }
+        .modal-close:hover { color: var(--iso-alert); }
+        .modal-print { position: absolute; top: 18px; right: 70px; font-size: 1.2rem; cursor: pointer; color: #888; transition: 0.2s; }
+        .modal-print:hover { color: var(--iso-dark); }
         
-        .faction-display { margin-bottom: 2rem; border: 1px solid #333; background: #090909; padding: 15px; position: relative; display: grid; grid-template-columns: 1fr; gap: 10px; flex-shrink: 0; }
-        .faction-display::before { content: 'POLITICAL ALIGNMENT'; position: absolute; top: -8px; left: 10px; background: #0d0d0d; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: #777; padding: 0 5px; }
-        .faction-header { border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 5px; }
-        .faction-name { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
-        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #ccc; font-size: 0.9rem; margin-bottom: 8px; }
-        .faction-agenda { font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #888; line-height: 1.4; }
-        .agenda-label { color: var(--imperial-red); font-weight: bold; margin-right: 5px; }
-
+        .dossier-label { 
+            color: #fff; background: var(--iso-dark); padding: 2px 6px; 
+            font-family: 'Share Tech Mono'; letter-spacing: 1px; margin-bottom: 10px; 
+            font-size: 0.7rem; width: fit-content; 
+        }
+        .modal-name { font-family: 'Antonio'; font-size: 3rem; color: #000; text-transform: uppercase; line-height: 1; margin-bottom: 5px; }
+        .modal-title { color: #555; font-size: 1.2rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 10px; display: block; font-weight: 700; }
+        
+        .faction-display { margin-bottom: 2rem; border: 1px solid #999; background: #f9f9f9; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .faction-header { border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .faction-name { font-family: 'Antonio'; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; color: #000; }
+        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #666; font-size: 1rem; }
+        
         .modal-desc { 
-            font-family: 'Share Tech Mono'; color: var(--text-main); line-height: 1.6; font-size: 0.95rem; 
-            border-left: 3px solid var(--imperial-red-dim); padding-left: 1rem; margin-bottom: 2rem; 
-            white-space: pre-wrap; flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; 
+            font-family: 'Share Tech Mono'; color: #333; line-height: 1.6; font-size: 1rem; 
+            border-left: 4px solid #ccc; padding-left: 1.5rem; margin-bottom: 2rem; 
+            white-space: pre-wrap;
+            max-height: 250px; 
+            overflow-y: auto;
+            padding-right: 10px;
         }
 
-        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: auto; flex-shrink: 0; }
-        .m-stat-box { background: #111; padding: 10px; border: 1px solid #333; }
-        .m-stat-label { color: #666; font-size: 0.7rem; font-family: 'Share Tech Mono'; display: block; margin-bottom: 5px; }
-        .m-stat-val { color: var(--holo-blue); font-size: 1.1rem; font-family: 'Orbitron'; }
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: auto; }
+        .m-stat-box { background: #fff; padding: 15px; border: 2px solid #000; box-shadow: 5px 5px 0 #eee; }
+        .m-stat-label { color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono'; display: block; margin-bottom: 5px; }
+        .m-stat-val { color: #000; font-size: 1.5rem; font-family: 'Antonio'; font-weight: bold; }
+
+        /* Loyalty Graph */
+        .loyalty-graph { display: flex; align-items: flex-end; height: 50px; gap: 4px; margin-top: 10px; border-bottom: 1px solid #999; padding-bottom: 2px; }
+        .l-bar { width: 10px; background: #ccc; transition: height 0.5s; }
+        .l-bar:last-child { background: var(--iso-dark); }
+
+        /* Print Styles */
+        @media print {
+            body > *:not(#modal-overlay) { display: none !important; }
+            #modal-overlay { position: absolute; background: white; width: 100%; height: 100%; z-index: 99999; display: block !important; }
+            .modal-container { box-shadow: none; border: 1px solid #000; width: 100%; height: auto; }
+            .modal-close, .modal-print, .modal-actions { display: none; }
+            .modal-right { padding: 1rem; }
+            .modal-name { font-size: 2rem; }
+        }
 
         /* --- TICKER --- */
-        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 35px; background: #000; border-top: 2px solid var(--imperial-red); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.9rem; text-transform: uppercase; }
-        .ticker-title { background: var(--imperial-red); color: #000; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; }
+        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 40px; background: var(--iso-white); border-top: 4px solid var(--iso-dark); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--iso-dark); font-size: 1rem; text-transform: uppercase; }
+        .ticker-title { background: var(--iso-dark); color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
-        .ticker-item { display: inline-block; padding: 0 2rem; }
-        .ticker-item::before { content: '/// '; opacity: 0.5; margin-right: 5px; }
+        .ticker-item { display: inline-block; padding: 0 3rem; }
+        .ticker-item::before { content: '/// '; margin-right: 5px; font-weight: bold; }
 
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes modalOpen { 0% { transform: scaleY(0.01) scaleX(0); } 50% { transform: scaleY(0.01) scaleX(1); } 100% { transform: scaleY(1) scaleX(1); } }
-        @keyframes scanDown { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        @keyframes modalOpen { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
 
         @media(max-width: 900px) {
-            .modal-container { flex-direction: column; height: 90vh; overflow-y: auto; }
-            .modal-left { width: 100%; height: 250px; border-right: none; border-bottom: 2px solid var(--imperial-red-dim); }
-            .modal-right { width: 100%; padding: 1.5rem; height: auto; overflow-y: visible; }
-            .modal-desc { flex-grow: 0; overflow-y: visible; height: auto; min-height: initial; }
-            .modal-name { font-size: 1.8rem; }
+            .modal-container { flex-direction: column; height: 95vh; overflow-y: auto; }
+            .modal-left { width: 100%; height: 200px; border-right: none; border-bottom: 2px solid #000; }
+            .modal-right { width: 100%; padding: 1.5rem; }
             .grid { grid-template-columns: 1fr; }
             aside { display: none; }
         }
@@ -334,37 +501,75 @@
 </head>
 <body>
 
+    <!-- ANDOR STYLE LOGIN PAGE -->
+    <div id="login-overlay">
+        <div class="login-grid-bg"></div>
+        
+        <div class="login-container">
+            <div class="login-header">Imperial High Command</div>
+            
+            <!-- Code Cylinder Interface -->
+            <div id="cylinder-interface">
+                <div class="cylinder-port" id="cylinder-port" onclick="insertCylinder()">
+                    <div class="cylinder-inner" id="cylinder-inner"></div>
+                </div>
+                <div class="login-instruction">INSERT CODE CYLINDER TO PROCEED</div>
+            </div>
+
+            <!-- Manual Override Interface (Hidden by default) -->
+            <div id="manual-interface" style="display:none;">
+                <div class="key-display" id="key-display"></div>
+                <div class="keypad-container" style="display:grid;">
+                    <button class="key-btn" onclick="pressKey('1')">1</button>
+                    <button class="key-btn" onclick="pressKey('2')">2</button>
+                    <button class="key-btn" onclick="pressKey('3')">3</button>
+                    <button class="key-btn" onclick="pressKey('4')">4</button>
+                    <button class="key-btn" onclick="pressKey('5')">5</button>
+                    <button class="key-btn" onclick="pressKey('6')">6</button>
+                    <button class="key-btn" onclick="pressKey('7')">7</button>
+                    <button class="key-btn" onclick="pressKey('8')">8</button>
+                    <button class="key-btn" onclick="pressKey('9')">9</button>
+                    <button class="key-btn" onclick="pressKey('CLR')">CLR</button>
+                    <button class="key-btn" onclick="pressKey('0')">0</button>
+                    <button class="key-btn" onclick="pressKey('ENT')">ENT</button>
+                </div>
+                <div class="login-instruction">ENTER SECURITY CLEARANCE</div>
+            </div>
+
+            <button class="manual-override-btn" onclick="toggleManualMode()">[ MANUAL OVERRIDE ]</button>
+
+            <div class="login-status" id="login-status">TERMINAL LOCKED</div>
+            
+            <div class="auth-code-display" id="auth-code-display">
+                AUTH CODE: <span id="generated-code">---</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT (Hidden behind login) -->
     <div class="bg-grid"></div>
     <div class="vignette"></div>
-    <div class="crt-overlay"></div>
 
-    <!-- BOOT SEQUENCE -->
+    <!-- BOOT SEQUENCE (Runs after login) -->
     <div id="boot-screen">
         <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL 6.2...</div>
         <div class="boot-text" id="boot-2">VERIFYING BIOMETRIC SIGNATURE...</div>
         <div class="boot-text" id="boot-3">DECRYPTING PERSONNEL DATABASE...</div>
-        <div class="boot-text" id="boot-4" style="color:white; font-weight:bold;">ACCESS GRANTED. ERA: 5 ABY.</div>
+        <div class="boot-text" id="boot-4" style="font-weight:bold; background: #000; color: #fff; padding: 2px 5px;">ACCESS GRANTED. ERA: 5 ABY.</div>
     </div>
 
     <!-- MODAL OVERLAY -->
     <div id="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-container" onclick="event.stopPropagation()">
-            <div class="modal-corner tl"></div>
-            <div class="modal-corner tr"></div>
-            <div class="modal-corner bl"></div>
-            <div class="modal-corner br"></div>
-            
+        <div id="modal-container" class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="closeModal()">×</div>
+            <div class="modal-print" onclick="printDossier()"><i class="fas fa-print"></i></div>
 
             <div class="modal-left">
-                <div class="modal-img-container">
-                    <img id="m-img" class="modal-img" src="" alt="Personnel Image">
-                    <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#111;">
-                        <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512">
-                            <path id="m-svg-path" d=""/>
-                        </svg>
-                    </div>
-                    <div class="reticle"><div class="scan-line-anim"></div></div>
+                <img id="m-img" class="modal-img" src="" alt="Personnel Image">
+                <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#eee;">
+                    <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512">
+                        <path id="m-svg-path" d=""/>
+                    </svg>
                 </div>
             </div>
 
@@ -378,21 +583,23 @@
                         <div id="m-faction-name" class="faction-name">FACTION</div>
                     </div>
                     <div id="m-faction-quote" class="faction-quote">"Quote"</div>
-                    <div class="faction-agenda"><span class="agenda-label">AGENDA:</span><span id="m-faction-agenda">Agenda Text</span></div>
+                    <div class="faction-agenda"><span style="font-weight:bold; font-size:0.7rem;">AGENDA:</span> <span id="m-faction-agenda">Agenda Text</span></div>
                 </div>
                 
-                <div class="dossier-label">BIOGRAPHICAL DATA SUMMARY</div>
+                <div style="font-family:'Antonio'; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #ccc;">BIOGRAPHICAL SUMMARY</div>
                 <p id="m-desc" class="modal-desc">Description text...</p>
 
                 <div class="modal-stats-grid">
-                    <!-- Removed Status and Clearance stats as per user request -->
                     <div class="m-stat-box">
-                        <span class="m-stat-label">LOCATION</span>
+                        <span class="m-stat-label">CURRENT LOCATION</span>
                         <span id="m-loc" class="m-stat-val">CORUSCANT</span>
                     </div>
                     <div class="m-stat-box">
-                        <span class="m-stat-label">LOYALTY</span>
-                        <span id="m-loyalty" class="m-stat-val" style="color:var(--imperial-red)">98%</span>
+                        <span class="m-stat-label">HISTORICAL LOYALTY TRACKING</span>
+                        <div class="loyalty-graph" id="loyalty-graph">
+                            <!-- Injected JS -->
+                        </div>
+                        <span id="m-loyalty" class="m-stat-val" style="font-size:1rem; margin-top:5px; display:block;">98%</span>
                     </div>
                 </div>
             </div>
@@ -401,11 +608,14 @@
 
     <!-- SIDEBAR WITH FILTERS AND LOGS -->
     <aside>
-        <div class="sidebar-section">
+        <div class="sidebar-section" style="background: #e9e9e9;">
             <div class="sidebar-header">
                 <span>FILTER DATABASE</span>
                 <i class="fas fa-filter" style="font-size:0.8rem"></i>
             </div>
+            
+            <!-- SEARCH INPUT -->
+            <input type="text" id="search-bar" class="search-input" placeholder="SEARCH ID/NAME..." onkeyup="handleSearch()">
             
             <div class="filter-group">
                 <button class="filter-btn active" onclick="filterData('all', this)">
@@ -413,7 +623,7 @@
                 </button>
             </div>
             
-            <div style="margin:15px 0 5px 0; color:#555; font-size:0.7rem; font-family:'Share Tech Mono'">ORGANIZATION</div>
+            <div style="margin:15px 0 5px 0; color:#000; font-weight:bold; font-size:0.7rem; font-family:'Share Tech Mono'">ORGANIZATION</div>
             <div class="filter-group">
                 <button class="filter-btn" onclick="filterData('org', this, 'High Command')">
                     High Command <span class="filter-count" id="count-mil">0</span>
@@ -435,27 +645,31 @@
                 </button>
             </div>
 
-            <div style="margin:15px 0 5px 0; color:#555; font-size:0.7rem; font-family:'Share Tech Mono'">POLITICAL FACTION</div>
+            <div style="margin:15px 0 5px 0; color:#000; font-weight:bold; font-size:0.7rem; font-family:'Share Tech Mono'">POLITICAL FACTION</div>
             <div class="filter-group">
                 <button class="filter-btn" onclick="filterData('faction', this, 'Hardliner')">
-                    Hardliners <i class="fas fa-circle" style="font-size:8px; color:var(--faction-hardliner)"></i>
+                    Hardliners <i class="fas fa-square" style="font-size:10px; color:var(--faction-hardliner)"></i>
                 </button>
                 <button class="filter-btn" onclick="filterData('faction', this, 'Traditionalist')">
-                    Traditionalists <i class="fas fa-circle" style="font-size:8px; color:var(--faction-traditionalist)"></i>
+                    Traditionalists <i class="fas fa-square" style="font-size:10px; color:var(--faction-traditionalist)"></i>
                 </button>
                 <button class="filter-btn" onclick="filterData('faction', this, 'Ultranationalist')">
-                    Ultranationalists <i class="fas fa-circle" style="font-size:8px; color:var(--faction-ultranationalist)"></i>
+                    Ultranationalists <i class="fas fa-square" style="font-size:10px; color:var(--faction-ultranationalist)"></i>
                 </button>
                 <button class="filter-btn" onclick="filterData('faction', this, 'Reformer')">
-                    Reformers <i class="fas fa-circle" style="font-size:8px; color:var(--faction-reformer)"></i>
+                    Reformers <i class="fas fa-square" style="font-size:10px; color:var(--faction-reformer)"></i>
                 </button>
             </div>
         </div>
 
-        <div style="padding: 0.5rem 1.5rem; color: var(--imperial-red); border-bottom: 1px solid #222; font-size: 0.8rem; font-weight: bold; font-family:'Share Tech Mono'">
-            SYSTEM LOGS
+        <div style="padding: 0.8rem 1.5rem; background: var(--iso-dark); color: #fff; font-size: 0.8rem; font-weight: bold; font-family:'Share Tech Mono'; display:flex; justify-content:space-between; align-items:center;">
+            <span>SYSTEM LOGS // TERMINAL 442</span>
+            <div style="width:8px; height:8px; background:#0f0; border-radius:50%; box-shadow:0 0 5px #0f0;" id="connection-status"></div>
         </div>
         <div class="log-container" id="system-log"></div>
+        <div class="comms-input-container">
+            <input type="text" class="comms-input" id="comms-input" placeholder="> BROADCAST TO NET..." onkeypress="handleComms(event)">
+        </div>
     </aside>
 
     <main>
@@ -464,10 +678,22 @@
                 <div class="subtitle">Galactic Empire // Personnel Database</div>
                 <h1>High Command</h1>
             </div>
+            
             <div class="header-stats">
-                <div>ERA: 5 ABY (Post-Endor)</div>
-                <div>CYCLE: <span id="stardate"></span></div>
-                <div>ENCRYPTION: <span class="stat-val">TOP SECRET</span></div>
+                <div class="threat-level-widget" id="threat-widget" data-level="1" onclick="cycleThreatLevel()">
+                    <div class="threat-bars">
+                        <div class="t-bar"></div>
+                        <div class="t-bar"></div>
+                        <div class="t-bar"></div>
+                    </div>
+                    <div class="threat-label" id="threat-text">SEC: NORMAL</div>
+                </div>
+                
+                <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                    <div>ERA: 5 ABY</div>
+                    <div>CYCLE: <span id="stardate" class="stat-hover" onmouseover="showRealTime(true)" onmouseout="showRealTime(false)"></span></div>
+                    <div>KEY: <span class="stat-val">TOP SECRET</span></div>
+                </div>
             </div>
         </header>
 
@@ -720,16 +946,202 @@
     // --- LOGIC ---
 
     function init() {
-        runBootSequence();
+        // Boot sequence logic is now triggered AFTER login
         updateFilterCounts();
         renderCards(personnelConfig); // Initial Render
         initTicker();
         startLogs();
+        updateStardate();
+        setInterval(updateStardate, 1000);
         
-        // Stardate
-        const day = Math.floor(Math.random() * 365);
-        const cycle = Math.floor(Math.random() * 24);
-        document.getElementById('stardate').innerText = `35:${cycle}:${day}`;
+        // Draggable Logic
+        const modal = document.getElementById('modal-container');
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        modal.addEventListener('mousedown', (e) => {
+            // Prevent dragging if clicking input or textarea (if any) or scrollbar
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // Get current transform values or default to 0
+            const style = window.getComputedStyle(modal);
+            const matrix = new WebKitCSSMatrix(style.transform);
+            initialX = matrix.m41;
+            initialY = matrix.m42;
+            
+            modal.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            modal.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            modal.style.cursor = 'move';
+        });
+    }
+
+    function updateStardate() {
+        if(isRealTime) {
+            const now = new Date();
+            document.getElementById('stardate').innerText = now.toLocaleTimeString();
+        } else {
+            const day = Math.floor(Math.random() * 365);
+            const cycle = Math.floor(Math.random() * 24);
+            document.getElementById('stardate').innerText = `35:${cycle}:${day}`;
+        }
+    }
+
+    let isRealTime = false;
+    function showRealTime(bool) {
+        isRealTime = bool;
+        updateStardate();
+    }
+
+    // --- LOGIN LOGIC ---
+    let isCylinderInserted = false;
+    let manualMode = false;
+    let enteredKey = "";
+
+    function toggleManualMode() {
+        manualMode = !manualMode;
+        const cy = document.getElementById('cylinder-interface');
+        const man = document.getElementById('manual-interface');
+        if(manualMode) {
+            cy.style.display = 'none';
+            man.style.display = 'block';
+        } else {
+            cy.style.display = 'block';
+            man.style.display = 'none';
+        }
+    }
+
+    function pressKey(k) {
+        const display = document.getElementById('key-display');
+        if(k === 'CLR') {
+            enteredKey = "";
+        } else if (k === 'ENT') {
+            if(enteredKey.length >= 4) {
+                grantAccess();
+            } else {
+                display.innerText = "INVALID LENGTH";
+                enteredKey = "";
+                setTimeout(() => display.innerText = "", 1000);
+                return;
+            }
+        } else {
+            if(enteredKey.length < 8) enteredKey += k;
+        }
+        display.innerText = enteredKey.replace(/./g, '*');
+    }
+
+    function insertCylinder() {
+        if(isCylinderInserted) return;
+        isCylinderInserted = true;
+        
+        const inner = document.getElementById('cylinder-inner');
+        const status = document.getElementById('login-status');
+        
+        status.innerText = "AUTHENTICATING...";
+        inner.classList.add('spinning');
+        status.style.color = "#cc0000";
+
+        setTimeout(() => {
+            inner.classList.remove('spinning');
+            inner.classList.add('access-granted-ring');
+            grantAccess();
+        }, 2000);
+    }
+
+    function grantAccess() {
+        const status = document.getElementById('login-status');
+        const authDisplay = document.getElementById('auth-code-display');
+        const codeSpan = document.getElementById('generated-code');
+        
+        status.innerText = "ACCESS GRANTED";
+        status.style.color = "#000"; 
+        status.style.fontWeight = "900";
+
+        const randomCode = generateAuthCode();
+        codeSpan.innerText = randomCode;
+        authDisplay.style.display = 'block';
+
+        setTimeout(() => {
+            const overlay = document.getElementById('login-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                document.getElementById('boot-screen').style.display = 'flex';
+                runBootSequence();
+            }, 1000);
+        }, 1500);
+    }
+
+    function generateAuthCode() {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        let result = "IG-";
+        for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+        result += "-";
+        for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+        return result;
+    }
+
+    // --- INTERACTIVE ELEMENTS ---
+
+    let threatLevel = 1;
+    function cycleThreatLevel() {
+        threatLevel++;
+        if(threatLevel > 3) threatLevel = 1;
+        
+        const widget = document.getElementById('threat-widget');
+        const label = document.getElementById('threat-text');
+        const body = document.body;
+
+        widget.setAttribute('data-level', threatLevel);
+        
+        if(threatLevel === 1) {
+            label.innerText = "SEC: NORMAL";
+            body.classList.remove('alert-state');
+            addLog("SECURITY ALERT LEVEL: NORMAL");
+        } else if (threatLevel === 2) {
+            label.innerText = "SEC: ELEVATED";
+            body.classList.remove('alert-state');
+            addLog("SECURITY ALERT LEVEL: ELEVATED");
+        } else if (threatLevel === 3) {
+            label.innerText = "SEC: CRITICAL";
+            body.classList.add('alert-state');
+            addLog("SECURITY ALERT LEVEL: CRITICAL - LOCKDOWN PROTOCOLS");
+        }
+    }
+
+    function handleComms(e) {
+        if(e.key === 'Enter') {
+            const input = document.getElementById('comms-input');
+            if(input.value.trim() !== "") {
+                addLog(`[USER]: ${input.value.toUpperCase()}`);
+                input.value = "";
+            }
+        }
+    }
+
+    // Search Interaction
+    function handleSearch() {
+        const query = document.getElementById('search-bar').value.toLowerCase();
+        const filtered = personnelConfig.filter(p => p.name.toLowerCase().includes(query) || p.title.toLowerCase().includes(query));
+        renderCards(filtered);
+    }
+
+    // Print
+    function printDossier() {
+        window.print();
     }
 
     function getPips() {
@@ -750,7 +1162,7 @@
         grid.innerHTML = "";
         
         if(data.length === 0) {
-            grid.innerHTML = `<div style="color:#666; font-family:'Share Tech Mono'; grid-column: 1/-1; text-align:center; padding-top:50px;">NO RECORDS FOUND MATCHING QUERY.</div>`;
+            grid.innerHTML = `<div style="color:#000; font-family:'Share Tech Mono'; grid-column: 1/-1; text-align:center; padding-top:50px; font-weight:bold;">NO RECORDS FOUND MATCHING QUERY.</div>`;
             return;
         }
 
@@ -766,11 +1178,11 @@
             
             const techID = getTechID();
             const pips = getPips();
-            const fData = factionData[person.faction] || { color: "#fff" };
+            const fData = factionData[person.faction] || { color: "#333" };
 
             // Truncate Description for card
             const rawDesc = person.desc;
-            const summaryLength = 140; 
+            const summaryLength = 120; 
             let summaryDesc = rawDesc.length > summaryLength ? 
                               rawDesc.substring(0, rawDesc.lastIndexOf(' ', summaryLength)) + '...' : rawDesc;
 
@@ -795,9 +1207,9 @@
                         <div class="data-header">
                         <div class="org-stack">
                                 <div class="card-org">${person.displayOrg}</div>
-                                <div class="faction-tag" style="background:${fData.color}; box-shadow: 0 0 5px ${fData.color};">${person.faction}</div>
+                                <div class="faction-tag" style="background:${fData.color};">${person.faction}</div>
                             </div>
-                            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.7rem;">ID-${techID}</div>
+                            <div style="font-family:'Share Tech Mono'; color:#000; font-size:0.8rem; font-weight:bold;">ID-${techID}</div>
                         </div>
                         <div class="card-name">${person.name}</div>
                         <div class="card-title">${person.title}</div>
@@ -812,11 +1224,12 @@
                                 <div class="stat-track"><div class="stat-fill" style="width: ${person.influence}%"></div></div>
                             </div>
                         </div>
-                        <div class="card-body">${summaryDesc}</div>
-                        <div class="tech-specs">
-                            <div class="spec-item"><span style="color:#666">LOC</span><span class="spec-val" style="color:#fff">${person.location}</span></div>
-                        </div>
+                        <div style="font-size:0.75rem; color:#444; line-height:1.4;">${summaryDesc}</div>
                     </div>
+                </div>
+                <div class="tech-specs">
+                     <span>LOC: ${person.location.toUpperCase()}</span>
+                     <span>STATUS: ${person.status.toUpperCase()}</span>
                 </div>
             `;
             grid.appendChild(card);
@@ -853,23 +1266,29 @@
     }
 
     // --- MODAL ---
-    let typeWriterInterval;
-
+    
     function openModal(index) {
         const data = personnelConfig[index];
-        const fData = factionData[data.faction] || { color: "#fff", quote: "Unknown", agenda: "Classified" };
+        const fData = factionData[data.faction] || { color: "#333", quote: "Unknown", agenda: "Classified" };
         
         document.getElementById('m-name').innerText = data.name;
         document.getElementById('m-title').innerText = data.title;
-        // removed m-status update
-        document.getElementById('m-loc').innerText = data.location;
+        document.getElementById('m-loc').innerText = data.location.toUpperCase();
         document.getElementById('m-loyalty').innerText = data.loyalty + "%";
-        // removed m-clearance update
         
+        // Generate Fake Loyalty Graph
+        const graphCon = document.getElementById('loyalty-graph');
+        let graphHtml = '';
+        for(let i=0; i<15; i++) {
+            // Trend towards their actual loyalty
+            const h = Math.max(10, Math.min(100, data.loyalty + (Math.random()*40 - 20))); 
+            graphHtml += `<div class="l-bar" style="height:${h}%;"></div>`;
+        }
+        graphCon.innerHTML = graphHtml;
+
         const fNameEl = document.getElementById('m-faction-name');
         fNameEl.innerText = data.faction;
-        fNameEl.style.color = fData.color;
-        fNameEl.style.textShadow = `0 0 10px ${fData.color}`;
+        fNameEl.style.color = "#000";
         document.getElementById('m-faction-quote').innerText = `"${fData.quote}"`;
         document.getElementById('m-faction-agenda').innerText = fData.agenda;
 
@@ -889,22 +1308,13 @@
             svgPath.setAttribute('d', imperialCrestPath);
         }
 
-        // Description with Typewriter
+        // NO DECRYPT EFFECT - Plain Text
         const descEl = document.getElementById('m-desc');
-        descEl.innerText = "";
-        clearInterval(typeWriterInterval);
-        
-        let i = 0;
-        const typeChar = () => {
-            if (i < data.desc.length) {
-                descEl.innerText += data.desc.charAt(i);
-                descEl.scrollTop = descEl.scrollHeight; 
-                i++;
-            } else {
-                clearInterval(typeWriterInterval);
-            }
-        };
-        typeWriterInterval = setInterval(typeChar, 5); // Fast typing
+        descEl.innerText = data.desc;
+
+        // Reset Transform for Dragging
+        const modal = document.getElementById('modal-container');
+        modal.style.transform = "translate(0,0)";
 
         document.getElementById('modal-overlay').classList.add('active');
         addLog(`Accessing file: ${data.name} [SECURE]`);
@@ -912,7 +1322,6 @@
 
     function closeModal() {
         document.getElementById('modal-overlay').classList.remove('active');
-        clearInterval(typeWriterInterval);
     }
 
     // --- SYSTEM FX ---
