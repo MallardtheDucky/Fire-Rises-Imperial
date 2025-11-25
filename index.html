@@ -2,1002 +2,980 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ISB // DIRECTORATE // KRASK // SECURE</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperial High Command | Galactic Database</title>
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Teko:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Tekno&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --imp-white: #e5e5e5;
-            --imp-gray: #4a4a4a;
-            --imp-dark: #0a0a0a;
-            --imp-black: #020202;
-            --imp-red: #bb1e1e;
-            --imp-red-dim: #5c0a0a;
-            --imp-amber: #ffae00;
+            /* Core Palette */
+            --imperial-black: #020202;
+            --imperial-grey: #121212;
+            --imperial-light-grey: #b0b0b0;
+            --imperial-red: #ff1a1a;
+            --imperial-red-dim: #660000;
+            --imperial-red-dark: #330000;
+            --holo-blue: #00f2ff;
+            --holo-blue-dim: #004d52;
+            --text-main: #e0e0e0;
+            --card-bg: #0a0a0a;
+            --border-color: #333;
+            
+            /* Faction Colors */
+            --faction-hardliner: #ff3333;
+            --faction-traditionalist: #4488ff;
+            --faction-ultranationalist: #ffaa00;
+            --faction-reformer: #00cc66;
+            --faction-progressive: #aa66cc;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--imperial-red-dim); border: 1px solid var(--imperial-red); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--imperial-red); }
 
         body {
-            background-color: var(--imp-black);
-            color: var(--imp-white);
-            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--imperial-black);
+            color: var(--text-main);
+            font-family: 'Exo 2', sans-serif;
+            height: 100vh;
             overflow: hidden;
-            margin: 0;
-            padding: 0;
-            cursor: crosshair;
+            display: flex;
         }
 
-        /* --- TYPOGRAPHY --- */
-        .font-header { font-family: 'Teko', sans-serif; letter-spacing: 0.15em; }
-        .font-tech { font-family: 'Share Tech Mono', monospace; }
-        .font-mono-bold { font-family: 'JetBrains Mono', monospace; font-weight: 800; }
+        /* --- BACKGROUND FX --- */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: 0; pointer-events: none;
+            animation: gridPan 60s linear infinite;
+        }
+        @keyframes gridPan { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
 
-        /* --- CRT EFFECTS --- */
+        .vignette {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, #000 100%);
+            z-index: 2; pointer-events: none;
+        }
         .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 50;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(
+                0deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15) 1px, transparent 1px, transparent 2px
+            );
+            z-index: 100; pointer-events: none; opacity: 0.4;
         }
 
-        .scanline {
-            width: 100%;
-            height: 100px;
-            z-index: 51;
-            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0,0,0,0) 100%);
-            opacity: 0.1;
-            position: absolute;
-            bottom: 100%;
-            animation: scanline 8s linear infinite;
-            pointer-events: none;
+        /* --- BOOT SEQUENCE --- */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red);
         }
+        .boot-text { font-size: 1.4rem; margin: 5px; text-align: left; width: 500px; text-shadow: 0 0 5px var(--imperial-red); }
 
-        @keyframes scanline {
-            0% { bottom: 100%; }
-            100% { bottom: -100px; }
+        /* --- LAYOUT --- */
+        aside {
+            width: 340px; background: #050505; border-right: 2px solid var(--imperial-red-dim);
+            display: flex; flex-direction: column; padding: 0; z-index: 10;
+            font-family: 'Share Tech Mono', monospace; 
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+            transition: transform 0.3s ease;
         }
-
-        /* --- SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #050505; border-left: 1px solid #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #333; border: 1px solid #000; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--imp-red); }
-
-        /* --- UTILITIES --- */
-        .text-glow { text-shadow: 0 0 5px rgba(229, 229, 229, 0.3); }
-        .bg-grid-pattern {
-            background-size: 40px 40px;
-            background-image:
-                linear-gradient(to right, rgba(50, 50, 50, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(50, 50, 50, 0.1) 1px, transparent 1px);
-        }
-
-        /* Animations */
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        .ticker-content { animation: ticker 60s linear infinite; }
         
-        .cursor-blink::after { content: '█'; animation: blink 1s step-end infinite; color: var(--imp-red); margin-left: 4px; }
-        @keyframes blink { 50% { opacity: 0; } }
+        @media(max-width: 1100px) { aside { position:fixed; height:100%; transform: translateX(-100%); } aside.active { transform: translateX(0); } }
 
-        /* Custom Range Slider */
-        input[type=range] { -webkit-appearance: none; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; background: var(--imp-white); cursor: pointer; margin-top: -6px; border: 1px solid #000; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #333; }
-        input[type=range]:focus { outline: none; }
+        .sidebar-section { padding: 1.5rem; border-bottom: 1px solid #222; }
+        .sidebar-header {
+            color: var(--imperial-red); font-size: 1.1rem; 
+            text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 0 0 8px var(--imperial-red); margin-bottom: 1rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
         
-        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
-        .animate-slide-in { animation: slideIn 0.5s ease-out; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-btn {
+            background: transparent; border: 1px solid #333; color: #888;
+            padding: 8px 12px; font-family: 'Share Tech Mono'; text-transform: uppercase;
+            text-align: left; transition: all 0.2s; font-size: 0.8rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .filter-btn:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: #666; }
+        .filter-btn.active { 
+            background: rgba(255, 26, 26, 0.1); border-color: var(--imperial-red); 
+            color: var(--imperial-red); box-shadow: inset 3px 0 0 var(--imperial-red);
+        }
+        .filter-count { font-size: 0.7rem; opacity: 0.5; }
+
+        .log-container { 
+            flex-grow: 1; overflow-y: auto; padding: 1rem; 
+            background: #020202; border-top: 2px solid var(--imperial-red-dim);
+        }
+        .log-entry { margin-bottom: 6px; border-left: 2px solid transparent; padding-left: 8px; font-size: 0.7rem; color: #666; transition: all 0.3s; }
+        .log-entry.new { color: var(--holo-blue); border-left-color: var(--holo-blue); text-shadow: 0 0 5px var(--holo-blue); }
+        .log-entry.alert { color: var(--imperial-red); font-weight: bold; border-left-color: var(--imperial-red); }
+
+        /* --- MAIN CONTENT --- */
+        main { 
+            flex-grow: 1; overflow-y: auto; position: relative; z-index: 5; 
+            padding: 2rem 3rem; display: flex; flex-direction: column; 
+        }
+
+        header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 2px solid var(--imperial-red); padding-bottom: 1.5rem; margin-bottom: 2rem;
+            position: relative; background: linear-gradient(90deg, transparent 0%, rgba(207, 10, 10, 0.05) 50%, transparent 100%);
+            flex-shrink: 0;
+        }
+        header::after { content: ''; position: absolute; bottom: -6px; right: 0; width: 30%; height: 4px; background: var(--imperial-red-dim); }
+
+        .header-title h1 {
+            font-family: 'Orbitron', sans-serif; font-size: 3rem; text-transform: uppercase; letter-spacing: 6px;
+            color: #fff; text-shadow: 0 0 15px rgba(207, 10, 10, 0.8); margin-bottom: 5px;
+            position: relative; display: inline-block;
+        }
+        .header-title h1:hover { animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; color: var(--imperial-red); }
+        @keyframes glitch { 
+            0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 
+            40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 
+            80% { transform: translate(2px, -2px) } 100% { transform: translate(0) }
+        }
+
+        .header-title .subtitle {
+            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 1.1rem; letter-spacing: 3px;
+            display: flex; align-items: center;
+        }
+        .header-title .subtitle::before { content: ''; display: inline-block; width: 10px; height: 10px; background: var(--imperial-red); margin-right: 10px; box-shadow: 0 0 8px var(--imperial-red); }
+        .header-stats { text-align: right; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--imperial-light-grey); border-right: 2px solid var(--imperial-red); padding-right: 15px; line-height: 1.4; }
+        .stat-val { color: var(--imperial-red); font-weight: bold; }
+
+        /* --- GRID & CARDS --- */
+        .grid {
+            display: grid; gap: 2rem; padding-bottom: 6rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+        @keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background-color: rgba(15, 15, 15, 0.95);
+            border: 1px solid #333;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+            cursor: pointer; overflow: hidden; height: 100%;
+            animation: cardEnter 0.5s ease backwards;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: var(--imperial-red);
+            box-shadow: 0 0 25px rgba(207, 10, 10, 0.3);
+            z-index: 10; background-color: rgba(25, 20, 20, 1);
+        }
+
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 30px; height: 30px;
+            border-top: 2px solid var(--imperial-red); border-left: 2px solid var(--imperial-red);
+            opacity: 0.5; transition: all 0.3s; pointer-events: none; z-index: 2;
+        }
+        .card:hover::before { width: 100%; height: 100%; opacity: 1; box-shadow: inset 0 0 20px rgba(207, 10, 10, 0.1); }
+
+        .card-inner { display: block; padding: 1.2rem; height: 100%; position: relative; }
+
+        .card-visual {
+            float: left; width: 110px; height: 130px; margin-right: 1.2rem; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 1px solid #333; position: relative; overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .card-visual img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0.8; filter: grayscale(80%) contrast(120%); transition: all 0.3s; }
+        .card:hover .card-visual img { opacity: 1; filter: grayscale(0%) contrast(110%); }
+        
+        .imperial-crest { width: 60px; height: 60px; fill: #333; z-index: 1; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2)); transition: all 0.5s ease; }
+        .card:hover .imperial-crest { fill: #fff; filter: drop-shadow(0 0 8px var(--imperial-red)); transform: scale(1.1); }
+        
+        .rank-pips { margin-top: auto; padding-bottom: 10px; display: flex; gap: 3px; z-index: 2; }
+        .pip { width: 8px; height: 12px; box-shadow: inset 1px 1px 2px rgba(255,255,255,0.3); border: 1px solid rgba(0,0,0,0.5); }
+        .pip.red { background: #d00; box-shadow: 0 0 5px #d00; }
+        .pip.blue { background: #00a; box-shadow: 0 0 5px #00a; }
+        .pip.gold { background: #c90; box-shadow: 0 0 5px #c90; }
+
+        .card-data { font-family: 'Exo 2', sans-serif; }
+        .data-header { margin-bottom: 0.5rem; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; }
+        
+        .org-stack { display: flex; flex-direction: column; gap: 4px; max-width: 65%; }
+        .card-org { 
+            font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); 
+            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; 
+            background: rgba(207, 10, 10, 0.1); padding: 2px 5px; border-radius: 2px; 
+            width: fit-content; line-height: 1.1;
+        }
+        .faction-tag {
+            font-family: 'Exo 2'; font-weight: 800; font-size: 0.6rem; text-transform: uppercase;
+            padding: 2px 6px; border-radius: 2px; color: #000; letter-spacing: 0.5px; display: inline-block; width: fit-content;
+        }
+
+        .card-name { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 2px; line-height: 1.1; margin-top: 4px; }
+        .card-title { font-size: 0.8rem; color: var(--imperial-light-grey); font-weight: 300; margin-bottom: 10px; display: block; }
+        
+        .stats-bars { margin-bottom: 0.8rem; clear: right; }
+        .stat-line { display: flex; align-items: center; margin-bottom: 3px; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: #555; }
+        .stat-label { width: 60px; text-align: right; margin-right: 8px; }
+        .stat-track { flex-grow: 1; height: 3px; background: #222; position: relative; max-width: 120px; }
+        .stat-fill { height: 100%; background: var(--imperial-red); box-shadow: 0 0 5px var(--imperial-red); }
+        
+        .card-body {
+            font-size: 0.8rem; color: #999; line-height: 1.5; margin-bottom: 0.5rem; text-align: justify;
+            height: 5.2rem; overflow: hidden; position: relative;
+        }
+        .card-body::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1.2rem;
+            background: linear-gradient(to top, rgba(15, 15, 15, 0.95) 10%, transparent 100%);
+            pointer-events: none; transition: all 0.2s;
+        }
+        .card:hover .card-body::after { background: linear-gradient(to top, rgba(25, 20, 20, 1) 10%, transparent 100%); }
+
+        .tech-specs {
+            clear: both; display: grid; grid-template-columns: 1fr; gap: 1px; background: #333; border: 1px solid #333; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; margin-top: 10px;
+        }
+        .spec-item { background: #0d0d0d; padding: 4px 8px; display: flex; justify-content: space-between; }
+        .spec-val { color: var(--holo-blue); text-shadow: 0 0 3px var(--holo-blue-dim); }
+        .status-light { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-light.active { background: #0f0; box-shadow: 0 0 5px #0f0; }
+        .status-light.idle { background: #fb0; box-shadow: 0 0 5px #fb0; }
+        .status-light.alert { background: #f00; box-shadow: 0 0 5px #f00; }
+
+        /* --- MODAL --- */
+        #modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 1000; 
+            display: none; align-items: center; justify-content: center; 
+        }
+        #modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
+        
+        .modal-container { 
+            width: 90%; max-width: 1000px; height: 75vh; 
+            background: #0d0d0d; border: 2px solid var(--imperial-red); 
+            display: flex; box-shadow: 0 0 50px rgba(207, 10, 10, 0.4); 
+            position: relative; animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .modal-corner { position: absolute; width: 50px; height: 50px; border: 4px solid var(--imperial-red); transition: all 0.5s; }
+        .tl { top: -2px; left: -2px; border-bottom: none; border-right: none; }
+        .tr { top: -2px; right: -2px; border-bottom: none; border-left: none; }
+        .bl { bottom: -2px; left: -2px; border-top: none; border-right: none; }
+        .br { bottom: -2px; right: -2px; border-top: none; border-left: none; }
+        
+        .modal-left { width: 35%; background: #000; position: relative; overflow: hidden; border-right: 2px solid var(--imperial-red-dim); display: flex; align-items: center; justify-content: center; }
+        .modal-img-container { width: 100%; height: 100%; position: relative; }
+        .modal-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; filter: grayscale(50%); }
+        .reticle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; border: 1px solid rgba(255, 25, 25, 0.3); pointer-events: none; }
+        .reticle::before, .reticle::after { content: ''; position: absolute; width: 20px; height: 2px; background: var(--imperial-red); top: 50%; }
+        .reticle::before { left: -10px; } .reticle::after { right: -10px; }
+        .scan-line-anim { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(255, 0, 0, 0.5); box-shadow: 0 0 10px red; animation: scanDown 3s infinite linear; }
+
+        .modal-right { width: 65%; padding: 2.5rem; display: flex; flex-direction: column; position: relative; height: 100%; overflow-y: hidden; }
+        .modal-close { position: absolute; top: 20px; right: 20px; font-family: 'Orbitron'; color: var(--imperial-red); font-size: 2rem; cursor: pointer; transition: 0.3s; }
+        .modal-close:hover { text-shadow: 0 0 10px red; transform: scale(1.1); }
+        
+        .dossier-label { color: #555; font-family: 'Share Tech Mono'; letter-spacing: 2px; margin-bottom: 5px; font-size: 0.8rem; }
+        .modal-name { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        .modal-title { color: var(--imperial-red); font-size: 1.1rem; font-family: 'Exo 2'; text-transform: uppercase; margin-bottom: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 10px; display: inline-block; }
+        
+        .faction-display { margin-bottom: 2rem; border: 1px solid #333; background: #090909; padding: 15px; position: relative; display: grid; grid-template-columns: 1fr; gap: 10px; flex-shrink: 0; }
+        .faction-display::before { content: 'POLITICAL ALIGNMENT'; position: absolute; top: -8px; left: 10px; background: #0d0d0d; font-family: 'Share Tech Mono'; font-size: 0.6rem; color: #777; padding: 0 5px; }
+        .faction-header { border-bottom: 1px solid #222; padding-bottom: 5px; margin-bottom: 5px; }
+        .faction-name { font-family: 'Orbitron'; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+        .faction-quote { font-family: 'Exo 2'; font-style: italic; color: #ccc; font-size: 0.9rem; margin-bottom: 8px; }
+        .faction-agenda { font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #888; line-height: 1.4; }
+        .agenda-label { color: var(--imperial-red); font-weight: bold; margin-right: 5px; }
+
+        .modal-desc { 
+            font-family: 'Share Tech Mono'; color: var(--text-main); line-height: 1.6; font-size: 0.95rem; 
+            border-left: 3px solid var(--imperial-red-dim); padding-left: 1rem; margin-bottom: 2rem; 
+            white-space: pre-wrap; flex-grow: 1 !important; overflow-y: auto !important; min-height: 0 !important; 
+        }
+
+        .modal-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: auto; flex-shrink: 0; }
+        .m-stat-box { background: #111; padding: 10px; border: 1px solid #333; }
+        .m-stat-label { color: #666; font-size: 0.7rem; font-family: 'Share Tech Mono'; display: block; margin-bottom: 5px; }
+        .m-stat-val { color: var(--holo-blue); font-size: 1.1rem; font-family: 'Orbitron'; }
+
+        /* --- TICKER --- */
+        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 35px; background: #000; border-top: 2px solid var(--imperial-red); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--imperial-red); font-size: 0.9rem; text-transform: uppercase; }
+        .ticker-title { background: var(--imperial-red); color: #000; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; }
+        .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 2rem; }
+        .ticker-item::before { content: '/// '; opacity: 0.5; margin-right: 5px; }
+
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes modalOpen { 0% { transform: scaleY(0.01) scaleX(0); } 50% { transform: scaleY(0.01) scaleX(1); } 100% { transform: scaleY(1) scaleX(1); } }
+        @keyframes scanDown { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        @media(max-width: 900px) {
+            .modal-container { flex-direction: column; height: 90vh; overflow-y: auto; }
+            .modal-left { width: 100%; height: 250px; border-right: none; border-bottom: 2px solid var(--imperial-red-dim); }
+            .modal-right { width: 100%; padding: 1.5rem; height: auto; overflow-y: visible; }
+            .modal-desc { flex-grow: 0; overflow-y: visible; height: auto; min-height: initial; }
+            .modal-name { font-size: 1.8rem; }
+            .grid { grid-template-columns: 1fr; }
+            aside { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+    <div class="bg-grid"></div>
+    <div class="vignette"></div>
+    <div class="crt-overlay"></div>
 
-        // ==========================================
-        // DATA & LORE
-        // ==========================================
-        
-        const LORE = {
-            director: "DIRECTOR VALEN KRASK",
-            id: "ISB-CEN-001",
-            clearance: "CLE-10 // IMPERIAL EYES ONLY",
-            location: "ISB CENTRAL TOWER // CORUSCANT // 'THE IVORY TOWER'",
-            date: "5 ABY // CYCLE 144",
-            project: "COMPREHENSIVE SOCIAL EQUILIBRIUM",
-            code: "PANOPTICON",
-            target: "HOK (OVERSECTOR 4)",
-            motto: "ORDER IS MERCY. CHAOS IS CRUELTY."
-        };
+    <!-- BOOT SEQUENCE -->
+    <div id="boot-screen">
+        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL 6.2...</div>
+        <div class="boot-text" id="boot-2">VERIFYING BIOMETRIC SIGNATURE...</div>
+        <div class="boot-text" id="boot-3">DECRYPTING PERSONNEL DATABASE...</div>
+        <div class="boot-text" id="boot-4" style="color:white; font-weight:bold;">ACCESS GRANTED. ERA: 5 ABY.</div>
+    </div>
 
-        const SECTORS = [
-            { id: 'MINING', name: 'MINING DISTRICT 7G', x: 20, y: 30, risk: 92, output: 45, detail: "Guild 442 Strike imminent. Leader 'Kalen' flagged for behavioral review." },
-            { id: 'IND', name: 'INDUSTRIAL CORE', x: 45, y: 50, risk: 60, output: 95, detail: "Refinery output nominal. Quota pressures increasing stress metrics." },
-            { id: 'GOV', name: 'ADMINISTRATIVE ZONE', x: 70, y: 30, risk: 15, output: 100, detail: "Grand Moff Kessler's residence. High security. Reformist stronghold." },
-            { id: 'PORT', name: 'SPACEPORT ALPHA', x: 60, y: 70, risk: 75, output: 80, detail: "Smuggling vectors identified. Cargo checks failing due to bribery." },
-            { id: 'EDU', name: 'UNIVERSITY DISTRICT', x: 30, y: 60, risk: 55, output: 20, detail: "Ideological drift detected. History Dept. professors under surveillance." }
-        ];
-
-        // ==========================================
-        // UI COMPONENTS
-        // ==========================================
-
-        const Box = ({ children, className = "", title, alert = false, fit = false, scroll = false, glowing = false, noBorder = false }) => (
-            <div className={`relative bg-zinc-950/90 ${noBorder ? '' : 'border'} ${alert ? 'border-red-900 shadow-[0_0_10px_rgba(185,28,28,0.1)]' : 'border-zinc-800'} ${className} flex flex-col backdrop-blur-sm transition-colors duration-500`}>
-                {!noBorder && (
-                    <>
-                        <div className={`absolute -top-[1px] -left-[1px] w-2 h-2 border-t-2 border-l-2 ${alert ? 'border-red-600' : 'border-zinc-500'}`}></div>
-                        <div className={`absolute -bottom-[1px] -right-[1px] w-2 h-2 border-b-2 border-r-2 ${alert ? 'border-red-600' : 'border-zinc-500'}`}></div>
-                    </>
-                )}
-                
-                {title && (
-                    <div className={`flex items-center justify-between px-3 py-1.5 border-b ${alert ? 'border-red-900 bg-red-950/20' : 'border-zinc-800 bg-zinc-900/40'} shrink-0`}>
-                        <span className={`text-[10px] tracking-[0.2em] font-header uppercase ${alert ? 'text-red-500' : 'text-zinc-400'}`}>
-                            {title}
-                        </span>
-                        <div className="flex gap-1">
-                            <div className={`w-1 h-1 ${alert ? 'bg-red-500 animate-pulse' : 'bg-zinc-600'}`}></div>
-                        </div>
-                    </div>
-                )}
-                
-                <div className={`relative ${fit ? '' : 'p-4 flex-1'} ${scroll ? 'overflow-y-auto custom-scroll' : 'overflow-hidden'}`}>
-                    {children}
-                </div>
-            </div>
-        );
-
-        const LoadingBar = ({ progress, color = "bg-white", height = "h-1", animated = false }) => (
-            <div className={`w-full bg-zinc-900 ${height} overflow-hidden relative`}>
-                <div className={`absolute top-0 left-0 bottom-0 ${color} transition-all duration-1000 ${animated ? 'animate-pulse' : ''}`} style={{ width: `${progress}%` }}></div>
-                <div className="absolute inset-0 bg-[url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==')] opacity-30"></div>
-            </div>
-        );
-
-        const Button = ({ children, onClick, active = false, alert = false, className = "", disabled = false }) => (
-            <button 
-                onClick={onClick}
-                disabled={disabled}
-                className={`
-                    relative px-3 py-1.5 text-[10px] font-tech uppercase tracking-wider transition-all duration-200
-                    border focus:outline-none flex items-center justify-center gap-2
-                    ${active 
-                        ? (alert ? 'bg-red-950/60 border-red-500 text-red-500' : 'bg-zinc-800 border-zinc-400 text-white') 
-                        : (alert ? 'border-red-900/50 text-red-900 hover:border-red-500 hover:text-red-500' : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600')
-                    }
-                    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                    ${className}
-                `}
-            >
-                {children}
-            </button>
-        );
-
-        const Typewriter = ({ text, speed = 10, onComplete }) => {
-            const [display, setDisplay] = useState('');
-            useEffect(() => {
-                setDisplay('');
-                let i = 0;
-                const timer = setInterval(() => {
-                    if (i < text.length) {
-                        setDisplay(prev => prev + text.charAt(i));
-                        i++;
-                    } else {
-                        clearInterval(timer);
-                        if(onComplete) onComplete();
-                    }
-                }, speed);
-                return () => clearInterval(timer);
-            }, [text, speed]);
-            return <span>{display}</span>;
-        };
-
-        const RadarChart = () => {
-            return (
-                <div className="relative w-full h-full flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" className="w-3/4 h-3/4 overflow-visible">
-                        <polygon points="50,0 100,50 50,100 0,50" fill="none" stroke="#333" strokeWidth="1" />
-                        <polygon points="50,25 75,50 50,75 25,50" fill="none" stroke="#333" strokeDasharray="2 2" strokeWidth="0.5" />
-                        <line x1="50" y1="0" x2="50" y2="100" stroke="#333" strokeWidth="0.5" />
-                        <line x1="0" y1="50" x2="100" y2="50" stroke="#333" strokeWidth="0.5" />
-                        <polygon points="50,10 90,50 50,80 20,50" fill="rgba(185, 28, 28, 0.2)" stroke="#b91c1c" strokeWidth="1" />
-                    </svg>
-                    <div className="absolute top-0 text-[8px] text-zinc-500">FEAR</div>
-                    <div className="absolute bottom-0 text-[8px] text-zinc-500">COMPLIANCE</div>
-                    <div className="absolute left-0 text-[8px] text-zinc-500">RESISTANCE</div>
-                    <div className="absolute right-0 text-[8px] text-zinc-500">DEPENDENCY</div>
-                </div>
-            )
-        }
-
-        // ==========================================
-        // PAGE MODULES
-        // ==========================================
-
-        // --- NEW MODULE: BEHAVIORAL MODIFICATION ("THE PHYSICIAN") ---
-        const BehavioralMod = () => {
-            const [subject, setSubject] = useState(null);
-            const [step, setStep] = useState('SELECT'); // SELECT, ANALYZE, INTERVENE, RESULT
-            const [intervention, setIntervention] = useState(null);
-
-            const subjects = [
-                { id: 'SUB-892', name: 'PROF. J. CORRAN', role: 'History Dept. Head', risk: 65, traits: ['Nostalgic', 'Influential', 'Tenure'], status: 'ACTIVE' },
-                { id: 'SUB-441', name: 'KALEN VOS', role: 'Guild 442 Lead', risk: 92, traits: ['Charismatic', 'Volatile', 'Connected'], status: 'ACTIVE' },
-                { id: 'SUB-112', name: 'ADM. T. RANE', role: 'Port Authority', risk: 45, traits: ['Corrupt', 'Greedy', 'Cowardly'], status: 'ACTIVE' }
-            ];
-
-            const interventions = [
-                { id: 'ECO', name: 'ECONOMIC PRESSURE', desc: 'Restrict credit. Deny grants. Create bureaucratic debt.', cost: 'LOW', impact: 'SUBTLE' },
-                { id: 'SOC', name: 'SOCIAL ISOLATION', desc: 'Fabricate rumors. Distance colleagues. Algorithmically suppress comms.', cost: 'MED', impact: 'MODERATE' },
-                { id: 'DET', name: 'PREVENTIVE DETENTION', desc: 'Immediate extraction. Enhanced interrogation.', cost: 'HIGH', impact: 'SEVERE' }
-            ];
-
-            const handleIntervene = (type) => {
-                setIntervention(type);
-                setStep('RESULT');
-            };
-
-            const reset = () => {
-                setSubject(null);
-                setStep('SELECT');
-                setIntervention(null);
-            }
-
-            return (
-                <div className="h-full flex gap-6 animate-slide-in">
-                    <div className="w-1/3 flex flex-col gap-4">
-                        <Box title="SUBJECT_QUEUE" className="flex-1" scroll>
-                            <div className="space-y-2">
-                                {subjects.map(s => (
-                                    <button 
-                                        key={s.id} 
-                                        onClick={() => { setSubject(s); setStep('ANALYZE'); }}
-                                        className={`w-full text-left p-3 border transition-all ${subject?.id === s.id ? 'bg-white text-black border-white' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-500 text-zinc-400'}`}
-                                    >
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="font-header text-lg">{s.name}</span>
-                                            <span className={`text-xs font-mono ${s.risk > 80 ? 'text-red-500' : 'text-amber-500'}`}>{s.risk}% RISK</span>
-                                        </div>
-                                        <div className="text-[10px] font-mono opacity-70">{s.role}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </Box>
-                        <Box title="DOCTRINE" className="h-1/3 p-4">
-                            <div className="text-xs font-mono text-zinc-400 italic">"We do not wait for the disease to kill the patient. We intervene early. We treat the symptom before it becomes a condition."</div>
-                            <div className="text-[10px] font-mono text-zinc-600 mt-2 text-right">- THE PHYSICIAN</div>
-                        </Box>
-                    </div>
-
-                    <div className="flex-1">
-                        <Box title="INTERVENTION_CONSOLE" className="h-full" glowing={step === 'ANALYZE'}>
-                            {step === 'SELECT' && (
-                                <div className="h-full flex items-center justify-center opacity-50">
-                                    <div className="text-center">
-                                        <div className="text-4xl mb-2">⚕</div>
-                                        <div className="text-xs font-mono tracking-widest">SELECT PATIENT FOR EVALUATION</div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 'ANALYZE' && subject && (
-                                <div className="h-full flex flex-col animate-fade-in">
-                                    <div className="flex justify-between items-start mb-6 border-b border-zinc-800 pb-4">
-                                        <div>
-                                            <div className="text-xs font-mono text-zinc-500">SUBJECT ID: {subject.id}</div>
-                                            <div className="text-3xl font-header text-white">{subject.name}</div>
-                                            <div className="text-sm font-mono text-red-400">{subject.role}</div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-4xl font-header text-red-500">{subject.risk}%</div>
-                                            <div className="text-[9px] font-mono text-zinc-500">THREAT INDEX</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4 mb-8">
-                                        {subject.traits.map(t => (
-                                            <div key={t} className="p-2 border border-zinc-700 bg-zinc-900 text-center text-xs font-mono text-zinc-300">{t}</div>
-                                        ))}
-                                    </div>
-
-                                    <div className="flex-1">
-                                        <div className="text-xs font-mono text-zinc-500 uppercase mb-4">Select Treatment Protocol</div>
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {interventions.map(int => (
-                                                <button 
-                                                    key={int.id}
-                                                    onClick={() => handleIntervene(int)}
-                                                    className="group flex items-center justify-between p-4 border border-zinc-800 hover:border-red-500 hover:bg-red-950/20 transition-all text-left"
-                                                >
-                                                    <div>
-                                                        <div className="text-sm font-bold text-white group-hover:text-red-400">{int.name}</div>
-                                                        <div className="text-[10px] font-mono text-zinc-500">{int.desc}</div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="text-[9px] font-mono text-zinc-400">COST: {int.cost}</div>
-                                                        <div className="text-[9px] font-mono text-zinc-400">IMPACT: {int.impact}</div>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 'RESULT' && intervention && (
-                                <div className="h-full flex flex-col items-center justify-center text-center animate-fade-in">
-                                    <div className="w-16 h-16 border-2 border-red-500 rounded-full flex items-center justify-center mb-4">
-                                        <div className="w-12 h-12 bg-red-500 rounded-full animate-pulse"></div>
-                                    </div>
-                                    <h3 className="text-xl font-header text-white mb-2">INTERVENTION AUTHORIZED</h3>
-                                    <div className="text-sm font-mono text-zinc-300 mb-6 max-w-md">
-                                        Protocol <span className="text-red-400">{intervention.name}</span> initiated against {subject.name}. 
-                                        {intervention.id === 'ECO' && " Subject's credit rating downgraded. Grants revoked."}
-                                        {intervention.id === 'SOC' && " Isolation algorithms active. Peer distancing expected within 48 hours."}
-                                        {intervention.id === 'DET' && " Extraction team dispatched. Cover story: 'Medical Emergency'."}
-                                    </div>
-                                    <Button onClick={reset}>PROCESS NEXT SUBJECT</Button>
-                                </div>
-                            )}
-                        </Box>
-                    </div>
-                </div>
-            )
-        }
-
-        // --- NEW MODULE: SECURE COMMS ---
-        const SecureComms = () => {
-            const [messages, setMessages] = useState([
-                { id: 1, sender: 'MARUS', text: "Director, initial deployment on Hok is complete. However, Kessler's office is blocking our sensor grid installation in the Mining District.", type: 'in' }
-            ]);
-            const [options, setOptions] = useState([
-                { id: 'A', text: "Frame it as a safety audit. Use the recent guild strikes as pretext.", strategy: "SUBTLE" },
-                { id: 'B', text: "Override him using Article 4 emergency powers.", strategy: "AGGRESSIVE" }
-            ]);
-            const [typing, setTyping] = useState(false);
-
-            const handleReply = (option) => {
-                setMessages(prev => [...prev, { id: Date.now(), sender: 'KRASK', text: option.text, type: 'out' }]);
-                setOptions([]);
-                setTyping(true);
-
-                setTimeout(() => {
-                    let reply = "";
-                    if (option.strategy === "SUBTLE") {
-                        reply = "Understood. Framing as 'Infrastructure Safety Audit'. Kessler will have a hard time refusing without appearing negligent given the unrest. Proceeding.";
-                    } else {
-                        reply = "Risky. Kessler has allies on the Ruling Council. But if you insist... I will attempt to muscle it through. Expect political blowback.";
-                    }
-                    setMessages(prev => [...prev, { id: Date.now()+1, sender: 'MARUS', text: reply, type: 'in' }]);
-                    setTyping(false);
-                }, 2000);
-            };
-
-            return (
-                <div className="h-full flex flex-col animate-slide-in p-4 max-w-4xl mx-auto">
-                    <Box title="ENCRYPTED_CHANNEL // MARUS_DIRECT" className="flex-1 mb-4" scroll glowing>
-                        <div className="space-y-4">
-                            {messages.map(msg => (
-                                <div key={msg.id} className={`flex ${msg.type === 'out' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[80%] p-3 border ${msg.type === 'out' ? 'bg-zinc-900 border-zinc-700' : 'bg-red-950/20 border-red-900/50'}`}>
-                                        <div className="text-[9px] font-mono mb-1 opacity-50">{msg.sender} // {new Date().toLocaleTimeString()}</div>
-                                        <div className="text-sm font-mono text-white leading-relaxed">{msg.text}</div>
-                                    </div>
-                                </div>
-                            ))}
-                            {typing && (
-                                <div className="flex justify-start">
-                                    <div className="text-xs font-mono text-zinc-500 animate-pulse">MARUS IS TYPING...</div>
-                                </div>
-                            )}
-                        </div>
-                    </Box>
-                    <div className="h-32">
-                        {options.length > 0 ? (
-                            <div className="grid grid-cols-2 gap-4 h-full">
-                                {options.map(opt => (
-                                    <button 
-                                        key={opt.id}
-                                        onClick={() => handleReply(opt)}
-                                        className="border border-zinc-600 hover:bg-white hover:text-black hover:border-white transition-all p-4 text-left group h-full flex flex-col justify-center"
-                                    >
-                                        <div className="text-[10px] font-mono uppercase mb-2 text-zinc-500 group-hover:text-zinc-800">Option {opt.id}</div>
-                                        <div className="text-sm font-header tracking-wide">{opt.text}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="h-full border border-zinc-800 flex items-center justify-center text-zinc-600 font-mono text-xs">
-                                // AWAITING RESPONSE...
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )
-        }
-
-        // --- INTERACTIVE NETWORK GRAPH (Existing but Refined) ---
-        const NetworkAnalysis = () => {
-            const [selectedNode, setSelectedNode] = useState(null);
-            const [filters, setFilters] = useState({ COMMAND: true, CONFLICT: true, SURV: true });
-
-            const nodes = [
-                { id: 'KRASK', label: 'DIR. KRASK', x: 50, y: 15, type: 'director', desc: 'Central Authority. ISB Directorate. "The Physician".' },
-                { id: 'MARUS', label: 'DIR. MARUS', x: 30, y: 40, type: 'asset', desc: 'Project Panopticon Lead. Pragmatic. Family on Coruscant.' },
-                { id: 'KESSLER', label: 'G.M. KESSLER', x: 70, y: 40, type: 'target', desc: 'Political Obstacle. Reformist Leader. Controls Hok.' },
-                { id: 'MINING', label: 'GUILD 442', x: 70, y: 70, type: 'target', desc: 'Labor Force. High Unrest. Strike Risk.' },
-                { id: 'REBELS', label: 'CELL AUREK', x: 20, y: 80, type: 'threat', desc: 'Insurgency detected. Funding Mining Guild.' },
-                { id: 'COMPNOR', label: 'COMPNOR', x: 80, y: 20, type: 'political', desc: 'Political Backing. Budget Source. Ideological Hardliners.' },
-                { id: 'UNI', label: 'UNI. HOK', x: 40, y: 60, type: 'surv', desc: 'Academic Dissidents. Monitored.' }
-            ];
-
-            const links = [
-                { s: 'KRASK', t: 'MARUS', type: 'COMMAND', color: '#fff' },
-                { s: 'KRASK', t: 'KESSLER', type: 'CONFLICT', color: '#b91c1c' },
-                { s: 'KRASK', t: 'COMPNOR', type: 'COMMAND', color: '#f59e0b' },
-                { s: 'KESSLER', t: 'MINING', type: 'COMMAND', color: '#fff' },
-                { s: 'REBELS', t: 'MINING', type: 'CONFLICT', color: '#b91c1c' },
-                { s: 'MARUS', t: 'MINING', type: 'SURV', color: '#3b82f6' },
-                { s: 'MARUS', t: 'UNI', type: 'SURV', color: '#3b82f6' },
-                { s: 'REBELS', t: 'UNI', type: 'CONFLICT', color: '#b91c1c' }
-            ];
-
-            const toggleFilter = (f) => setFilters(prev => ({ ...prev, [f]: !prev[f] }));
-
-            return (
-                <div className="h-full flex gap-6 animate-slide-in">
-                    <div className="flex-1 flex flex-col gap-4">
-                        <div className="flex gap-2 border-b border-zinc-800 pb-2">
-                            <Button active={filters.COMMAND} onClick={() => toggleFilter('COMMAND')}>COMMAND</Button>
-                            <Button active={filters.CONFLICT} onClick={() => toggleFilter('CONFLICT')} alert>CONFLICT</Button>
-                            <Button active={filters.SURV} onClick={() => toggleFilter('SURV')}>SURVEILLANCE</Button>
-                        </div>
-                        
-                        <Box title="HOLONET_TOPOLOGY // INTERACTIVE" className="flex-1 bg-zinc-950">
-                            <svg viewBox="0 0 100 100" className="w-full h-full">
-                                <defs>
-                                    <marker id="arrow" markerWidth="4" markerHeight="4" refX="10" refY="2" orient="auto">
-                                        <path d="M0,0 L4,2 L0,4" fill="#666" />
-                                    </marker>
-                                </defs>
-                                
-                                {links.map((l, i) => {
-                                    if (!filters[l.type]) return null;
-                                    const s = nodes.find(n => n.id === l.s);
-                                    const t = nodes.find(n => n.id === l.t);
-                                    const isConnected = selectedNode && (selectedNode.id === l.s || selectedNode.id === l.t);
-                                    const opacity = selectedNode ? (isConnected ? 1 : 0.1) : 0.6;
-                                    
-                                    return (
-                                        <g key={i} className="transition-all duration-500">
-                                            <line x1={s.x} y1={s.y} x2={t.x} y2={t.y} stroke={l.color} strokeWidth="0.5" opacity={opacity} />
-                                            {isConnected && <circle cx={(s.x+t.x)/2} cy={(s.y+t.y)/2} r="1" fill={l.color} className="animate-ping" />}
-                                        </g>
-                                    )
-                                })}
-
-                                {nodes.map((n, i) => {
-                                    const isSelected = selectedNode?.id === n.id;
-                                    const isDimmed = selectedNode && !isSelected && !links.some(l => filters[l.type] && ((l.s === n.id && l.t === selectedNode.id) || (l.t === n.id && l.s === selectedNode.id)));
-                                    
-                                    return (
-                                        <g 
-                                            key={i} 
-                                            onClick={() => setSelectedNode(n)}
-                                            className={`cursor-pointer transition-all duration-300 ${isDimmed ? 'opacity-20' : 'opacity-100'}`}
-                                        >
-                                            <circle 
-                                                cx={n.x} cy={n.y} r={isSelected ? 6 : 4} 
-                                                fill={n.type === 'director' ? '#fff' : n.type === 'target' ? '#b91c1c' : n.type === 'political' ? '#f59e0b' : n.type === 'threat' ? '#ef4444' : '#3b82f6'} 
-                                                className="transition-all duration-300"
-                                                stroke={isSelected ? 'white' : 'none'}
-                                                strokeWidth="0.5"
-                                            />
-                                            <text x={n.x} y={n.y + 8} fontSize="3" textAnchor="middle" fill={isSelected ? '#fff' : '#888'} className="font-mono font-bold">{n.label}</text>
-                                        </g>
-                                    )
-                                })}
-                            </svg>
-                        </Box>
-                    </div>
-
-                    <div className="w-80 flex flex-col gap-4">
-                        <Box title="NODE_INTEL" className="h-2/3" scroll>
-                             {selectedNode ? (
-                                 <div className="space-y-4 animate-fade-in">
-                                    <div className="border-b border-zinc-800 pb-2">
-                                        <div className="text-[9px] text-zinc-500 uppercase">Designation</div>
-                                        <div className="text-2xl font-header text-white">{selectedNode.label}</div>
-                                        <div className="text-xs text-zinc-400 font-mono">{selectedNode.desc}</div>
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                        <div className="text-[9px] text-zinc-500 uppercase">Connections</div>
-                                        {links.filter(l => filters[l.type] && (l.s === selectedNode.id || l.t === selectedNode.id)).map((l, i) => (
-                                            <div key={i} className="flex items-center gap-2 text-xs font-mono border border-zinc-800 p-2 bg-zinc-900/50">
-                                                <div className="w-2 h-2 rounded-full" style={{background: l.color}}></div>
-                                                <span className="text-zinc-400">{l.type}</span>
-                                                <span className="text-zinc-600">→</span>
-                                                <span className="text-white">{l.s === selectedNode.id ? l.t : l.s}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                 </div>
-                             ) : (
-                                 <div className="h-full flex items-center justify-center text-center opacity-50">
-                                     <div className="space-y-2">
-                                         <div className="text-4xl">☊</div>
-                                         <div className="text-xs font-mono">SELECT NODE<br/>FOR ANALYSIS</div>
-                                     </div>
-                                 </div>
-                             )}
-                        </Box>
-                    </div>
-                </div>
-            )
-        }
-
-        // --- INTERACTIVE LOGISTICS (Enhanced with Layers) ---
-        const Logistics = () => {
-            const [budget, setBudget] = useState({ surv: 60, field: 30, rd: 10 });
-            const [assets, setAssets] = useState([
-                { id: 'P-882', type: 'PROBE', loc: 'Hok Orbit', status: 'SCANNING', health: 100 },
-                { id: 'P-883', type: 'PROBE', loc: 'Sector 7G', status: 'OFFLINE', health: 0 },
-                { id: 'TRP-A', type: 'TROOPER_BTN', loc: 'Admin Zone', status: 'PATROL', health: 98 },
-                { id: 'TRP-B', type: 'TROOPER_BTN', loc: 'Mining Dist', status: 'ENGAGED', health: 75 },
-                { id: 'INT-1', type: 'ISB_AGENT', loc: 'Uni. District', status: 'UNDERCOVER', health: 100 }
-            ]);
-            const [selectedAsset, setSelectedAsset] = useState(null);
-
-            const stability = Math.min(100, Math.floor((budget.surv * 0.8) + (budget.field * 0.5)));
-            const fear = Math.min(100, Math.floor((budget.field * 1.2) + (budget.surv * 0.2)));
+    <!-- MODAL OVERLAY -->
+    <div id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-corner tl"></div>
+            <div class="modal-corner tr"></div>
+            <div class="modal-corner bl"></div>
+            <div class="modal-corner br"></div>
             
-            const handleBudgetChange = (type, val) => {
-                const newVal = parseInt(val);
-                setBudget(prev => ({ ...prev, [type]: newVal }));
-            };
+            <div class="modal-close" onclick="closeModal()">×</div>
 
-            return (
-                <div className="h-full flex gap-6 animate-slide-in">
-                    <div className="w-1/2 flex flex-col gap-6">
-                        <Box title="RESOURCE_ALLOCATION_MATRIX" className="flex-1">
-                            <div className="p-6 space-y-8">
-                                <div>
-                                    <div className="flex justify-between mb-2 font-header text-xl text-white">
-                                        <span>LAYER 1: DATA COLLECTION</span>
-                                        <span>{budget.surv}%</span>
-                                    </div>
-                                    <input type="range" min="0" max="100" value={budget.surv} onChange={(e) => handleBudgetChange('surv', e.target.value)} className="w-full" />
-                                    <div className="text-[10px] text-zinc-500 mt-1">Impact: Increases detection. Lowers privacy.</div>
-                                </div>
-
-                                <div>
-                                    <div className="flex justify-between mb-2 font-header text-xl text-white">
-                                        <span>LAYER 2: PREDICTIVE INTERVENTION</span>
-                                        <span>{budget.field}%</span>
-                                    </div>
-                                    <input type="range" min="0" max="100" value={budget.field} onChange={(e) => handleBudgetChange('field', e.target.value)} className="w-full" />
-                                    <div className="text-[10px] text-zinc-500 mt-1">Impact: Pre-crime arrests. Generates fear.</div>
-                                </div>
-
-                                <div>
-                                    <div className="flex justify-between mb-2 font-header text-xl text-white">
-                                        <span>LAYER 3: CONDITIONING</span>
-                                        <span>{budget.rd}%</span>
-                                    </div>
-                                    <input type="range" min="0" max="100" value={budget.rd} onChange={(e) => handleBudgetChange('rd', e.target.value)} className="w-full" />
-                                    <div className="text-[10px] text-zinc-500 mt-1">Impact: Long term stability. Cultural alignment.</div>
-                                </div>
-                                
-                                <div className="pt-4 border-t border-zinc-800 grid grid-cols-2 gap-4">
-                                    <div className="p-2 border border-zinc-800 bg-zinc-900 text-center"><div className="text-[9px] text-zinc-500">STABILITY</div><div className="text-xl text-white font-header">{stability}%</div></div>
-                                    <div className="p-2 border border-zinc-800 bg-zinc-900 text-center"><div className="text-[9px] text-zinc-500">FEAR INDEX</div><div className="text-xl text-red-500 font-header">{fear}%</div></div>
-                                </div>
-                            </div>
-                        </Box>
+            <div class="modal-left">
+                <div class="modal-img-container">
+                    <img id="m-img" class="modal-img" src="" alt="Personnel Image">
+                    <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#111;">
+                        <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512">
+                            <path id="m-svg-path" d=""/>
+                        </svg>
                     </div>
+                    <div class="reticle"><div class="scan-line-anim"></div></div>
+                </div>
+            </div>
 
-                    <div className="w-1/2 flex flex-col gap-6">
-                        <Box title="ASSET_MANIFEST" className="h-2/3" scroll>
-                            <div className="space-y-2">
-                                {assets.map(asset => (
-                                    <div key={asset.id} onClick={() => setSelectedAsset(asset)} className={`p-3 border cursor-pointer transition-all flex justify-between items-center ${selectedAsset?.id === asset.id ? 'bg-zinc-800 border-white' : 'bg-black border-zinc-800 hover:bg-zinc-900'}`}>
-                                        <div><div className="font-tech text-white">{asset.id}</div><div className="text-[9px] text-zinc-500">{asset.type}</div></div>
-                                        <div className="text-right"><div className={`text-[10px] font-bold ${asset.status === 'OFFLINE' || asset.status === 'ENGAGED' ? 'text-red-500' : 'text-green-500'}`}>{asset.status}</div><div className="text-[9px] text-zinc-500">{asset.loc}</div></div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Box>
-                        <Box title="UNIT_DETAILS" className="h-1/3" alert={selectedAsset?.health < 50}>
-                            {selectedAsset ? (
-                                <div className="space-y-2 animate-fade-in">
-                                    <div className="flex justify-between items-center"><span className="font-header text-xl text-white">{selectedAsset.id}</span><span className="text-xs font-mono">{selectedAsset.type}</span></div>
-                                    <div className="space-y-1"><div className="flex justify-between text-[9px] text-zinc-500"><span>INTEGRITY</span><span>{selectedAsset.health}%</span></div><LoadingBar progress={selectedAsset.health} color={selectedAsset.health < 30 ? 'bg-red-600' : 'bg-white'} /></div>
-                                    <div className="grid grid-cols-2 gap-2 mt-2"><Button>RECALL</Button><Button alert>SELF_DESTRUCT</Button></div>
-                                </div>
-                            ) : (<div className="h-full flex items-center justify-center text-center opacity-50 text-xs font-mono">SELECT UNIT</div>)}
-                        </Box>
+            <div class="modal-right">
+                <div class="dossier-label">IMPERIAL DOSSIER // TOP SECRET</div>
+                <h2 id="m-name" class="modal-name">NAME</h2>
+                <div id="m-title" class="modal-title">TITLE</div>
+
+                <div class="faction-display">
+                    <div class="faction-header">
+                        <div id="m-faction-name" class="faction-name">FACTION</div>
+                    </div>
+                    <div id="m-faction-quote" class="faction-quote">"Quote"</div>
+                    <div class="faction-agenda"><span class="agenda-label">AGENDA:</span><span id="m-faction-agenda">Agenda Text</span></div>
+                </div>
+                
+                <div class="dossier-label">BIOGRAPHICAL DATA SUMMARY</div>
+                <p id="m-desc" class="modal-desc">Description text...</p>
+
+                <div class="modal-stats-grid">
+                    <!-- Removed Status and Clearance stats as per user request -->
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">LOCATION</span>
+                        <span id="m-loc" class="m-stat-val">CORUSCANT</span>
+                    </div>
+                    <div class="m-stat-box">
+                        <span class="m-stat-label">LOYALTY</span>
+                        <span id="m-loyalty" class="m-stat-val" style="color:var(--imperial-red)">98%</span>
                     </div>
                 </div>
-            )
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR WITH FILTERS AND LOGS -->
+    <aside>
+        <div class="sidebar-section">
+            <div class="sidebar-header">
+                <span>FILTER DATABASE</span>
+                <i class="fas fa-filter" style="font-size:0.8rem"></i>
+            </div>
+            
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterData('all', this)">
+                    All Records <span class="filter-count" id="count-all">0</span>
+                </button>
+            </div>
+            
+            <div style="margin:15px 0 5px 0; color:#555; font-size:0.7rem; font-family:'Share Tech Mono'">ORGANIZATION</div>
+            <div class="filter-group">
+                <button class="filter-btn" onclick="filterData('org', this, 'High Command')">
+                    High Command <span class="filter-count" id="count-mil">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('org', this, 'Ministry')">
+                    Ministries <span class="filter-count" id="count-min">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('org', this, 'Ruling Council')">
+                    Ruling Council <span class="filter-count" id="count-cou">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('org', this, 'COMPNOR')">
+                    COMPNOR / Party <span class="filter-count" id="count-com">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('org', this, 'Security')">
+                    Intel / Security <span class="filter-count" id="count-sec">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('org', this, 'Provincial')">
+                    Provincial / Moffs <span class="filter-count" id="count-pro">0</span>
+                </button>
+            </div>
+
+            <div style="margin:15px 0 5px 0; color:#555; font-size:0.7rem; font-family:'Share Tech Mono'">POLITICAL FACTION</div>
+            <div class="filter-group">
+                <button class="filter-btn" onclick="filterData('faction', this, 'Hardliner')">
+                    Hardliners <i class="fas fa-circle" style="font-size:8px; color:var(--faction-hardliner)"></i>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Traditionalist')">
+                    Traditionalists <i class="fas fa-circle" style="font-size:8px; color:var(--faction-traditionalist)"></i>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Ultranationalist')">
+                    Ultranationalists <i class="fas fa-circle" style="font-size:8px; color:var(--faction-ultranationalist)"></i>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Reformer')">
+                    Reformers <i class="fas fa-circle" style="font-size:8px; color:var(--faction-reformer)"></i>
+                </button>
+            </div>
+        </div>
+
+        <div style="padding: 0.5rem 1.5rem; color: var(--imperial-red); border-bottom: 1px solid #222; font-size: 0.8rem; font-weight: bold; font-family:'Share Tech Mono'">
+            SYSTEM LOGS
+        </div>
+        <div class="log-container" id="system-log"></div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-title">
+                <div class="subtitle">Galactic Empire // Personnel Database</div>
+                <h1>High Command</h1>
+            </div>
+            <div class="header-stats">
+                <div>ERA: 5 ABY (Post-Endor)</div>
+                <div>CYCLE: <span id="stardate"></span></div>
+                <div>ENCRYPTION: <span class="stat-val">TOP SECRET</span></div>
+            </div>
+        </header>
+
+        <div class="grid" id="cardGrid"></div>
+    </main>
+
+    <div class="ticker-wrap">
+        <div class="ticker-title">HOLONET NEWS</div>
+        <div class="ticker" id="ticker-content">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+<script>
+    // --- DATABASE CONFIGURATION ---
+    const personnelConfig = [
+        {
+            name: "TANRI KETHIAN",
+            title: "Grand Vizier",
+            org: "Imperial Court",
+            displayOrg: "Imperial Throne",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=MA&backgroundColor=222", 
+            desc: "The Head of State's supreme legal and political executor. Ensures senior officials adhere to Imperial doctrine and the sovereign’s vision. Oversees the Imperial Throne corporate and its many extralegal instrumentalities.",
+            status: "active", location: "Imperial Palace", loyalty: 70, influence: 45
+        },
+        {
+            name: "Synnove Fenn",
+            title: "Supreme Commander",
+            org: "High Command",
+            displayOrg: "Galactic Empire",
+            faction: "Reformer",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=SF&backgroundColor=300",
+            desc: "Head of State. The apex of Imperial authority, uniting political sovereignty and military supremacy. Commands the Empire’s destiny through decree, war direction, and strategic will. All state power ultimately answers to this office.",
+            status: "active", location: "Imperial Palace", loyalty: 95, influence: 95
+        },
+        {
+            name: "[REDACTED]",
+            title: "Prime Minister",
+            org: "Ministry",
+            displayOrg: "Council of Ministers",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=PM&backgroundColor=111",
+            desc: "Administrative head of the executive government. Coordinates ministries and communicates high-level directives across the bureaucratic machine. Maintains continuity of governance amid crisis and upheaval.",
+            status: "idle", location: "Coruscant", loyalty: 85, influence: 70
+        },
+        {
+            name: "Martyn Strickland",
+            title: "Minister of Security",
+            org: "Ministry",
+            displayOrg: "Council of Ministers",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=MS&backgroundColor=300",
+            desc: "A scared man.",
+            status: "alert", location: "Imperial Ministerium", loyalty: 65, influence: 20
+        },
+        {
+            name: "Iuuna Albescu",
+            title: "Minister of War",
+            org: "Ministry",
+            displayOrg: "Council of Ministers",
+            faction: "Hardliner",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=WA&backgroundColor=400",
+            desc: "sesbian lex elf",
+            status: "active", location: "Anaxes", loyalty: 80, influence: 60
+        },
+        {
+            name: "[REDACTED]",
+            title: "Minister of Justice",
+            org: "Ministry",
+            displayOrg: "Council of Ministers",
+            faction: "Hardliner",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=MJ&backgroundColor=121",
+            desc: "Guardian of Imperial law and state legality. Supervises legal institutions and high courts while ensuring justice operates as an instrument of Imperial authority. Interprets and enforces the Empire’s supreme statutes. As a Hardliner, he views the courts not as independent arbiters but as extensions of the Emperor's will, legitimizing the military junta's seizure of power.",
+            status: "idle", location: "Supreme Court", loyalty: 90, influence: 60
+        },
+        {
+            name: "[REDACTED]",
+            title: "Lord/Lady President",
+            org: "Ruling Council",
+            displayOrg: "IMPERIAL RULING COUNCIL",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=LP&backgroundColor=010",
+            desc: "Senior master of the Ruling Council. Controls Council functions parallel to formal state structures. Operates as a power broker within the Empire’s highest political strata. Has largely replaced the Imperial Senate in authority. He maneuvers to maintain the status quo and protects the interests of the aristocracy, viewing the military's current dominance as a temporary necessity.",
+            status: "active", location: "Imperial Palace", loyalty: 85, influence: 85
+        },
+        {
+            name: "Darius Vorne",
+            title: "Chairman of the Select Committee",
+            org: "COMPNOR",
+            displayOrg: "COMPNOR",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=CV&backgroundColor=224",
+            desc: "Wields sweeping authority to enforce the Emperor’s will via social, political, and ideological channels. Oversees COMPNOR’s vast apparatus and its many subsidiaries. Functions as the Empire’s principal engine of indoctrination and societal control. Vorne believes the Empire is best served by a stable, obedient citizenry achieved through cultural conditioning rather than brute force.",
+            status: "alert", location: "COMPNOR HQ", loyalty: 80, influence: 85
+        },
+        {
+            name: "Inquart Teegeeack",
+            title: "General-Secretary",
+            org: "COMPNOR",
+            displayOrg: "New Order Party",
+            faction: "Ultranationalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=GT&backgroundColor=840",
+            desc: "High priest of New Order ideology and enforcer of doctrinal purity. Shapes the ideological center of Imperial politics. Ensures all party organs remain loyal to the spirit and letter of the New Order. An Ultranationalist ideologue, Teegeeack believes the Empire is the end of history and that doubt is treason. He runs the Party as a parallel state security apparatus.",
+            status: "idle", location: "Ralltiir", loyalty: 95, influence: 85
+        },
+        {
+            name: "Veyron Cassius",
+            title: "Vice Chief of Naval Operations",
+            org: "High Command",
+            displayOrg: "IMPERIAL NAVY",
+            faction: "Reformer",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=VC&backgroundColor=002",
+            desc: "Administrative and operational commander of the Imperial Navy’s daily functioning. Oversees fleet development and naval readiness. Second only to the Empire’s foremost admirals. As a Hardliner, Cassius supports the view that the military is the only institution capable of holding the Empire together. He commands the administrative backbone of the Navy.",
+            status: "active", location: "Kuat Yards", loyalty: 75, influence: 90
+        },
+        {
+            name: "Keegan Retloc",
+            title: "Vice Chairman of the Joint Chiefs",
+            org: "High Command",
+            displayOrg: "JOINT CHIEFS OF STAFF",
+            faction: "Reformer",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=VR&backgroundColor=311",
+            desc: "The attack dog of the Imperial Armed Forces. Effective co-ruler of the Empire with Synnove Fenn. Uniformed political chief of the Imperial defense apparatus, responsible for cracking High Command into shape. Retloc is known for his brutal efficiency in suppressing internal rebellions and overseeing the strategic deployment of Stormtrooper legions.",
+            status: "active", location: "Bastion", loyalty: 95, influence: 95
+        },
+        {
+            name: "Maximilian Veers",
+            title: "Chief of Staff",
+            org: "High Command",
+            displayOrg: "IMPERIAL ARMY",
+            faction: "Hardliner",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=MV&backgroundColor=333",
+            desc: "Leads all ground forces across the Empire. Directs doctrine, personnel, strategy, and operational planning for the Army. Elevated post-Endor to restore Army effectiveness and discipline. General Veers, a veteran of countless campaigns including the Battle of Hoth, prioritizes combined arms warfare and disciplined troop deployment.",
+            status: "active", location: "Carida", loyalty: 85, influence: 80
+        },
+        {
+            name: "Ardus Kaine",
+            title: "Dean",
+            org: "Provincial",
+            displayOrg: "COLLEGE OF MOFFS",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=DK&backgroundColor=444",
+            desc: "Chief steward of sector governors, providing guidance, oversight, and arbitration. Ensures Moffs uphold Imperial doctrine and maintain local stability. Serves as intermediary between regional authority and central command. Kaine protects the collective interests of the Moffs, favoring stable provincial governance over radical upheaval.",
+            status: "idle", location: "Coruscant", loyalty: 80, influence: 70
+        },
+        {
+            name: "Garrik Kessler",
+            title: "Chairman",
+            org: "Provincial",
+            displayOrg: "Grand Moffs",
+            faction: "Reformer",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=GK&backgroundColor=223",
+            desc: "Ensures Grand Moffs enforce Imperial policy, ensure stability, enshrine prosperity, and develop their portfolios in line with Imperial doctrine. Ex officio in control of most military and paramilitary forces in the Empire through leadership of the Grand Moffs. Kessler represents the highest level of regional authority, overseeing vast swathes of space.",
+            status: "active", location: "Eriadu", loyalty: 90, influence: 95
+        },
+        {
+            name: "Idris Randd",
+            title: "Governor-Superior",
+            org: "Provincial",
+            displayOrg: "DIET OF GOVERNORS",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=GR&backgroundColor=123",
+            desc: "Leads the assembly of planetary governors, both Moff and non-Moff. Coordinates regional administration and enforces compliance with central policy. Acts as the Empire’s supreme provincial arbiter. Randd navigates the treacherous political landscape by ensuring core governmental functions—taxation, infrastructure, public works—continue unimpeded.",
+            status: "idle", location: "Sector 0", loyalty: 75, influence: 60
+        },
+        {
+            name: "Ysanne Isard",
+            title: "Director of Imperial Intelligence",
+            org: "Security",
+            displayOrg: "IMPERIAL INTELLIGENCE",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=DI&backgroundColor=500",
+            desc: "Machiavellian head of the vast and secretive Imperial Intelligence Community, as well as the Director of the shadowy Imperial Intelligence Service. Directs all intelligence, surveillance, and counterintelligence efforts within and without the Empire. Isard's network of agents is unmatched, capable of penetrating the highest levels of both the Alliance and internal Imperial factions.",
+            status: "alert", location: "Classified", loyalty: 40, influence: 60
+        },
+        {
+            name: "Director Valen Krask",
+            title: "Imperial Security Bureau",
+            org: "Security",
+            displayOrg: "SECURITY BUREAU",
+            faction: "Ultranationalist",
+            image: "images/882d83f4166d0c037cc47346f92e4089 (1).jpg",
+            desc: "Chief security officer of the Empire. Directs, guides, and monitors the Imperial Security Bureau and all other internal civil intelligence and police agencies. Krask embodies the Hardliner agenda of 'law and order.' His ISB safeguards loyalty, suppresses dissent, and roots out treason with omnipresent surveillance and terror.",
+            status: "active", location: "ISB Central", loyalty: 100, influence: 70
+        },
+        {
+            name: "Director [REDACTED]",
+            title: "Judicial Forces",
+            org: "Security",
+            displayOrg: "JUDICIAL FORCES",
+            faction: "Hardliner",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=DJ&backgroundColor=101",
+            desc: "Leads the Empire’s uniformed federal police and judicial enforcement units. Serves as law enforcement’s representative within the intelligence-security triad. Ensures order is maintained through disciplined legal force. The Judicial Forces are the heavy, public presence of Imperial authority on Core Worlds.",
+            status: "idle", location: "Coruscant", loyalty: 85, influence: 50
+        },
+        {
+            name: "[REDACTED]",
+            title: "Grandmaster/mistress",
+            org: "Ruling Council",
+            displayOrg: "SECRET ORDER",
+            faction: "Ultranationalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=GM&backgroundColor=601",
+            desc: "Unseen grand cleric of the late Emperor’s arcane and esoteric adepts. Acts as the sovereign’s hand, prophet, and instrument in esoteric affairs. Extends the Empire's reach into the mystical and unknowable. An Ultranationalist extremist, the Grandmaster views the Empire as a spiritual doctrine made manifest, feared even by High Command.",
+            status: "alert", location: "Byss", loyalty: 10, influence: 65
+        },
+        {
+            name: "[REDACTED]",
+            title: "Lord/Lady",
+            org: "Ruling Council",
+            displayOrg: "IMPERIAL COURT",
+            faction: "Traditionalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=LC&backgroundColor=202",
+            desc: "Ceremonial and political figure within the Emperor’s inner circle. Manages courtly traditions, diplomacy, and elite social order. Serves as a visible embodiment of Imperial prestige. Maintains the complex hierarchy and etiquette of the Imperial Court, a subtle but effective way to maintain the illusion of continuity and stability.",
+            status: "idle", location: "Imperial Palace", loyalty: 40, influence: 50
+        },
+        {
+            name: "Taokr Selzen",
+            title: "Grand Inquisitor",
+            org: "Security",
+            displayOrg: "Inquisition",
+            faction: "Ultranationalist",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=GI&backgroundColor=800",
+            desc: "The Empire’s foremost authority on force-sensitive control. Wields an unlimited charter to hunt, regulate, and contain force users. Answers only to the Emperor and enforces absolute compliance. Selzen aligns with the Ultranationalists, enforcing absolute purity and hunting down any who threaten the Emperor's dark vision.",
+            status: "alert", location: "Nur", loyalty: 40, influence: 20
+        }
+    ];
+
+    const factionData = {
+        "Hardliner": { color: "var(--faction-hardliner)", quote: "Total commitment, or total annihilation.", agenda: "Establish unified enforcement rule, mobilize society, subordinate traditional authority to uniformed services." },
+        "Traditionalist": { color: "var(--faction-traditionalist)", quote: "This too shall pass.", agenda: "Maintenance of the political, economic, and social status quo. Maintain existing institutions, preserve civilian governance, implement careful incremental reforms, stabilize administration, prevent radical upheaval from any faction." },
+        "Ultranationalist": { color: "var(--faction-ultranationalist)", quote: "The galaxy obeys, or the galaxy burns.", agenda: "Enforce ideological purity, crush dissent, punish disloyalty, restore a totally dominant Empire, and punish the galaxy for its insolence." },
+        "Reformer": { color: "var(--faction-reformer)", quote: "An Empire that cannot rule justly will not rule at all.", agenda: "End the worst excesses of the Empire, ease discrimination as much as possible, improve accountable governance, reform the bureaucracy, eliminate corruption, restructure the government, allow limited self-rule." },
+        "Progressive": { color: "var(--faction-progressive)", quote: "The Emperor is not the Empire.", agenda: "Abolish the monarchy, establish collective or representative executive bodies, restore lawful governance, empower civilian institutions, eliminate arbitrary or tyrannical organs." }
+    };
+
+    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
+
+    const headlines = [
+        "I WANT THAT TWINK (INQUART) OBLITERATED",
+        "VALEN 'TORMENT NEXUS' KRASK",
+        "ALL OF THE LIGHTS",
+        "GRAND MOFF MOFF MCMOFFFACE",
+        "SONIC IS A BITCH ASS MOTHERFUCKER",
+        "ASHER HALCYON ASCENDS TO THE THRONE OF EMPEROR",
+        "PALPATINE FOUND ALIVE IN A CAVE ON REACH",
+        "SYNNOVE 'FINISHED CHARACTER SHEET' FENN"
+    ];
+
+    // --- LOGIC ---
+
+    function init() {
+        runBootSequence();
+        updateFilterCounts();
+        renderCards(personnelConfig); // Initial Render
+        initTicker();
+        startLogs();
+        
+        // Stardate
+        const day = Math.floor(Math.random() * 365);
+        const cycle = Math.floor(Math.random() * 24);
+        document.getElementById('stardate').innerText = `35:${cycle}:${day}`;
+    }
+
+    function getPips() {
+        const types = ['red', 'blue', 'gold'];
+        let html = '';
+        const count = Math.floor(Math.random() * 4) + 3;
+        for(let i=0; i<count; i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            html += `<div class="pip ${type}"></div>`;
+        }
+        return html;
+    }
+
+    function getTechID() { return Math.floor(10000 + Math.random() * 90000); }
+
+    function renderCards(data) {
+        const grid = document.getElementById('cardGrid');
+        grid.innerHTML = "";
+        
+        if(data.length === 0) {
+            grid.innerHTML = `<div style="color:#666; font-family:'Share Tech Mono'; grid-column: 1/-1; text-align:center; padding-top:50px;">NO RECORDS FOUND MATCHING QUERY.</div>`;
+            return;
         }
 
-        // --- TACTICAL MAP (HOK) ---
-        const InteractiveMap = () => {
-            const [selectedSector, setSelectedSector] = useState(null);
-            const [overlay, setOverlay] = useState('RISK');
-            const [tab, setTab] = useState('MAP');
+        data.forEach((person, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            // Stagger animation based on filtered index
+            card.style.animationDelay = `${index * 50}ms`;
+            
+            // Find original index in master config for correct modal opening
+            const masterIndex = personnelConfig.indexOf(person);
+            card.onclick = () => openModal(masterIndex);
+            
+            const techID = getTechID();
+            const pips = getPips();
+            const fData = factionData[person.faction] || { color: "#fff" };
 
-            const handleSectorClick = (sector) => {
-                setSelectedSector(sector);
-                setTab('DATA');
-            };
+            // Truncate Description for card
+            const rawDesc = person.desc;
+            const summaryLength = 140; 
+            let summaryDesc = rawDesc.length > summaryLength ? 
+                              rawDesc.substring(0, rawDesc.lastIndexOf(' ', summaryLength)) + '...' : rawDesc;
 
-            const getSectorColor = (sector) => {
-                if (overlay === 'RISK') return sector.risk > 70 ? '#ef4444' : sector.risk > 40 ? '#f59e0b' : '#10b981';
-                if (overlay === 'OUTPUT') return sector.output < 50 ? '#ef4444' : '#10b981';
-                if (overlay === 'SURV') return '#3b82f6';
-                return '#fff';
-            };
-
-            return (
-                <div className="h-full flex flex-col gap-4 animate-slide-in">
-                    <div className="flex gap-2 border-b border-zinc-800 pb-2 shrink-0">
-                        <Button active={tab === 'MAP'} onClick={() => setTab('MAP')}>SECTOR_MAP</Button>
-                        <Button active={tab === 'DATA'} onClick={() => setTab('DATA')}>SECTOR_INTEL</Button>
-                        <Button active={tab === 'LABOR'} onClick={() => setTab('LABOR')} alert>LABOR_WATCH</Button>
-                    </div>
-
-                    <div className="flex-1 flex gap-4 min-h-0">
-                        <Box title={`TACTICAL_VIEW // HOK // ${overlay}_OVERLAY`} className="flex-1 bg-zinc-950">
-                            <div className="absolute top-4 left-4 z-10 flex gap-2">
-                                <Button active={overlay === 'RISK'} onClick={() => setOverlay('RISK')} alert>RISK</Button>
-                                <Button active={overlay === 'OUTPUT'} onClick={() => setOverlay('OUTPUT')}>OUTPUT</Button>
-                                <Button active={overlay === 'SURV'} onClick={() => setOverlay('SURV')}>SURVEILLANCE</Button>
-                            </div>
-
-                            <div className="w-full h-full relative p-8">
-                                <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                                    <defs>
-                                        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#222" strokeWidth="0.5"/>
-                                        </pattern>
-                                    </defs>
-                                    <rect width="100%" height="100%" fill="url(#grid)" />
-                                    <path d="M20,30 L45,50 L70,30 L60,70 L30,60 Z" fill="none" stroke="#333" strokeWidth="0.5" strokeDasharray="2 2" />
-                                    {SECTORS.map((sector) => {
-                                        const isSelected = selectedSector?.id === sector.id;
-                                        const color = getSectorColor(sector);
-                                        return (
-                                            <g key={sector.id} onClick={() => handleSectorClick(sector)} className="cursor-pointer transition-all duration-300 group">
-                                                {isSelected && <circle cx={sector.x} cy={sector.y} r="12" fill="none" stroke="white" strokeWidth="0.5" className="animate-ping opacity-50" />}
-                                                <circle cx={sector.x} cy={sector.y} r={isSelected ? 6 : 4} fill={color} fillOpacity="0.2" stroke={color} strokeWidth={isSelected ? 1 : 0.5} className="transition-all duration-300" />
-                                                <text x={sector.x} y={sector.y + 10} fill={isSelected ? '#fff' : '#666'} fontSize="3" textAnchor="middle" className="font-mono tracking-widest uppercase transition-colors">{sector.name}</text>
-                                                <rect x={sector.x + 5} y={sector.y - 5} width="20" height="8" fill="#111" stroke="#333" strokeWidth="0.2" className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                                <text x={sector.x + 7} y={sector.y} fill="#aaa" fontSize="2" className="font-mono opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">RISK: {sector.risk}%</text>
-                                            </g>
-                                        );
-                                    })}
-                                </svg>
-                            </div>
-                        </Box>
-
-                        <div className="w-80 flex flex-col gap-4">
-                            {tab === 'LABOR' ? (
-                                <Box title="GUILD_442_SURVEILLANCE" className="h-full" alert scroll>
-                                    <div className="space-y-4">
-                                        <div className="p-2 bg-red-950/20 border border-red-900/50 text-red-400 text-xs font-mono">WARNING: ILLEGAL ASSEMBLY DETECTED IN SECTOR 7G</div>
-                                        <div className="space-y-2 text-[10px] font-mono text-zinc-400 border-l border-zinc-800 pl-2">
-                                            <p><span className="text-zinc-600">TARGET_A:</span> "We can't meet the new quotas. It's physically impossible."</p>
-                                            <p><span className="text-zinc-600">TARGET_B:</span> "Kalen says we strike tomorrow. Before the new shift."</p>
-                                        </div>
-                                        <Button alert className="w-full mt-2">FLAG FOR INTERVENTION</Button>
-                                    </div>
-                                </Box>
-                            ) : (
-                                <Box title="SECTOR_INTEL" className="h-full" scroll>
-                                    {selectedSector ? (
-                                        <div className="space-y-4 animate-fade-in">
-                                            <div><h2 className="text-xl font-header text-white mb-1">{selectedSector.name}</h2><div className="text-[9px] font-mono text-zinc-500">{selectedSector.id} // SECURE_GRID_4</div></div>
-                                            <div className="p-2 border border-zinc-800 bg-zinc-900/50"><div className="text-[9px] font-mono text-zinc-500 uppercase mb-1">Status Report</div><p className="text-xs font-tech text-white leading-tight">{selectedSector.detail}</p></div>
-                                            <div className="space-y-3">
-                                                <div><div className="flex justify-between text-[9px] font-mono text-zinc-500 mb-1"><span>INSURGENCY RISK</span><span className={selectedSector.risk > 50 ? 'text-red-500' : 'text-zinc-400'}>{selectedSector.risk}%</span></div><LoadingBar progress={selectedSector.risk} color={selectedSector.risk > 50 ? 'bg-red-600' : 'bg-green-600'} /></div>
-                                            </div>
-                                        </div>
-                                    ) : (<div className="h-full flex items-center justify-center text-center opacity-50"><div className="space-y-2"><div className="text-4xl">⌖</div><div className="text-xs font-mono">SELECT SECTOR<br/>FOR ANALYSIS</div></div></div>)}
-                                </Box>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- ENCRYPTION MODULE ---
-        const Encryption = () => {
-            const [input, setInput] = useState('');
-            const [key, setKey] = useState('');
-            const [output, setOutput] = useState('');
-            const [mode, setMode] = useState('ENCRYPT'); 
-            const [isProcessing, setIsProcessing] = useState(false);
-
-            const handleProcess = () => {
-                if (!key || !input) { setOutput("ERROR: MISSING_INPUT_OR_KEY"); return; }
-                setIsProcessing(true); setOutput('');
-                setTimeout(() => {
-                    let result = "";
-                    const cleanInput = input.toUpperCase();
-                    const cleanKey = key.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    if (!cleanKey) { setOutput("ERROR: INVALID_KEY_FORMAT"); setIsProcessing(false); return; }
-                    for (let i = 0, j = 0; i < cleanInput.length; i++) {
-                        const char = cleanInput.charCodeAt(i);
-                        if (char >= 65 && char <= 90) {
-                            const keyChar = cleanKey.charCodeAt(j % cleanKey.length);
-                            const shift = keyChar - 65;
-                            if (mode === 'ENCRYPT') { result += String.fromCharCode(((char - 65 + shift) % 26) + 65); } 
-                            else { result += String.fromCharCode(((char - 65 - shift + 26) % 26) + 65); }
-                            j++;
-                        } else { result += cleanInput[i]; }
-                    }
-                    setOutput(result); setIsProcessing(false);
-                }, 800);
-            };
-
-            return (
-                <div className="h-full flex items-center justify-center p-8">
-                    <Box title="SIGINT // CRYPTO_SUITE_V2" className="w-full max-w-4xl h-full" glowing>
-                        <div className="flex flex-col h-full gap-6">
-                            <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
-                                <div className="flex gap-4">
-                                    <Button active={mode === 'ENCRYPT'} onClick={() => setMode('ENCRYPT')}>ENCRYPT_MODE</Button>
-                                    <Button active={mode === 'DECRYPT'} onClick={() => setMode('DECRYPT')} alert>DECRYPT_MODE</Button>
-                                </div>
-                                <div className="w-64">
-                                    <div className="text-[9px] font-mono text-zinc-500 uppercase mb-1">Encryption Key (Mandatory)</div>
-                                    <input type="text" value={key} onChange={(e) => setKey(e.target.value.toUpperCase())} className="w-full bg-zinc-900 border border-zinc-700 p-1 text-sm font-mono text-red-500 focus:outline-none focus:border-red-500 tracking-widest text-center" placeholder="ENTER_KEY_SEQUENCE" />
-                                </div>
-                            </div>
-                            <div className="flex-1 grid grid-cols-2 gap-6 min-h-0">
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-[10px] font-mono text-zinc-500 uppercase">Input Data</label>
-                                    <textarea className="flex-1 bg-black border border-zinc-700 p-4 font-mono text-zinc-300 text-sm focus:border-white focus:outline-none resize-none placeholder-zinc-800" placeholder={mode === 'ENCRYPT' ? "ENTER CLEAR TEXT..." : "ENTER ENCRYPTED DATA..."} value={input} onChange={(e) => setInput(e.target.value)} spellCheck="false"></textarea>
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-[10px] font-mono text-zinc-500 uppercase">Result Data</label>
-                                    <div className="flex-1 bg-zinc-900/50 border border-zinc-800 p-4 font-mono text-sm relative overflow-y-auto custom-scroll">
-                                        {isProcessing ? (<div className="absolute inset-0 flex items-center justify-center flex-col gap-4"><div className="w-12 h-12 border-t-2 border-r-2 border-white rounded-full animate-spin"></div><div className="text-[10px] text-zinc-500 animate-pulse tracking-widest">PROCESSING ALGORITHM...</div></div>) : (<div className="text-white break-all whitespace-pre-wrap tracking-wide">{output}</div>)}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="pt-2 flex justify-center">
-                                <button onClick={handleProcess} disabled={isProcessing || !key} className={`px-12 py-3 text-sm font-header tracking-[0.3em] uppercase transition-all ${isProcessing || !key ? 'bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed' : 'bg-white text-black hover:bg-zinc-200 border border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}>{isProcessing ? 'CALCULATING' : 'EXECUTE'}</button>
-                            </div>
-                        </div>
-                    </Box>
-                </div>
-            );
-        };
-
-        // --- DASHBOARD (Main) ---
-        const Dashboard = () => {
-             const resources = [{ label: "Data Coll.", val: 85 }, { label: "Predictive", val: 45 }, { label: "Conditioning", val: 60 }, { label: "Detention", val: 30 }];
-             return (
-                <div className="h-full grid grid-cols-12 grid-rows-6 gap-4 animate-fade-in">
-                    <Box title="SYSTEM_METRICS" className="col-span-8 row-span-2">
-                        <div className="grid grid-cols-4 gap-4 h-full content-center">
-                            <div className="text-center p-2 border border-zinc-800 bg-zinc-950/50"><div className="text-3xl font-header text-white mb-1">89%</div><div className="text-[9px] font-mono text-zinc-500 uppercase">Stability Index</div></div>
-                            <div className="text-center p-2 border border-zinc-800 bg-zinc-950/50"><div className="text-3xl font-header text-red-500 mb-1 animate-pulse">12</div><div className="text-[9px] font-mono text-zinc-500 uppercase">Active Alerts</div></div>
-                            <div className="text-center p-2 border border-zinc-800 bg-zinc-950/50"><div className="text-3xl font-header text-white mb-1">94%</div><div className="text-[9px] font-mono text-zinc-500 uppercase">Resource Output</div></div>
-                            <div className="text-center p-2 border border-zinc-800 bg-zinc-950/50"><div className="text-3xl font-header text-white mb-1">144</div><div className="text-[9px] font-mono text-zinc-500 uppercase">Cycle Count</div></div>
-                        </div>
-                    </Box>
-                    <Box title="PRIORITY_FEED" className="col-span-4 row-span-6" alert scroll>
-                         <div className="space-y-3">
-                            {[{ src: "HOK", msg: "Labor strikes reported in Sector 7G. Guild 442.", time: "00:02" }, { src: "CORUSCANT", msg: "Budget for Phase II approved by COMPNOR.", time: "01:15" }, { src: "KESSEL", msg: "Insurgency activity spike.", time: "02:30" }, { src: "SYS", msg: "Director Marus login detected.", time: "03:45" }, { src: "INTEL", msg: "Grand Moff Kessler viewing Mining Reports.", time: "04:10" }].map((item, i) => (
-                                <div key={i} className="pb-2 border-b border-zinc-800/50"><div className="flex justify-between text-[9px] font-mono text-zinc-500 mb-1"><span>{item.src}</span><span>-{item.time}</span></div><div className="text-xs font-tech text-zinc-300 leading-tight">{item.msg}</div></div>
-                            ))}
-                        </div>
-                    </Box>
-                    <Box title="STABILITY_TREND" className="col-span-5 row-span-4 bg-zinc-900"><div className="w-full h-full relative p-4 flex items-center justify-center text-zinc-500 text-xs font-mono">TREND_ANALYSIS_GRAPH_ACTIVE</div></Box>
-                    <Box title="INITIATIVE_STATUS" className="col-span-3 row-span-4"><div className="h-full flex flex-col justify-around px-2">{resources.map((r, i) => (<div key={i} className="space-y-1"><div className="flex justify-between text-[9px] font-mono text-zinc-400"><span>{r.label}</span><span>{r.val}%</span></div><LoadingBar progress={r.val} color="bg-zinc-600" /></div>))}</div></Box>
-                </div>
-            );
-        };
-
-        // --- PANOPTICON (Detailed) ---
-        const Panopticon = () => {
-             const [expanded, setExpanded] = useState('I');
-             const [tab, setTab] = useState('PHASES');
-             const [sim, setSim] = useState({ name: 'Subject 8821', risk: 12 });
-
-             useEffect(() => {
-                 if(tab !== 'ALGO') return;
-                 const interval = setInterval(() => { setSim({ name: `Subject ${Math.floor(Math.random()*9000)+1000}`, risk: Math.floor(Math.random() * 100) }); }, 2000);
-                 return () => clearInterval(interval);
-             }, [tab]);
-
-             const phases = [
-                { id: "I", title: "FOUNDATION (Data)", detail: "Comprehensive data collection. Integration of medical, financial, and transit records.", tasks: ["Recruit Local Personnel", "Inventory Assets", "Audit Civil Service", "Secure Kessler Authorization"] },
-                { id: "II", title: "PREDICTIVE (Analysis)", detail: "Algorithm v4 deployment. Identifying risk patterns before crimes occur.", tasks: ["Deploy Camera Grid", "Install Bio-Scanners", "Activate Algorithm v4", "Establish Ops Center"] },
-                { id: "III", title: "INTERVENTION (Conditioning)", detail: "Graduated pressure protocols. Making resistance psychologically impossible.", tasks: ["Identify High-Risk Targets", "Begin Graduated Pressure", "Monitor Dissident Response", "Test Intervention Thresholds"] }
-            ];
-
-            return (
-                <div className="h-full flex flex-col gap-6 animate-slide-in">
-                    <Box title="PROJECT_HEADER" className="shrink-0 p-6 flex justify-between items-center">
-                        <div><h1 className="text-4xl font-header text-white mb-2">COMPREHENSIVE SOCIAL EQUILIBRIUM</h1><p className="font-mono text-sm text-zinc-400 max-w-3xl">"Privacy allows conspiracy. Privacy enables resistance. Privacy creates blind spots."</p></div>
-                        <div className="text-right flex flex-col gap-2"><div className="text-xs font-mono text-zinc-500">TARGET: HOK (OVERSECTOR 4)</div><div className="flex gap-2 justify-end"><Button active={tab === 'PHASES'} onClick={() => setTab('PHASES')}>PHASE_VIEW</Button><Button active={tab === 'ALGO'} onClick={() => setTab('ALGO')} alert>PREDICTIVE_MODEL</Button></div></div>
-                    </Box>
-
-                    <div className="flex-1 min-h-0 flex gap-6">
-                        {tab === 'PHASES' && (
-                            <>
-                            <Box title="PHASE_EXECUTOR" className="w-1/3" scroll>
-                                <div className="space-y-4">{phases.map((p) => (<div key={p.id} className="border border-zinc-800 bg-zinc-900/30"><button onClick={() => setExpanded(expanded === p.id ? null : p.id)} className="w-full p-4 flex justify-between items-center hover:bg-zinc-800 transition-colors"><span className="font-header text-lg text-white">PHASE {p.id} // {p.title}</span><span className="text-xs font-mono text-zinc-500">{expanded === p.id ? '[-]' : '[+]'}</span></button>{expanded === p.id && (<div className="p-4 border-t border-zinc-800 bg-zinc-950/50"><p className="text-xs font-mono text-zinc-400 mb-4">{p.detail}</p><div className="space-y-2">{p.tasks.map((t, i) => (<div key={i} className="flex items-center gap-3 text-xs font-mono text-zinc-500"><div className="w-3 h-3 border border-zinc-600"></div>{t}</div>))}</div></div>)}</div>))}</div>
-                            </Box>
-                            <div className="w-1/3 flex flex-col gap-4">
-                                <Box title="PSYCHOGRAPHIC_MODEL" className="h-1/2"><RadarChart /></Box>
-                                <Box title="FALSE_POSITIVE_UTILITY" className="h-1/2 p-4">
-                                    <div className="text-xs font-mono text-zinc-400 mb-2">"False positives are a feature, not a bug. Generalized uncertainty creates caution."</div>
-                                    <div className="mt-4"><div className="flex justify-between text-[10px] text-zinc-500 uppercase"><span>Current Error Rate</span><span className="text-white">12%</span></div><LoadingBar progress={12} color="bg-red-600" /></div>
-                                </Box>
-                            </div>
-                            </>
-                        )}
-                        {tab === 'ALGO' && (
-                             <Box title="ALGORITHMIC_PROCESSING_UNIT" className="w-2/3" glowing>
-                                 <div className="h-full flex flex-col items-center justify-center"><div className="w-64 h-64 border-4 border-zinc-800 rounded-full flex items-center justify-center relative"><div className="absolute inset-0 border-2 border-red-900 rounded-full animate-ping opacity-20"></div><div className="text-center"><div className="text-xs font-mono text-zinc-500">ANALYZING</div><div className="text-2xl font-header text-white">{sim.name}</div><div className="text-4xl font-header mt-2" style={{color: sim.risk > 80 ? 'red' : sim.risk > 50 ? 'orange' : 'green'}}>{sim.risk}%</div><div className="text-[10px] font-mono text-zinc-500 mt-1">RISK QUOTIENT</div></div></div></div>
-                             </Box>
-                        )}
-                        <div className="w-1/3 flex flex-col gap-6">
-                            <Box title="POLITICAL_OBSTACLE" alert fit>
-                                <div className="p-4"><div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 bg-zinc-900 border border-red-900 flex items-center justify-center text-red-700 font-header text-xl">GK</div><div><div className="text-sm font-bold text-white uppercase">Grand Moff Kessler</div><div className="text-[10px] text-zinc-500">Reformist Faction Leader</div></div></div><p className="text-xs text-zinc-400 font-mono leading-tight">Advocates "Trust-Based Governance". Blocking expansion in Oversector 4. Vulnerable to accusations of negligence regarding Mining Guild strikes.</p></div>
-                            </Box>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        const Dossiers = () => {
-             const [selected, setSelected] = useState('krask');
-             const profiles = { 
-                 krask: { name: "VALEN KRASK", rank: "DIRECTOR", unit: "ISB CENTRAL", bio: `Born 50 BBY, Alsakan. Nicknames: "The Physician", "The Surgeon". Approaches security as surgery. Believes the Republic failed because it couldn't make difficult decisions. Unmarried. No children. The Ivory Tower is his only home.`, activity: ["Authorized Phase II Budget", "Meeting with T. Marus (0700)", "Reviewed 'Death Star' failure memo"] }, 
-                 marus: { name: "THANE MARUS", rank: "PROJECT DIRECTOR", unit: "PANOPTICON INITIATIVE", bio: `Deputy Director. Intelligent, pragmatic. Selected for flexibility. Questioned ethical implications but accepted the logic of "Freedom through Order". Family: Wife + 2 Children (Coruscant). Hesitant but loyal.`, activity: ["Accepted Hok Assignment", "Briefing with Tech Division", "Relocation Protocols Initiated"] }, 
-                 kessler: { name: "GARRIK KESSLER", rank: "GRAND MOFF", unit: "OVERSECTOR 4", bio: `Primary political obstacle. Reformist Leader. Advocates "Trust-Based Governance". Believes heavy security creates resistance. Controls Hok.`, activity: ["Submitted complaint re: ISB overreach", "Touring Mining District 7G", "Denied automated surveillance permit"] } 
-            };
-            const data = profiles[selected];
-            return (
-                <div className="h-full flex gap-6 animate-slide-in">
-                    <div className="w-64 flex flex-col gap-2">{Object.entries(profiles).map(([key, p]) => (<button key={key} onClick={() => setSelected(key)} className={`p-4 border text-left transition-all ${selected === key ? 'bg-zinc-900 border-white' : 'bg-black border-zinc-800 hover:border-zinc-600'}`}><div className="text-[9px] font-mono text-zinc-500 uppercase">{p.rank}</div><div className="font-header text-lg text-white">{p.name}</div></button>))}</div>
-                    <Box title={`SUBJECT // ${data.name}`} className="flex-1" scroll><div className="grid grid-cols-2 gap-8"><div><div className="mb-6"><div className="text-[9px] font-mono text-zinc-500 uppercase mb-2">Biographical Summary</div><p className="font-mono text-sm text-zinc-300 leading-relaxed">{data.bio}</p></div></div><div><div className="text-[9px] font-mono text-zinc-500 uppercase mb-2 border-b border-zinc-800 pb-1">Recent Activity Log</div><div className="space-y-2">{data.activity.map((act, i) => (<div key={i} className="flex gap-3 text-xs font-mono text-zinc-400"><span className="text-zinc-600">[-0{i}h]</span><span>{act}</span></div>))}</div></div></div></Box>
-                </div>
-            );
-        };
-
-        const Archives = () => {
-            const logs = [
-                { id: "LOG-0547", date: "5 ABY // 05:47", title: "Morning Reflection", text: "The city transitions from night to day. Awareness gives me satisfaction. Not pleasure. Satisfaction. The systems work. My office is bare. Decoration implies leisure. I have no time for leisure. Order requires vigilance. The Ivory Tower stands as a monument to that vigilance." },
-                { id: "LOG-0700", date: "5 ABY // 07:00", title: "Meeting: Marus / Panopticon", text: "Marus is skeptical but obedient. I showed him the 'Comprehensive Social Equilibrium Initiative'. He called it ambitious. He asked about the privacy implications. I told him privacy is a luxury the Empire cannot afford. We are building systematic inevitability." },
-                { id: "LOG-21BBY", date: "21 BBY // ARCHIVE", title: "Refugee Crisis Management", text: "Refugee populations are security vulnerabilities. Compassion that compromises security is not compassion, it's negligence. I would rather detain a thousand innocent people than let one saboteur through." },
-                { id: "LOG-04ABY", date: "4 ABY // POST-ENDOR", title: "The Crisis of Authority", text: "The Emperor is dead. The mechanism is broken. Without him, we have institutions, yes, but we lack the unifying force. We must create different capabilities. Institutional rather than personal." }
-            ];
-            return (
-                <div className="h-full flex gap-6 animate-slide-in">
-                    <Box title="LOG_INDEX" className="w-1/3" scroll><div className="space-y-2">{logs.map((log) => (<div key={log.id} className="p-3 border border-zinc-800 hover:bg-zinc-900 hover:border-zinc-600 transition-all cursor-pointer group"><div className="flex justify-between items-center mb-1"><span className="text-[10px] font-mono text-red-500">{log.id}</span><span className="text-[9px] text-zinc-600">{log.date.split('//')[0]}</span></div><div className="text-sm font-tech text-zinc-300 group-hover:text-white">{log.title}</div></div>))}</div></Box>
-                    <Box title="CONTENT_VIEWER" className="flex-1" scroll><div className="space-y-8 pr-4">{logs.map((log) => (<div key={log.id} className="pb-8 border-b border-zinc-800 last:border-0"><div className="flex items-center gap-4 mb-4"><div className="px-2 py-1 bg-zinc-900 border border-zinc-700 text-[10px] font-mono text-zinc-400">{log.id}</div><div className="text-xs font-mono text-zinc-500 uppercase">{log.date}</div></div><h3 className="text-lg font-header text-white mb-2 uppercase tracking-wide">{log.title}</h3><p className="font-mono text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{log.text}</p></div>))}</div></Box>
-                </div>
-            );
-        };
-
-        // ==========================================
-        // APP SHELL
-        // ==========================================
-
-        const App = () => {
-            const [view, setView] = useState('dashboard');
-            const [loginStep, setLoginStep] = useState(0);
-
-            const handleLogin = () => {
-                if (loginStep === 0) { setLoginStep(1); setTimeout(() => setLoginStep(2), 1500); setTimeout(() => setLoginStep(3), 3000); }
-            };
-
-            if (loginStep < 3) {
-                return (
-                    <div className="h-screen w-screen bg-black flex items-center justify-center relative overflow-hidden cursor-pointer" onClick={handleLogin}>
-                         <div className="crt-overlay"></div><div className="scanline"></div>
-                         <div className="relative z-20 text-center flex flex-col items-center gap-6">
-                            <div className="border-4 border-white p-2 mb-4"><div className="border border-white p-8"><h1 className="text-8xl font-header text-white tracking-[0.2em] text-glow">ISB</h1></div></div>
-                            <div className="h-12 flex items-center justify-center w-64">
-                                {loginStep === 0 && <div className="animate-pulse text-sm font-mono text-zinc-500 tracking-widest cursor-blink">[ INSERT CYLINDER ]</div>}
-                                {loginStep === 1 && <div className="text-red-500 font-mono text-xs tracking-widest">READING BIOMETRICS...</div>}
-                                {loginStep === 2 && (<div className="w-full"><div className="text-xs font-mono text-zinc-400 mb-2 text-left">DECRYPTING KEY...</div><LoadingBar progress={100} color="bg-white" height="h-2" animated /></div>)}
-                            </div>
-                         </div>
-                         <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-                    </div>
-                );
+            // Image Handling
+            let imgContent = '';
+            let fallbackStyle = 'display:block';
+            if (person.image && person.image.trim() !== "") {
+                imgContent = `<img src="${person.image}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">`;
+                fallbackStyle = 'display:none';
             }
-
-            const NAV = [
-                { id: 'dashboard', label: 'CMD_DECK', icon: 'GRID' },
-                { id: 'panopticon', label: 'PRJ_PANOPTICON', icon: 'EYE' },
-                { id: 'hok', label: 'SEC_VIEW_HOK', icon: 'MAP' },
-                { id: 'psych', label: 'PSYCH_EVAL', icon: 'MED' }, // NEW
-                { id: 'comms', label: 'SECURE_COMMS', icon: 'MSG' }, // NEW
-                { id: 'logistics', label: 'LOGISTICS', icon: 'BOX' },
-                { id: 'network', label: 'NETWORK_GRPH', icon: 'NET' },
-                { id: 'dossiers', label: 'DOSSIERS', icon: 'USER' },
-                { id: 'encryption', label: 'ENCRYPTION', icon: 'LOCK' },
-                { id: 'archives', label: 'ARCHIVES', icon: 'FILE' }
-            ];
-
-            return (
-                <div className="h-screen w-screen bg-black text-white flex flex-col overflow-hidden relative selection:bg-red-900 selection:text-white">
-                    <div className="crt-overlay"></div><div className="scanline"></div><div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-                    <header className="h-16 shrink-0 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between px-6 relative z-30">
-                        <div className="flex items-center gap-4"><div className="w-8 h-8 border border-white flex items-center justify-center font-header text-xl bg-white text-black">ISB</div><div><h1 className="text-xl font-header tracking-widest text-white leading-none">{LORE.director}</h1><div className="text-[9px] font-mono text-zinc-500 tracking-[0.2em]">{LORE.id} // {LORE.clearance}</div></div></div>
-                        <div className="hidden lg:block text-[10px] font-mono text-zinc-600 tracking-[0.3em] opacity-50">"{LORE.motto}"</div>
-                        <div className="flex items-center gap-8"><div className="hidden md:block text-right"><div className="text-[10px] font-mono text-red-500 tracking-widest animate-pulse">SECURE UPLINK ACTIVE</div><div className="text-[9px] font-mono text-zinc-600">{LORE.location}</div></div><div className="text-right"><div className="text-xl font-mono-bold text-white leading-none">0547</div><div className="text-[10px] font-mono text-zinc-500">CYCLE 144</div></div></div>
-                    </header>
-                    <div className="flex-1 flex overflow-hidden relative z-20">
-                        <nav className="w-16 md:w-64 shrink-0 bg-zinc-950 border-r border-zinc-800 flex flex-col">
-                            <div className="flex-1 py-6 flex flex-col gap-1">
-                                {NAV.map((item) => (
-                                    <button key={item.id} onClick={() => setView(item.id)} className={`group relative px-6 py-3 text-left transition-all duration-200 flex items-center gap-4 hover:bg-zinc-900 ${view === item.id ? 'border-r-2 border-white bg-zinc-900' : 'border-r-2 border-transparent'}`}>
-                                        <div className={`text-lg transition-colors ${view === item.id ? 'text-red-500' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
-                                            {item.icon === 'GRID' && '⊞'} {item.icon === 'EYE' && '◉'} {item.icon === 'MAP' && '⌖'} {item.icon === 'USER' && '♟'} {item.icon === 'LOCK' && '⚿'} {item.icon === 'FILE' && '≡'} {item.icon === 'BOX' && '◫'} {item.icon === 'NET' && '☊'} {item.icon === 'MED' && '⚕'} {item.icon === 'MSG' && '✉'}
-                                        </div>
-                                        <span className={`hidden md:block text-xs font-tech tracking-wider uppercase ${view === item.id ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`}>{item.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </nav>
-                        <main className="flex-1 bg-black p-6 md:p-8 overflow-hidden flex flex-col relative">
-                            <div className="flex-1 min-h-0 relative">
-                                {view === 'dashboard' && <Dashboard />}
-                                {view === 'panopticon' && <Panopticon />}
-                                {view === 'hok' && <InteractiveMap />}
-                                {view === 'encryption' && <Encryption />}
-                                {view === 'archives' && <Archives />}
-                                {view === 'dossiers' && <Dossiers />}
-                                {view === 'network' && <NetworkAnalysis />}
-                                {view === 'logistics' && <Logistics />}
-                                {view === 'psych' && <BehavioralMod />}
-                                {view === 'comms' && <SecureComms />}
-                            </div>
-                        </main>
+            
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-visual">
+                        ${imgContent}
+                        <svg class="imperial-crest" style="${fallbackStyle}" viewBox="0 0 512 512">
+                            <path d="${imperialCrestPath}"/>
+                        </svg>
+                        <div class="rank-pips">${pips}</div>
                     </div>
-                    <div className="h-6 bg-zinc-900 border-t border-zinc-800 flex items-center overflow-hidden relative z-30">
-                        <div className="px-4 text-[9px] font-mono text-red-500 bg-zinc-950 border-r border-zinc-800 h-full flex items-center z-10 shrink-0">ALERT FEED</div>
-                        <div className="ticker-content whitespace-nowrap text-[9px] font-mono text-zinc-500 flex gap-12 px-4"><span>/// KESSEL UPRISING CONTAINMENT FAILED ///</span><span>/// NEW REPUBLIC FLEET SIGHTED IN SECTOR 5 ///</span><span>/// DIRECTOR KRASK APPROVES BUDGET INCREASE ///</span><span>/// HOK MINING GUILD DECLARED UNLAWFUL ASSEMBLY ///</span><span>/// GRAND MOFF KESSLER REQUESTS AUDIENCE ///</span><span>/// COMPNOR REVIEW PENDING ///</span></div>
+                    <div class="card-data">
+                        <div class="data-header">
+                        <div class="org-stack">
+                                <div class="card-org">${person.displayOrg}</div>
+                                <div class="faction-tag" style="background:${fData.color}; box-shadow: 0 0 5px ${fData.color};">${person.faction}</div>
+                            </div>
+                            <div style="font-family:'Share Tech Mono'; color:#555; font-size:0.7rem;">ID-${techID}</div>
+                        </div>
+                        <div class="card-name">${person.name}</div>
+                        <div class="card-title">${person.title}</div>
+                        
+                        <div class="stats-bars">
+                            <div class="stat-line">
+                                <span class="stat-label">LOYALTY</span>
+                                <div class="stat-track"><div class="stat-fill" style="width: ${person.loyalty}%"></div></div>
+                            </div>
+                            <div class="stat-line">
+                                <span class="stat-label">INFLUENCE</span>
+                                <div class="stat-track"><div class="stat-fill" style="width: ${person.influence}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="card-body">${summaryDesc}</div>
+                        <div class="tech-specs">
+                            <div class="spec-item"><span style="color:#666">LOC</span><span class="spec-val" style="color:#fff">${person.location}</span></div>
+                        </div>
                     </div>
                 </div>
-            );
-        };
+            `;
+            grid.appendChild(card);
+        });
+    }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+    function filterData(type, btn, value) {
+        // UI State
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Logic
+        let filtered = [];
+        if (type === 'all') {
+            filtered = personnelConfig;
+        } else if (type === 'org') {
+            filtered = personnelConfig.filter(p => p.org === value);
+        } else if (type === 'faction') {
+            filtered = personnelConfig.filter(p => p.faction === value);
+        }
+        
+        renderCards(filtered);
+        addLog(`Filtering database: ${value || 'ALL'}...`);
+    }
+
+    function updateFilterCounts() {
+        document.getElementById('count-all').innerText = personnelConfig.length;
+        document.getElementById('count-mil').innerText = personnelConfig.filter(p => p.org === 'High Command').length;
+        document.getElementById('count-min').innerText = personnelConfig.filter(p => p.org === 'Ministry').length;
+        document.getElementById('count-cou').innerText = personnelConfig.filter(p => p.org === 'Ruling Council').length;
+        document.getElementById('count-com').innerText = personnelConfig.filter(p => p.org === 'COMPNOR').length;
+        document.getElementById('count-sec').innerText = personnelConfig.filter(p => p.org === 'Security').length;
+        document.getElementById('count-pro').innerText = personnelConfig.filter(p => p.org === 'Provincial').length;
+    }
+
+    // --- MODAL ---
+    let typeWriterInterval;
+
+    function openModal(index) {
+        const data = personnelConfig[index];
+        const fData = factionData[data.faction] || { color: "#fff", quote: "Unknown", agenda: "Classified" };
+        
+        document.getElementById('m-name').innerText = data.name;
+        document.getElementById('m-title').innerText = data.title;
+        // removed m-status update
+        document.getElementById('m-loc').innerText = data.location;
+        document.getElementById('m-loyalty').innerText = data.loyalty + "%";
+        // removed m-clearance update
+        
+        const fNameEl = document.getElementById('m-faction-name');
+        fNameEl.innerText = data.faction;
+        fNameEl.style.color = fData.color;
+        fNameEl.style.textShadow = `0 0 10px ${fData.color}`;
+        document.getElementById('m-faction-quote').innerText = `"${fData.quote}"`;
+        document.getElementById('m-faction-agenda').innerText = fData.agenda;
+
+        // Image
+        const imgEl = document.getElementById('m-img');
+        const svgContainer = document.getElementById('m-svg-container');
+        const svgPath = document.getElementById('m-svg-path');
+        
+        if (data.image && data.image.trim() !== "") {
+            imgEl.style.display = 'block';
+            svgContainer.style.display = 'none';
+            imgEl.src = data.image;
+            imgEl.onerror = () => { imgEl.style.display='none'; svgContainer.style.display='flex'; svgPath.setAttribute('d', imperialCrestPath); };
+        } else {
+            imgEl.style.display = 'none';
+            svgContainer.style.display = 'flex';
+            svgPath.setAttribute('d', imperialCrestPath);
+        }
+
+        // Description with Typewriter
+        const descEl = document.getElementById('m-desc');
+        descEl.innerText = "";
+        clearInterval(typeWriterInterval);
+        
+        let i = 0;
+        const typeChar = () => {
+            if (i < data.desc.length) {
+                descEl.innerText += data.desc.charAt(i);
+                descEl.scrollTop = descEl.scrollHeight; 
+                i++;
+            } else {
+                clearInterval(typeWriterInterval);
+            }
+        };
+        typeWriterInterval = setInterval(typeChar, 5); // Fast typing
+
+        document.getElementById('modal-overlay').classList.add('active');
+        addLog(`Accessing file: ${data.name} [SECURE]`);
+    }
+
+    function closeModal() {
+        document.getElementById('modal-overlay').classList.remove('active');
+        clearInterval(typeWriterInterval);
+    }
+
+    // --- SYSTEM FX ---
+    function startLogs() {
+        setInterval(() => addLog(), 2500);
+        for(let i=0; i<4; i++) addLog();
+    }
+
+    const logMsgs = [
+        "Scanning Sector 4...", "Encrypted Transmission: VERIFIED", "Unit 774-A reporting in.",
+        "Holonet relay stabilized.", "Rebel activity detected in Sector 9.", "TIE Squadron deployed.",
+        "Background radiation: NORMAL", "Updating personnel manifest...", "Connection secured",
+        "Auth token refreshed.", "Compiling analytics...", "Hyperdrive diagnostic complete."
+    ];
+
+    function addLog(specificText = null) {
+        const con = document.getElementById('system-log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry new';
+        
+        const text = specificText || logMsgs[Math.floor(Math.random() * logMsgs.length)];
+        const time = new Date().toLocaleTimeString([], {hour12: false});
+        entry.innerText = `[${time}] ${text}`;
+        
+        if(!specificText && Math.random() > 0.85) {
+            entry.className += ' alert';
+            entry.innerText = `[${time}] ALERT: ${text.toUpperCase()}`;
+        }
+
+        con.appendChild(entry);
+        con.scrollTop = con.scrollHeight;
+        setTimeout(() => entry.classList.remove('new'), 500);
+        if(con.children.length > 20) con.removeChild(con.firstChild);
+    }
+
+    function initTicker() {
+        const t = document.getElementById('ticker-content');
+        let html = '';
+        headlines.forEach(h => html += `<div class="ticker-item">${h}</div>`);
+        t.innerHTML = html;
+    }
+
+    function runBootSequence() {
+        const bootScreen = document.getElementById('boot-screen');
+        const lines = [
+            document.getElementById('boot-1'), document.getElementById('boot-2'),
+            document.getElementById('boot-3'), document.getElementById('boot-4')
+        ];
+        let delay = 0;
+        lines.forEach((line) => {
+            line.style.display = 'none';
+            setTimeout(() => { line.style.display = 'block'; }, delay);
+            delay += 800;
+        });
+        setTimeout(() => {
+            bootScreen.style.opacity = '0';
+            setTimeout(() => { bootScreen.style.display = 'none'; }, 600);
+        }, delay + 1000);
+    }
+
+    window.onload = init;
+    document.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
+
+</script>
 </body>
 </html>
