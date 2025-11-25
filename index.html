@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Imperial High Command | Galactic Database</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
@@ -10,9 +10,8 @@
     
     <style>
         :root {
-            /* ANDOR / HIGH COMMAND PALETTE */
-            --iso-white: #f4f4f4;       /* Main Background - Sterile White */
-            --iso-off-white: #e6e6e6;   /* Panel Backgrounds */
+            --iso-white: #e0e0e0;       /* Imperial Light Gray */
+            --iso-off-white: #dcdcdc;   /* Slightly darker panel background */
             --iso-grey: #b0b0b0;        /* Secondary Text */
             --iso-dark: #121212;        /* Primary Text / Borders - Stark Black */
             --iso-alert: #cc0000;       /* Flat Red - No Glow */
@@ -32,22 +31,30 @@
             --faction-traditionalist: #1976d2;
             --faction-ultranationalist: #f57c00;
             --faction-reformer: #388e3c;
+            --faction-progressive: #607d8b;
         }
 
         /* CRITICAL STATE OVERRIDE */
         body.alert-state {
-            --bg-main: #f0f0f0;
+            --bg-main: #d0d0d0;
             --iso-dark: #3a0000; /* Dark Red text */
             --border-heavy: 2px solid #cc0000;
+            animation: redPulse 4s infinite;
         }
+        @keyframes redPulse {
+            0% { background-color: #d0d0d0; }
+            50% { background-color: #d6bgbg; } /* Subtle red tint */
+            100% { background-color: #d0d0d0; }
+        }
+
         body.alert-state .card { border-color: #cc0000; }
         body.alert-state header { border-bottom-color: #cc0000; }
         body.alert-state aside { border-right-color: #cc0000; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; -webkit-tap-highlight-color: transparent; }
 
         /* Scrollbar Styling - Industrial */
-        ::-webkit-scrollbar { width: 8px; background: var(--iso-off-white); border-left: 1px solid var(--iso-dark); }
+        ::-webkit-scrollbar { width: 6px; background: var(--iso-off-white); border-left: 1px solid var(--iso-dark); }
         ::-webkit-scrollbar-thumb { background: var(--iso-dark); border: 1px solid var(--iso-off-white); }
         ::-webkit-scrollbar-thumb:hover { background: var(--iso-alert); }
 
@@ -59,6 +66,21 @@
             overflow: hidden;
             display: flex;
             transition: background-color 0.5s ease;
+        }
+
+        /* CRT SCANLINE EFFECT */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 999;
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
         }
 
         /* --- LOGIN PAGE (High Command / Andor Style) --- */
@@ -73,16 +95,16 @@
             color: var(--iso-dark);
             font-family: 'Share Tech Mono', monospace;
             transition: opacity 1s ease-in-out;
+            padding: 20px;
         }
 
-        /* Architectural Grid Background */
         .login-grid-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-image: 
                 linear-gradient(#ccc 1px, transparent 1px),
                 linear-gradient(90deg, #ccc 1px, transparent 1px);
             background-size: 40px 40px;
-            opacity: 0.5;
+            opacity: 0.3; /* Reduced opacity for cleaner look */
             pointer-events: none;
         }
 
@@ -90,19 +112,20 @@
             position: relative;
             z-index: 2;
             text-align: center;
-            width: 450px;
-            background: rgba(255,255,255,0.95);
+            width: 100%;
+            max-width: 450px;
+            background: rgba(255,255,255,0.9);
             border: var(--border-heavy);
-            padding: 3rem;
+            padding: 2rem;
             box-shadow: 15px 15px 0px rgba(0,0,0,0.1);
         }
 
         .login-header {
-            font-family: 'Antonio', sans-serif; /* Tall, imposing font */
+            font-family: 'Antonio', sans-serif;
             font-weight: 700;
-            font-size: 2rem;
+            font-size: 1.8rem;
             letter-spacing: 2px;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             text-transform: uppercase;
             border-bottom: 4px solid var(--iso-dark);
             padding-bottom: 10px;
@@ -110,31 +133,24 @@
             color: var(--iso-dark);
         }
 
-        /* The Cylinder Port */
         .cylinder-port {
-            width: 140px;
-            height: 140px;
+            width: 120px; height: 120px;
             border: 6px solid var(--iso-dark);
             border-radius: 50%;
             margin: 0 auto 2rem auto;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             cursor: pointer;
             background: #fff;
+            touch-action: manipulation;
         }
 
-        .cylinder-port:hover {
-            transform: scale(1.02);
-            border-color: var(--iso-alert);
-        }
+        .cylinder-port:active { transform: scale(0.95); }
+        .cylinder-port:hover { border-color: var(--iso-alert); }
         
-        /* Inner mechanism visuals */
         .cylinder-inner {
-            width: 85%;
-            height: 85%;
+            width: 85%; height: 85%;
             border: 2px dashed #333;
             border-radius: 50%;
             transition: all 0.5s;
@@ -145,7 +161,6 @@
             width: 10px; height: 10px; background: #333; border-radius: 50%;
         }
 
-        /* Spinning Animation Classes */
         .spinning { animation: spinRandom 0.5s infinite linear; border-style: solid; border-color: var(--iso-amber); }
         .access-granted-ring {
             border-style: solid; background: var(--iso-dark); border-color: var(--iso-dark);
@@ -184,17 +199,18 @@
         /* MANUAL KEYPAD */
         .manual-override-btn {
             background: transparent; border: none; color: #888; text-decoration: underline;
-            font-size: 0.7rem; margin-top: 10px; cursor: pointer; font-family: 'Share Tech Mono';
+            font-size: 0.8rem; margin-top: 20px; cursor: pointer; font-family: 'Share Tech Mono'; padding: 10px;
         }
         .keypad-container {
             display: none; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 20px;
         }
         .key-btn {
-            background: #eee; border: 1px solid #999; padding: 10px; font-family: 'Orbitron';
-            cursor: pointer; transition: 0.2s; font-weight: bold; color: #333;
+            background: #eee; border: 1px solid #999; padding: 15px; font-family: 'Orbitron';
+            cursor: pointer; transition: 0.2s; font-weight: bold; color: #333; font-size: 1.2rem;
+            touch-action: manipulation;
         }
-        .key-btn:hover { background: #333; color: #fff; }
-        .key-display { grid-column: 1/-1; background: #222; color: #0f0; padding: 8px; text-align: right; margin-bottom: 5px; font-family: monospace; letter-spacing: 3px; min-height: 35px;}
+        .key-btn:active { background: #333; color: #fff; }
+        .key-display { grid-column: 1/-1; background: #222; color: #0f0; padding: 12px; text-align: right; margin-bottom: 5px; font-family: monospace; letter-spacing: 3px; min-height: 45px; font-size: 1.2rem;}
 
         /* --- BACKGROUND FX --- */
         .bg-grid {
@@ -212,25 +228,34 @@
             z-index: 2; pointer-events: none;
         }
 
+        /* WATERMARK */
+        .bg-watermark {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+            font-family: 'Antonio', sans-serif; font-size: 8rem; color: rgba(0,0,0,0.03);
+            pointer-events: none; z-index: 1; white-space: nowrap; user-select: none;
+        }
+
         /* --- BOOT SEQUENCE --- */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--iso-white); z-index: 9999;
             display: none; flex-direction: column; justify-content: center; align-items: center;
             font-family: 'Share Tech Mono', monospace; color: var(--iso-dark);
+            padding: 20px;
         }
         .boot-text { 
-            font-size: 1.2rem; margin: 5px; text-align: left; width: 500px; 
+            font-size: 1.1rem; margin: 5px; text-align: left; width: 100%; max-width: 500px;
             border-left: 5px solid var(--iso-dark); padding-left: 10px;
         }
 
         /* --- LAYOUT --- */
         aside {
             width: 320px; background: #fff; border-right: 2px solid var(--iso-dark);
-            display: flex; flex-direction: column; padding: 0; z-index: 10;
+            display: flex; flex-direction: column; padding: 0; z-index: 100;
             font-family: 'Share Tech Mono', monospace; 
             box-shadow: 5px 0 15px rgba(0,0,0,0.05);
-            transition: border-color 0.5s;
+            transition: transform 0.3s ease-in-out;
+            height: 100vh; flex-shrink: 0;
         }
         
         .sidebar-section { padding: 1.5rem; border-bottom: 2px solid var(--iso-dark); }
@@ -241,15 +266,16 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         
-        .filter-group { display: flex; flex-direction: column; gap: -1px; } /* Overlapping borders */
+        .filter-group { display: flex; flex-direction: column; gap: -1px; }
         .filter-btn {
             background: #fff; border: 1px solid #ccc; color: #555;
-            padding: 10px 12px; font-family: 'Share Tech Mono'; text-transform: uppercase;
+            padding: 12px 12px; font-family: 'Share Tech Mono'; text-transform: uppercase;
             text-align: left; transition: all 0.1s; font-size: 0.85rem;
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: -1px;
+            margin-bottom: -1px; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
-        .filter-btn:hover { background: #eee; color: #000; z-index: 2; border-color: #999; }
+        .filter-btn:active { background: #eee; }
         .filter-btn.active { 
             background: var(--iso-dark); border-color: var(--iso-dark); 
             color: #fff; z-index: 3;
@@ -260,8 +286,9 @@
             flex-grow: 1; overflow-y: auto; padding: 1rem; 
             background: #fcfcfc; border-top: 4px solid var(--iso-dark);
             font-family: 'Share Tech Mono';
+            font-size: 0.75rem;
         }
-        .log-entry { margin-bottom: 4px; padding-left: 8px; font-size: 0.75rem; color: #444; border-left: 2px solid #ddd; }
+        .log-entry { margin-bottom: 4px; padding-left: 8px; color: #444; border-left: 2px solid #ddd; }
         .log-entry.new { color: var(--iso-dark); border-left-color: var(--iso-dark); font-weight: bold; }
         .log-entry.alert { color: var(--iso-alert); border-left-color: var(--iso-alert); font-weight: bold; background: rgba(204, 0, 0, 0.05); }
 
@@ -269,20 +296,21 @@
             padding: 10px; background: #eee; border-top: 1px solid #ccc;
         }
         .comms-input {
-            width: 100%; background: #fff; border: 1px solid #999; padding: 5px;
-            font-family: 'Share Tech Mono'; font-size: 0.8rem; outline: none;
-            color: var(--iso-dark);
+            width: 100%; background: #fff; border: 1px solid #999; padding: 10px;
+            font-family: 'Share Tech Mono'; font-size: 0.9rem; outline: none;
+            color: var(--iso-dark); border-radius: 0;
         }
         .comms-input::placeholder { color: #888; }
         .search-input {
-            width: 100%; background: #fff; border: 1px solid #999; padding: 8px; margin-bottom: 1rem;
-            font-family: 'Share Tech Mono'; font-size: 0.8rem; outline: none; color: var(--iso-dark);
+            width: 100%; background: #fff; border: 1px solid #999; padding: 10px; margin-bottom: 1rem;
+            font-family: 'Share Tech Mono'; font-size: 0.9rem; outline: none; color: var(--iso-dark); border-radius: 0;
         }
 
         /* --- MAIN CONTENT --- */
         main { 
             flex-grow: 1; overflow-y: auto; position: relative; z-index: 5; 
             padding: 2rem 3rem; display: flex; flex-direction: column; 
+            -webkit-overflow-scrolling: touch;
         }
 
         header {
@@ -291,6 +319,11 @@
             position: relative; 
             flex-shrink: 0;
             transition: border-color 0.5s;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .mobile-menu-btn {
+            display: none; font-size: 1.5rem; color: var(--iso-dark); cursor: pointer; padding: 10px;
         }
 
         .header-title h1 {
@@ -308,12 +341,17 @@
         .stat-val { color: var(--iso-dark); font-weight: bold; background: #ddd; padding: 0 4px; }
         .stat-hover:hover { background: var(--iso-dark); color: #fff; cursor: help; }
 
+        /* Sort Controls */
+        .sort-controls { margin-bottom: 1rem; display: flex; justify-content: flex-end; gap: 10px; align-items: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; }
+        .sort-select { padding: 5px; border: 1px solid var(--iso-dark); background: white; font-family: 'Share Tech Mono'; }
+
         /* DEFCON WIDGET */
         .threat-level-widget {
-            display: flex; flex-direction: column; align-items: flex-end; cursor: pointer;
+            display: flex; flex-direction: column; align-items: flex-end; cursor: pointer; margin-bottom: 5px;
+            -webkit-tap-highlight-color: transparent;
         }
-        .threat-bars { display: flex; gap: 2px; margin-bottom: 4px; }
-        .t-bar { width: 12px; height: 20px; background: #ddd; border: 1px solid #999; transition: 0.2s; }
+        .threat-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+        .t-bar { width: 15px; height: 25px; background: #ddd; border: 1px solid #999; transition: 0.2s; }
         .threat-label { font-size: 0.7rem; font-weight: bold; color: #666; letter-spacing: 1px; }
         
         .threat-level-widget[data-level="1"] .t-bar:nth-child(1) { background: #4d6e7a; }
@@ -327,7 +365,7 @@
         /* --- GRID & CARDS (DOSSIER STYLE) --- */
         .grid {
             display: grid; gap: 1.5rem; padding-bottom: 6rem;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
         @keyframes cardEnter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -339,8 +377,10 @@
             cursor: pointer; overflow: hidden; height: 100%;
             animation: cardEnter 0.4s ease backwards;
             box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
+            -webkit-tap-highlight-color: transparent;
         }
 
+        .card:active { transform: translateY(-1px); box-shadow: 2px 2px 0px var(--iso-dark); }
         .card:hover {
             transform: translateY(-3px);
             box-shadow: 8px 8px 0px var(--iso-dark);
@@ -353,10 +393,24 @@
             border-top: 20px solid var(--iso-dark); border-left: 20px solid transparent;
         }
 
+        /* Quick Actions Overlay on Card */
+        .card-actions {
+            position: absolute; top: 0; right: 0; width: 40px; height: 100%;
+            display: flex; flex-direction: column; gap: 5px; padding-top: 25px;
+            align-items: center; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+        }
+        .card:hover .card-actions { opacity: 1; pointer-events: auto; }
+        .action-btn { 
+            width: 24px; height: 24px; background: var(--iso-dark); color: #fff; 
+            display: flex; align-items: center; justify-content: center; font-size: 10px;
+            border-radius: 50%; cursor: pointer; transition: 0.2s;
+        }
+        .action-btn:hover { transform: scale(1.2); background: var(--iso-alert); }
+
         .card-inner { display: flex; padding: 1.2rem; height: 100%; position: relative; gap: 1rem; }
 
         .card-visual {
-            width: 100px; height: 120px; flex-shrink: 0;
+            width: 90px; height: 110px; flex-shrink: 0;
             background: #eee; border: 1px solid #999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             position: relative; overflow: hidden;
@@ -367,20 +421,20 @@
         .imperial-crest { width: 50px; height: 50px; fill: #ccc; z-index: 1; transition: all 0.5s ease; }
         .card:hover .imperial-crest { fill: var(--iso-dark); }
         
-        .rank-pips { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; height: 10px; }
+        .rank-pips { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; height: 8px; }
         .pip { flex-grow: 1; border-right: 1px solid #fff; }
         .pip.red { background: #cc0000; }
         .pip.blue { background: #003366; }
         .pip.gold { background: #cc9900; }
 
-        .card-data { font-family: 'Exo 2', sans-serif; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-data { font-family: 'Exo 2', sans-serif; flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         
         .data-header { margin-bottom: 0.5rem; border-bottom: 1px solid #ccc; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: flex-start; }
         
         .org-stack { display: flex; flex-direction: column; gap: 4px; }
         .card-org { 
             font-family: 'Share Tech Mono', monospace; color: var(--iso-dark); 
-            font-size: 0.7rem; text-transform: uppercase; font-weight: bold;
+            font-size: 0.6rem; text-transform: uppercase; font-weight: bold;
             background: #ddd; padding: 2px 5px; width: fit-content;
         }
         .faction-tag {
@@ -388,12 +442,12 @@
             padding: 2px 6px; color: #fff; display: inline-block; width: fit-content;
         }
 
-        .card-name { font-family: 'Antonio', sans-serif; font-size: 1.4rem; font-weight: 700; color: #000; margin-bottom: 2px; line-height: 1; text-transform: uppercase; }
-        .card-title { font-size: 0.8rem; color: #666; font-weight: 500; margin-bottom: 8px; display: block; font-style: italic; }
+        .card-name { font-family: 'Antonio', sans-serif; font-size: 1.3rem; font-weight: 700; color: #000; margin-bottom: 2px; line-height: 1; text-transform: uppercase; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .card-title { font-size: 0.75rem; color: #666; font-weight: 500; margin-bottom: 8px; display: block; font-style: italic; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         
         .stats-bars { margin-bottom: 0.8rem; margin-top: auto; }
         .stat-line { display: flex; align-items: center; margin-bottom: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: #333; }
-        .stat-label { width: 60px; text-align: right; margin-right: 8px; }
+        .stat-label { width: 55px; text-align: right; margin-right: 8px; }
         .stat-track { flex-grow: 1; height: 6px; background: #e0e0e0; border: 1px solid #999; }
         .stat-fill { height: 100%; background: var(--iso-dark); }
         
@@ -409,33 +463,43 @@
         #modal-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: grayscale(100%); z-index: 1000; 
-            display: none; align-items: center; justify-content: center; 
+            display: none; align-items: center; justify-content: center; padding: 20px;
         }
         #modal-overlay.active { display: flex; animation: fadeIn 0.3s forwards; }
         
         .modal-container { 
-            width: 90%; max-width: 1100px; height: 80vh; 
+            width: 100%; max-width: 1100px; height: 90vh; 
             background: #fff; border: 4px solid var(--iso-dark); 
             display: flex; box-shadow: 0 0 50px rgba(0,0,0,0.1); 
             position: relative; animation: modalOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            cursor: move; /* Indicates Draggable */
+            flex-direction: row;
         }
         
-        .modal-left { width: 40%; background: #f0f0f0; border-right: 2px solid var(--iso-dark); display: flex; align-items: center; justify-content: center; position: relative; }
-        /* Grid overlay on image */
+        .modal-left { width: 40%; background: #f0f0f0; border-right: 2px solid var(--iso-dark); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;}
+        /* REMOVED GRID OVERLAY HERE */
+        /*
         .modal-left::before {
             content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
             background-image: linear-gradient(#ccc 1px, transparent 1px), linear-gradient(90deg, #ccc 1px, transparent 1px);
             background-size: 20px 20px; pointer-events: none; opacity: 0.5; z-index: 1;
         }
+        */
+
+        /* Holo Scan Effect */
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+            background: rgba(0, 255, 0, 0.5);
+            box-shadow: 0 0 10px rgba(0,255,0,0.8);
+            z-index: 2; animation: scan 3s infinite linear;
+            display: none;
+        }
+        @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
         .modal-img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); mix-blend-mode: multiply; z-index: 0; }
         
         .modal-right { width: 60%; padding: 3rem; display: flex; flex-direction: column; position: relative; overflow-y: auto; cursor: default; }
-        .modal-close { position: absolute; top: 10px; right: 20px; font-family: 'Arial'; font-weight: bold; color: var(--iso-dark); font-size: 3rem; cursor: pointer; line-height: 0.8; }
+        .modal-close { position: absolute; top: 10px; right: 20px; font-family: 'Arial'; font-weight: bold; color: var(--iso-dark); font-size: 3rem; cursor: pointer; line-height: 0.8; z-index: 10; }
         .modal-close:hover { color: var(--iso-alert); }
-        .modal-print { position: absolute; top: 18px; right: 70px; font-size: 1.2rem; cursor: pointer; color: #888; transition: 0.2s; }
-        .modal-print:hover { color: var(--iso-dark); }
         
         .dossier-label { 
             color: #fff; background: var(--iso-dark); padding: 2px 6px; 
@@ -469,39 +533,81 @@
         .l-bar { width: 10px; background: #ccc; transition: height 0.5s; }
         .l-bar:last-child { background: var(--iso-dark); }
 
-        /* Print Styles */
-        @media print {
-            body > *:not(#modal-overlay) { display: none !important; }
-            #modal-overlay { position: absolute; background: white; width: 100%; height: 100%; z-index: 99999; display: block !important; }
-            .modal-container { box-shadow: none; border: 1px solid #000; width: 100%; height: auto; }
-            .modal-close, .modal-print, .modal-actions { display: none; }
-            .modal-right { padding: 1rem; }
-            .modal-name { font-size: 2rem; }
-        }
-
         /* --- TICKER --- */
-        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 40px; background: var(--iso-white); border-top: 4px solid var(--iso-dark); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--iso-dark); font-size: 1rem; text-transform: uppercase; }
-        .ticker-title { background: var(--iso-dark); color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; }
+        .ticker-wrap { position: fixed; bottom: 0; left: 0; width: 100%; height: 36px; background: var(--iso-white); border-top: 4px solid var(--iso-dark); overflow: hidden; z-index: 50; display: flex; align-items: center; font-family: 'Share Tech Mono', monospace; color: var(--iso-dark); font-size: 0.9rem; text-transform: uppercase; }
+        .ticker-title { background: var(--iso-dark); color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: bold; z-index: 2; font-size: 0.8rem; }
         .ticker { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 40s linear infinite; }
         .ticker-item { display: inline-block; padding: 0 3rem; }
-        .ticker-item::before { content: '/// '; margin-right: 5px; font-weight: bold; }
+        .ticker-item::before { content: '/// '; margin-right: 5px; font-weight: bold; color: var(--iso-alert); }
+
+        /* TOAST NOTIFICATION */
+        #toast-container {
+            position: fixed; bottom: 50px; right: 20px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: #000; color: #fff; padding: 15px; 
+            border-left: 5px solid var(--iso-amber);
+            font-family: 'Share Tech Mono'; font-size: 0.8rem;
+            width: 300px; box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s forwards;
+            cursor: pointer;
+        }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; } }
+
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media(max-width: 900px) {
+            .mobile-menu-btn { display: block; }
+            
+            aside {
+                position: fixed; top: 0; left: 0; bottom: 0;
+                transform: translateX(-100%);
+                width: 85%; max-width: 320px;
+                box-shadow: 10px 0 50px rgba(0,0,0,0.5);
+                border-right: 4px solid var(--iso-dark);
+            }
+            aside.open { transform: translateX(0); }
+            
+            /* Overlay when sidebar is open */
+            .sidebar-overlay {
+                position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); 
+                z-index: 90; display:none; backdrop-filter: blur(2px);
+            }
+            .sidebar-overlay.active { display: block; }
+
+            main { padding: 1rem; width: 100%; }
+            
+            header { flex-direction: column; align-items: flex-start; gap: 15px; border-bottom-width: 2px; }
+            .header-title h1 { font-size: 2.5rem; }
+            .header-stats { width: 100%; border: none; padding: 0; justify-content: space-between; text-align: left; }
+            
+            .modal-container { 
+                flex-direction: column; height: 100%; width: 100%; max-width: none; border:none; 
+            }
+            .modal-left { width: 100%; height: 200px; border-right: none; border-bottom: 2px solid #000; flex-shrink: 0;}
+            .modal-right { width: 100%; padding: 1.5rem; height: auto; flex-grow: 1; }
+            .modal-name { font-size: 2rem; }
+            
+            .grid { grid-template-columns: 1fr; }
+            
+            .card:hover { transform: none; box-shadow: 4px 4px 0px rgba(0,0,0,0.05); }
+            .card-actions { display: flex; opacity: 1; width: 30px; background: rgba(255,255,255,0.8); padding-top: 10px;}
+
+            /* Ticker adjustment */
+            .ticker-wrap { font-size: 0.75rem; }
+            .ticker-item { padding: 0 1rem; }
+        }
 
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes modalOpen { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
 
-        @media(max-width: 900px) {
-            .modal-container { flex-direction: column; height: 95vh; overflow-y: auto; }
-            .modal-left { width: 100%; height: 200px; border-right: none; border-bottom: 2px solid #000; }
-            .modal-right { width: 100%; padding: 1.5rem; }
-            .grid { grid-template-columns: 1fr; }
-            aside { display: none; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- ANDOR STYLE LOGIN PAGE -->
+    <!-- LOGIN PAGE -->
     <div id="login-overlay">
         <div class="login-grid-bg"></div>
         
@@ -513,7 +619,8 @@
                 <div class="cylinder-port" id="cylinder-port" onclick="insertCylinder()">
                     <div class="cylinder-inner" id="cylinder-inner"></div>
                 </div>
-                <div class="login-instruction">INSERT CODE CYLINDER TO PROCEED</div>
+                <div class="login-instruction">INSERT CODE CYLINDER</div>
+                <div style="font-size: 0.65rem; color: #999; margin-top:5px;">(TAP PORT TO AUTHENTICATE)</div>
             </div>
 
             <!-- Manual Override Interface (Hidden by default) -->
@@ -529,14 +636,14 @@
                     <button class="key-btn" onclick="pressKey('7')">7</button>
                     <button class="key-btn" onclick="pressKey('8')">8</button>
                     <button class="key-btn" onclick="pressKey('9')">9</button>
-                    <button class="key-btn" onclick="pressKey('CLR')">CLR</button>
+                    <button class="key-btn" onclick="pressKey('CLR')" style="color:#cc0000">X</button>
                     <button class="key-btn" onclick="pressKey('0')">0</button>
-                    <button class="key-btn" onclick="pressKey('ENT')">ENT</button>
+                    <button class="key-btn" onclick="pressKey('ENT')" style="color:green">></button>
                 </div>
                 <div class="login-instruction">ENTER SECURITY CLEARANCE</div>
             </div>
 
-            <button class="manual-override-btn" onclick="toggleManualMode()">[ MANUAL OVERRIDE ]</button>
+            <button class="manual-override-btn" onclick="toggleManualMode()">[ SWITCH INPUT METHOD ]</button>
 
             <div class="login-status" id="login-status">TERMINAL LOCKED</div>
             
@@ -549,22 +656,26 @@
     <!-- MAIN APP CONTENT (Hidden behind login) -->
     <div class="bg-grid"></div>
     <div class="vignette"></div>
+    <div class="bg-watermark">CLASSIFIED // EYES ONLY</div>
 
-    <!-- BOOT SEQUENCE (Runs after login) -->
+    <!-- BOOT SEQUENCE -->
     <div id="boot-screen">
-        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL 6.2...</div>
+        <div class="boot-text" id="boot-1">INITIALIZING IMPERIAL KERNEL 6.3...</div>
         <div class="boot-text" id="boot-2">VERIFYING BIOMETRIC SIGNATURE...</div>
         <div class="boot-text" id="boot-3">DECRYPTING PERSONNEL DATABASE...</div>
-        <div class="boot-text" id="boot-4" style="font-weight:bold; background: #000; color: #fff; padding: 2px 5px;">ACCESS GRANTED. ERA: 5 ABY.</div>
+        <div class="boot-text" id="boot-4" style="font-weight:bold; background: #000; color: #fff; padding: 2px 5px; display:inline-block; width:auto;">ACCESS GRANTED.</div>
     </div>
+
+    <!-- SIDEBAR OVERLAY FOR MOBILE -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- MODAL OVERLAY -->
     <div id="modal-overlay" onclick="closeModal(event)">
         <div id="modal-container" class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-close" onclick="closeModal()">×</div>
-            <div class="modal-print" onclick="printDossier()"><i class="fas fa-print"></i></div>
 
             <div class="modal-left">
+                <div class="scan-line" id="scan-line"></div>
                 <img id="m-img" class="modal-img" src="" alt="Personnel Image">
                 <div id="m-svg-container" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#eee;">
                     <svg class="imperial-crest" style="width:150px; height:150px; fill:#333;" viewBox="0 0 512 512">
@@ -607,7 +718,7 @@
     </div>
 
     <!-- SIDEBAR WITH FILTERS AND LOGS -->
-    <aside>
+    <aside id="main-sidebar">
         <div class="sidebar-section" style="background: #e9e9e9;">
             <div class="sidebar-header">
                 <span>FILTER DATABASE</span>
@@ -674,9 +785,13 @@
 
     <main>
         <header>
-            <div class="header-title">
-                <div class="subtitle">Galactic Empire // Personnel Database</div>
-                <h1>High Command</h1>
+            <div class="header-left">
+                <i class="fas fa-bars mobile-menu-btn" onclick="toggleSidebar()"></i>
+                <div class="header-title">
+                    <div class="subtitle">Galactic Empire // Personnel Database</div>
+                    <h1>High Command</h1>
+                    <div style="font-family:'Share Tech Mono'; font-size:0.7rem; color:#666; letter-spacing:1px; margin-top:2px;">SECTOR CONTROL ID: 994-ALPHA</div>
+                </div>
             </div>
             
             <div class="header-stats">
@@ -689,23 +804,34 @@
                     <div class="threat-label" id="threat-text">SEC: NORMAL</div>
                 </div>
                 
-                <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; min-height: 50px;">
                     <div>ERA: 5 ABY</div>
-                    <div>CYCLE: <span id="stardate" class="stat-hover" onmouseover="showRealTime(true)" onmouseout="showRealTime(false)"></span></div>
+                    <div>CYCLE: <span id="stardate" class="stat-hover" style="cursor:pointer;" onclick="toggleRealTime()"></span></div>
                     <div>KEY: <span class="stat-val">TOP SECRET</span></div>
                 </div>
             </div>
         </header>
 
+        <div class="sort-controls">
+            <span>SORT BY:</span>
+            <select class="sort-select" onchange="sortGrid(this.value)">
+                <option value="default">RANK (DEFAULT)</option>
+                <option value="loyalty">LOYALTY (HIGH-LOW)</option>
+                <option value="influence">INFLUENCE (HIGH-LOW)</option>
+                <option value="name">NAME (A-Z)</option>
+            </select>
+        </div>
+
         <div class="grid" id="cardGrid"></div>
     </main>
 
     <div class="ticker-wrap">
-        <div class="ticker-title">HOLONET NEWS</div>
-        <div class="ticker" id="ticker-content">
-            <!-- Injected via JS -->
-        </div>
+        <div class="ticker-title">HOLONET</div>
+        <div class="ticker" id="ticker-content"></div>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
 <script>
     // --- DATABASE CONFIGURATION ---
@@ -747,7 +873,7 @@
             displayOrg: "Council of Ministers",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=MS&backgroundColor=300",
-            desc: "A scared man.",
+            desc: "A cautious bureaucrat navigating a minefield of paranoia. Charged with internal defense but often sidelined by the ISB. Attempts to maintain a facade of civil order while the galaxy burns.",
             status: "alert", location: "Imperial Ministerium", loyalty: 65, influence: 20
         },
         {
@@ -757,7 +883,7 @@
             displayOrg: "Council of Ministers",
             faction: "Hardliner",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=WA&backgroundColor=400",
-            desc: "sesbian lex elf",
+            desc: "A brilliant logistical mind and ruthless strategist. Advocates for total war economy and conscription. Often clashes with High Command over resource allocation.",
             status: "active", location: "Anaxes", loyalty: 80, influence: 60
         },
         {
@@ -767,7 +893,7 @@
             displayOrg: "Council of Ministers",
             faction: "Hardliner",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=MJ&backgroundColor=121",
-            desc: "Guardian of Imperial law and state legality. Supervises legal institutions and high courts while ensuring justice operates as an instrument of Imperial authority. Interprets and enforces the Empire’s supreme statutes. As a Hardliner, he views the courts not as independent arbiters but as extensions of the Emperor's will, legitimizing the military junta's seizure of power.",
+            desc: "Guardian of Imperial law and state legality. Supervises legal institutions and high courts while ensuring justice operates as an instrument of Imperial authority. Interprets and enforces the Empire’s supreme statutes.",
             status: "idle", location: "Supreme Court", loyalty: 90, influence: 60
         },
         {
@@ -777,7 +903,7 @@
             displayOrg: "IMPERIAL RULING COUNCIL",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=LP&backgroundColor=010",
-            desc: "Senior master of the Ruling Council. Controls Council functions parallel to formal state structures. Operates as a power broker within the Empire’s highest political strata. Has largely replaced the Imperial Senate in authority. He maneuvers to maintain the status quo and protects the interests of the aristocracy, viewing the military's current dominance as a temporary necessity.",
+            desc: "Senior master of the Ruling Council. Controls Council functions parallel to formal state structures. Operates as a power broker within the Empire’s highest political strata. Has largely replaced the Imperial Senate in authority.",
             status: "active", location: "Imperial Palace", loyalty: 85, influence: 85
         },
         {
@@ -787,7 +913,7 @@
             displayOrg: "COMPNOR",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=CV&backgroundColor=224",
-            desc: "Wields sweeping authority to enforce the Emperor’s will via social, political, and ideological channels. Oversees COMPNOR’s vast apparatus and its many subsidiaries. Functions as the Empire’s principal engine of indoctrination and societal control. Vorne believes the Empire is best served by a stable, obedient citizenry achieved through cultural conditioning rather than brute force.",
+            desc: "Wields sweeping authority to enforce the Emperor’s will via social, political, and ideological channels. Oversees COMPNOR’s vast apparatus and its many subsidiaries. Functions as the Empire’s principal engine of indoctrination.",
             status: "alert", location: "COMPNOR HQ", loyalty: 80, influence: 85
         },
         {
@@ -797,7 +923,7 @@
             displayOrg: "New Order Party",
             faction: "Ultranationalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=GT&backgroundColor=840",
-            desc: "High priest of New Order ideology and enforcer of doctrinal purity. Shapes the ideological center of Imperial politics. Ensures all party organs remain loyal to the spirit and letter of the New Order. An Ultranationalist ideologue, Teegeeack believes the Empire is the end of history and that doubt is treason. He runs the Party as a parallel state security apparatus.",
+            desc: "High priest of New Order ideology and enforcer of doctrinal purity. Shapes the ideological center of Imperial politics. Ensures all party organs remain loyal to the spirit and letter of the New Order.",
             status: "idle", location: "Ralltiir", loyalty: 95, influence: 85
         },
         {
@@ -807,7 +933,7 @@
             displayOrg: "IMPERIAL NAVY",
             faction: "Reformer",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=VC&backgroundColor=002",
-            desc: "Administrative and operational commander of the Imperial Navy’s daily functioning. Oversees fleet development and naval readiness. Second only to the Empire’s foremost admirals. As a Hardliner, Cassius supports the view that the military is the only institution capable of holding the Empire together. He commands the administrative backbone of the Navy.",
+            desc: "Administrative and operational commander of the Imperial Navy’s daily functioning. Oversees fleet development and naval readiness. Second only to the Empire’s foremost admirals. Pragmatic and efficiency-minded.",
             status: "active", location: "Kuat Yards", loyalty: 75, influence: 90
         },
         {
@@ -817,7 +943,7 @@
             displayOrg: "JOINT CHIEFS OF STAFF",
             faction: "Reformer",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=VR&backgroundColor=311",
-            desc: "The attack dog of the Imperial Armed Forces. Effective co-ruler of the Empire with Synnove Fenn. Uniformed political chief of the Imperial defense apparatus, responsible for cracking High Command into shape. Retloc is known for his brutal efficiency in suppressing internal rebellions and overseeing the strategic deployment of Stormtrooper legions.",
+            desc: "The attack dog of the Imperial Armed Forces. Effective co-ruler of the Empire with Synnove Fenn. Uniformed political chief of the Imperial defense apparatus, responsible for cracking High Command into shape.",
             status: "active", location: "Bastion", loyalty: 95, influence: 95
         },
         {
@@ -827,7 +953,7 @@
             displayOrg: "IMPERIAL ARMY",
             faction: "Hardliner",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=MV&backgroundColor=333",
-            desc: "Leads all ground forces across the Empire. Directs doctrine, personnel, strategy, and operational planning for the Army. Elevated post-Endor to restore Army effectiveness and discipline. General Veers, a veteran of countless campaigns including the Battle of Hoth, prioritizes combined arms warfare and disciplined troop deployment.",
+            desc: "Leads all ground forces across the Empire. Directs doctrine, personnel, strategy, and operational planning for the Army. Elevated post-Endor to restore Army effectiveness and discipline.",
             status: "active", location: "Carida", loyalty: 85, influence: 80
         },
         {
@@ -837,7 +963,7 @@
             displayOrg: "COLLEGE OF MOFFS",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=DK&backgroundColor=444",
-            desc: "Chief steward of sector governors, providing guidance, oversight, and arbitration. Ensures Moffs uphold Imperial doctrine and maintain local stability. Serves as intermediary between regional authority and central command. Kaine protects the collective interests of the Moffs, favoring stable provincial governance over radical upheaval.",
+            desc: "Chief steward of sector governors, providing guidance, oversight, and arbitration. Ensures Moffs uphold Imperial doctrine and maintain local stability. Serves as intermediary between regional authority and central command.",
             status: "idle", location: "Coruscant", loyalty: 80, influence: 70
         },
         {
@@ -847,7 +973,7 @@
             displayOrg: "Grand Moffs",
             faction: "Reformer",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=GK&backgroundColor=223",
-            desc: "Ensures Grand Moffs enforce Imperial policy, ensure stability, enshrine prosperity, and develop their portfolios in line with Imperial doctrine. Ex officio in control of most military and paramilitary forces in the Empire through leadership of the Grand Moffs. Kessler represents the highest level of regional authority, overseeing vast swathes of space.",
+            desc: "Ensures Grand Moffs enforce Imperial policy, ensure stability, enshrine prosperity, and develop their portfolios in line with Imperial doctrine. Ex officio in control of most military and paramilitary forces in the Empire.",
             status: "active", location: "Eriadu", loyalty: 90, influence: 95
         },
         {
@@ -857,7 +983,7 @@
             displayOrg: "DIET OF GOVERNORS",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=GR&backgroundColor=123",
-            desc: "Leads the assembly of planetary governors, both Moff and non-Moff. Coordinates regional administration and enforces compliance with central policy. Acts as the Empire’s supreme provincial arbiter. Randd navigates the treacherous political landscape by ensuring core governmental functions—taxation, infrastructure, public works—continue unimpeded.",
+            desc: "Leads the assembly of planetary governors, both Moff and non-Moff. Coordinates regional administration and enforces compliance with central policy. Acts as the Empire’s supreme provincial arbiter.",
             status: "idle", location: "Sector 0", loyalty: 75, influence: 60
         },
         {
@@ -867,48 +993,18 @@
             displayOrg: "IMPERIAL INTELLIGENCE",
             faction: "Traditionalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=DI&backgroundColor=500",
-            desc: "Machiavellian head of the vast and secretive Imperial Intelligence Community, as well as the Director of the shadowy Imperial Intelligence Service. Directs all intelligence, surveillance, and counterintelligence efforts within and without the Empire. Isard's network of agents is unmatched, capable of penetrating the highest levels of both the Alliance and internal Imperial factions.",
+            desc: "Machiavellian head of the vast and secretive Imperial Intelligence Community. Directs all intelligence, surveillance, and counterintelligence efforts within and without the Empire.",
             status: "alert", location: "Classified", loyalty: 40, influence: 60
         },
         {
-            name: "Director Valen Krask",
-            title: "Imperial Security Bureau",
+            name: "Valen Krask",
+            title: "Director",
             org: "Security",
             displayOrg: "SECURITY BUREAU",
             faction: "Ultranationalist",
-            image: "images/882d83f4166d0c037cc47346f92e4089 (1).jpg",
-            desc: "Chief security officer of the Empire. Directs, guides, and monitors the Imperial Security Bureau and all other internal civil intelligence and police agencies. Krask embodies the Hardliner agenda of 'law and order.' His ISB safeguards loyalty, suppresses dissent, and roots out treason with omnipresent surveillance and terror.",
+            image: "https://api.dicebear.com/7.x/initials/svg?seed=VK&backgroundColor=101",
+            desc: "Chief security officer of the Empire. Directs, guides, and monitors the Imperial Security Bureau and all other internal civil intelligence and police agencies. Ruthless and efficient.",
             status: "active", location: "ISB Central", loyalty: 100, influence: 70
-        },
-        {
-            name: "Director [REDACTED]",
-            title: "Judicial Forces",
-            org: "Security",
-            displayOrg: "JUDICIAL FORCES",
-            faction: "Hardliner",
-            image: "https://api.dicebear.com/7.x/initials/svg?seed=DJ&backgroundColor=101",
-            desc: "Leads the Empire’s uniformed federal police and judicial enforcement units. Serves as law enforcement’s representative within the intelligence-security triad. Ensures order is maintained through disciplined legal force. The Judicial Forces are the heavy, public presence of Imperial authority on Core Worlds.",
-            status: "idle", location: "Coruscant", loyalty: 85, influence: 50
-        },
-        {
-            name: "[REDACTED]",
-            title: "Grandmaster/mistress",
-            org: "Ruling Council",
-            displayOrg: "SECRET ORDER",
-            faction: "Ultranationalist",
-            image: "https://api.dicebear.com/7.x/initials/svg?seed=GM&backgroundColor=601",
-            desc: "Unseen grand cleric of the late Emperor’s arcane and esoteric adepts. Acts as the sovereign’s hand, prophet, and instrument in esoteric affairs. Extends the Empire's reach into the mystical and unknowable. An Ultranationalist extremist, the Grandmaster views the Empire as a spiritual doctrine made manifest, feared even by High Command.",
-            status: "alert", location: "Byss", loyalty: 10, influence: 65
-        },
-        {
-            name: "[REDACTED]",
-            title: "Lord/Lady",
-            org: "Ruling Council",
-            displayOrg: "IMPERIAL COURT",
-            faction: "Traditionalist",
-            image: "https://api.dicebear.com/7.x/initials/svg?seed=LC&backgroundColor=202",
-            desc: "Ceremonial and political figure within the Emperor’s inner circle. Manages courtly traditions, diplomacy, and elite social order. Serves as a visible embodiment of Imperial prestige. Maintains the complex hierarchy and etiquette of the Imperial Court, a subtle but effective way to maintain the illusion of continuity and stability.",
-            status: "idle", location: "Imperial Palace", loyalty: 40, influence: 50
         },
         {
             name: "Taokr Selzen",
@@ -917,94 +1013,84 @@
             displayOrg: "Inquisition",
             faction: "Ultranationalist",
             image: "https://api.dicebear.com/7.x/initials/svg?seed=GI&backgroundColor=800",
-            desc: "The Empire’s foremost authority on force-sensitive control. Wields an unlimited charter to hunt, regulate, and contain force users. Answers only to the Emperor and enforces absolute compliance. Selzen aligns with the Ultranationalists, enforcing absolute purity and hunting down any who threaten the Emperor's dark vision.",
+            desc: "The Empire’s foremost authority on force-sensitive control. Wields an unlimited charter to hunt, regulate, and contain force users. Answers only to the Emperor and enforces absolute compliance.",
             status: "alert", location: "Nur", loyalty: 40, influence: 20
         }
     ];
 
     const factionData = {
         "Hardliner": { color: "var(--faction-hardliner)", quote: "Total commitment, or total annihilation.", agenda: "Establish unified enforcement rule, mobilize society, subordinate traditional authority to uniformed services." },
-        "Traditionalist": { color: "var(--faction-traditionalist)", quote: "This too shall pass.", agenda: "Maintenance of the political, economic, and social status quo. Maintain existing institutions, preserve civilian governance, implement careful incremental reforms, stabilize administration, prevent radical upheaval from any faction." },
-        "Ultranationalist": { color: "var(--faction-ultranationalist)", quote: "The galaxy obeys, or the galaxy burns.", agenda: "Enforce ideological purity, crush dissent, punish disloyalty, restore a totally dominant Empire, and punish the galaxy for its insolence." },
-        "Reformer": { color: "var(--faction-reformer)", quote: "An Empire that cannot rule justly will not rule at all.", agenda: "End the worst excesses of the Empire, ease discrimination as much as possible, improve accountable governance, reform the bureaucracy, eliminate corruption, restructure the government, allow limited self-rule." },
-        "Progressive": { color: "var(--faction-progressive)", quote: "The Emperor is not the Empire.", agenda: "Abolish the monarchy, establish collective or representative executive bodies, restore lawful governance, empower civilian institutions, eliminate arbitrary or tyrannical organs." }
+        "Traditionalist": { color: "var(--faction-traditionalist)", quote: "This too shall pass.", agenda: "Maintenance of the political, economic, and social status quo. Maintain existing institutions, preserve civilian governance." },
+        "Ultranationalist": { color: "var(--faction-ultranationalist)", quote: "The galaxy obeys, or the galaxy burns.", agenda: "Enforce ideological purity, crush dissent, punish disloyalty, restore a totally dominant Empire." },
+        "Reformer": { color: "var(--faction-reformer)", quote: "An Empire that cannot rule justly will not rule at all.", agenda: "End the worst excesses of the Empire, ease discrimination, improve accountable governance, reform the bureaucracy." },
+        "Progressive": { color: "var(--faction-progressive)", quote: "The Emperor is not the Empire.", agenda: "Abolish the monarchy, establish collective or representative executive bodies, restore lawful governance." }
     };
 
     const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
 
     const headlines = [
-        "I WANT THAT TWINK (INQUART) OBLITERATED",
-        "VALEN 'TORMENT NEXUS' KRASK",
-        "ALL OF THE LIGHTS",
-        "GRAND MOFF MOFF MCMOFFFACE",
-        "SONIC IS A BITCH ASS MOTHERFUCKER",
-        "ASHER HALCYON ASCENDS TO THE THRONE OF EMPEROR",
-        "PALPATINE FOUND ALIVE IN A CAVE ON REACH",
-        "SYNNOVE 'FINISHED CHARACTER SHEET' FENN"
+        "IMPERIAL SENATE REMAINS SUSPENDED FOR EMERGENCY PERIOD",
+        "KUAT DRIVE YARDS ANNOUNCES RECORD PRODUCTION OUTPUT",
+        "SECURITY ALERT: UNIDENTIFIED SIGNAL IN SECTOR 7",
+        "GRAND MOFF COUNCIL TO CONVENE ON ERIADU",
+        "COMPNOR YOUTH PROGRAM ENROLLMENT UP 15%",
+        "HOLONET MAINTENANCE SCHEDULED FOR 0300",
+        "REBEL CELLS REPORTED IN OUTER RIM - ISB INVESTIGATING"
     ];
+
+    let currentData = [...personnelConfig];
 
     // --- LOGIC ---
 
     function init() {
-        // Boot sequence logic is now triggered AFTER login
         updateFilterCounts();
-        renderCards(personnelConfig); // Initial Render
+        renderCards(currentData);
         initTicker();
         startLogs();
         updateStardate();
         setInterval(updateStardate, 1000);
         
-        // Draggable Logic
-        const modal = document.getElementById('modal-container');
-        let isDragging = false;
-        let startX, startY, initialX, initialY;
-
-        modal.addEventListener('mousedown', (e) => {
-            // Prevent dragging if clicking input or textarea (if any) or scrollbar
-            if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            // Get current transform values or default to 0
-            const style = window.getComputedStyle(modal);
-            const matrix = new WebKitCSSMatrix(style.transform);
-            initialX = matrix.m41;
-            initialY = matrix.m42;
-            
-            modal.style.cursor = 'grabbing';
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            modal.style.transform = `translate(${initialX + dx}px, ${initialY + dy}px)`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            modal.style.cursor = 'move';
-        });
+        // Random "Transmission" Events
+        setInterval(() => {
+            if(Math.random() > 0.8) {
+                const msgs = ["Incoming Transmission", "Data Sync Complete", "Biometric Scan Required", "Sector Alert", "Priority Signal"];
+                showToast(msgs[Math.floor(Math.random() * msgs.length)]);
+            }
+        }, 15000);
     }
 
+    // --- SORTING ---
+    function sortGrid(criteria) {
+        let sorted = [...currentData];
+        if (criteria === 'loyalty') {
+            sorted.sort((a, b) => b.loyalty - a.loyalty);
+        } else if (criteria === 'influence') {
+            sorted.sort((a, b) => b.influence - a.influence);
+        } else if (criteria === 'name') {
+            sorted.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+            // Default: roughly by original index/rank logic, here just reset
+            sorted = [...personnelConfig].filter(p => currentData.includes(p));
+        }
+        renderCards(sorted);
+    }
+
+    // --- TIME & DATES ---
+    let isRealTime = false;
     function updateStardate() {
+        const el = document.getElementById('stardate');
         if(isRealTime) {
             const now = new Date();
-            document.getElementById('stardate').innerText = now.toLocaleTimeString();
+            el.innerText = now.toLocaleTimeString();
         } else {
-            const day = Math.floor(Math.random() * 365);
-            const cycle = Math.floor(Math.random() * 24);
-            document.getElementById('stardate').innerText = `35:${cycle}:${day}`;
+            // Faux Imperial Time
+            const now = new Date();
+            const cycle = Math.floor(now.getTime() / 1000000000);
+            const sub = Math.floor(Math.random() * 999);
+            el.innerText = `C-${cycle}.${sub}`;
         }
     }
-
-    let isRealTime = false;
-    function showRealTime(bool) {
-        isRealTime = bool;
-        updateStardate();
-    }
+    function toggleRealTime() { isRealTime = !isRealTime; updateStardate(); }
 
     // --- LOGIN LOGIC ---
     let isCylinderInserted = false;
@@ -1058,7 +1144,7 @@
             inner.classList.remove('spinning');
             inner.classList.add('access-granted-ring');
             grantAccess();
-        }, 2000);
+        }, 1500);
     }
 
     function grantAccess() {
@@ -1082,14 +1168,12 @@
                 document.getElementById('boot-screen').style.display = 'flex';
                 runBootSequence();
             }, 1000);
-        }, 1500);
+        }, 1200);
     }
 
     function generateAuthCode() {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let result = "IG-";
-        for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-        result += "-";
         for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
         return result;
     }
@@ -1119,6 +1203,7 @@
             label.innerText = "SEC: CRITICAL";
             body.classList.add('alert-state');
             addLog("SECURITY ALERT LEVEL: CRITICAL - LOCKDOWN PROTOCOLS");
+            showToast("DEFCON 3 INITIATED");
         }
     }
 
@@ -1128,6 +1213,7 @@
             if(input.value.trim() !== "") {
                 addLog(`[USER]: ${input.value.toUpperCase()}`);
                 input.value = "";
+                showToast("MESSAGE BROADCASTED");
             }
         }
     }
@@ -1135,13 +1221,8 @@
     // Search Interaction
     function handleSearch() {
         const query = document.getElementById('search-bar').value.toLowerCase();
-        const filtered = personnelConfig.filter(p => p.name.toLowerCase().includes(query) || p.title.toLowerCase().includes(query));
-        renderCards(filtered);
-    }
-
-    // Print
-    function printDossier() {
-        window.print();
+        currentData = personnelConfig.filter(p => p.name.toLowerCase().includes(query) || p.title.toLowerCase().includes(query));
+        renderCards(currentData);
     }
 
     function getPips() {
@@ -1157,34 +1238,32 @@
 
     function getTechID() { return Math.floor(10000 + Math.random() * 90000); }
 
+    function reportTreason(name) {
+        showToast(`REPORT FILED: ${name.toUpperCase()} FOR TREASON`);
+        addLog(`USER FLAGGED ${name.toUpperCase()} FOR IMMEDIATE REVIEW`);
+    }
+
     function renderCards(data) {
         const grid = document.getElementById('cardGrid');
         grid.innerHTML = "";
         
         if(data.length === 0) {
-            grid.innerHTML = `<div style="color:#000; font-family:'Share Tech Mono'; grid-column: 1/-1; text-align:center; padding-top:50px; font-weight:bold;">NO RECORDS FOUND MATCHING QUERY.</div>`;
+            grid.innerHTML = `<div style="color:#000; font-family:'Share Tech Mono'; grid-column: 1/-1; text-align:center; padding-top:50px; font-weight:bold;">NO RECORDS FOUND.</div>`;
             return;
         }
 
         data.forEach((person, index) => {
             const card = document.createElement('div');
             card.className = 'card';
-            // Stagger animation based on filtered index
             card.style.animationDelay = `${index * 50}ms`;
             
-            // Find original index in master config for correct modal opening
+            // Interaction to open modal
             const masterIndex = personnelConfig.indexOf(person);
             card.onclick = () => openModal(masterIndex);
             
             const techID = getTechID();
             const pips = getPips();
             const fData = factionData[person.faction] || { color: "#333" };
-
-            // Truncate Description for card
-            const rawDesc = person.desc;
-            const summaryLength = 120; 
-            let summaryDesc = rawDesc.length > summaryLength ? 
-                              rawDesc.substring(0, rawDesc.lastIndexOf(' ', summaryLength)) + '...' : rawDesc;
 
             // Image Handling
             let imgContent = '';
@@ -1195,6 +1274,9 @@
             }
             
             card.innerHTML = `
+                <div class="card-actions">
+                    <div class="action-btn" title="Track" onclick="event.stopPropagation(); showToast('TRACKING ID-${techID}')"><i class="fas fa-satellite-dish"></i></div>
+                </div>
                 <div class="card-inner">
                     <div class="card-visual">
                         ${imgContent}
@@ -1209,7 +1291,7 @@
                                 <div class="card-org">${person.displayOrg}</div>
                                 <div class="faction-tag" style="background:${fData.color};">${person.faction}</div>
                             </div>
-                            <div style="font-family:'Share Tech Mono'; color:#000; font-size:0.8rem; font-weight:bold;">ID-${techID}</div>
+                            <div style="font-family:'Share Tech Mono'; color:#000; font-size:0.7rem; font-weight:bold;">ID-${techID}</div>
                         </div>
                         <div class="card-name">${person.name}</div>
                         <div class="card-title">${person.title}</div>
@@ -1220,16 +1302,15 @@
                                 <div class="stat-track"><div class="stat-fill" style="width: ${person.loyalty}%"></div></div>
                             </div>
                             <div class="stat-line">
-                                <span class="stat-label">INFLUENCE</span>
+                                <span class="stat-label">INF</span>
                                 <div class="stat-track"><div class="stat-fill" style="width: ${person.influence}%"></div></div>
                             </div>
                         </div>
-                        <div style="font-size:0.75rem; color:#444; line-height:1.4;">${summaryDesc}</div>
                     </div>
                 </div>
                 <div class="tech-specs">
                      <span>LOC: ${person.location.toUpperCase()}</span>
-                     <span>STATUS: ${person.status.toUpperCase()}</span>
+                     <span>${person.status.toUpperCase()}</span>
                 </div>
             `;
             grid.appendChild(card);
@@ -1237,22 +1318,24 @@
     }
 
     function filterData(type, btn, value) {
-        // UI State
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Logic
-        let filtered = [];
         if (type === 'all') {
-            filtered = personnelConfig;
+            currentData = personnelConfig;
         } else if (type === 'org') {
-            filtered = personnelConfig.filter(p => p.org === value);
+            currentData = personnelConfig.filter(p => p.org === value);
         } else if (type === 'faction') {
-            filtered = personnelConfig.filter(p => p.faction === value);
+            currentData = personnelConfig.filter(p => p.faction === value);
         }
         
-        renderCards(filtered);
+        // Reset sort to default when filtering
+        document.querySelector('.sort-select').value = 'default';
+        renderCards(currentData);
         addLog(`Filtering database: ${value || 'ALL'}...`);
+        
+        // Mobile: Close sidebar after selection
+        if(window.innerWidth <= 900) toggleSidebar();
     }
 
     function updateFilterCounts() {
@@ -1265,13 +1348,55 @@
         document.getElementById('count-pro').innerText = personnelConfig.filter(p => p.org === 'Provincial').length;
     }
 
+    // --- SIDEBAR TOGGLE (MOBILE) ---
+    function toggleSidebar() {
+        const sb = document.getElementById('main-sidebar');
+        const ol = document.querySelector('.sidebar-overlay');
+        sb.classList.toggle('open');
+        ol.classList.toggle('active');
+    }
+
     // --- MODAL ---
     
+    // Scramble Text Effect (Title & Name)
+    function scrambleText(element, finalText, speed = 30) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+        let iterations = 0;
+        
+        const interval = setInterval(() => {
+            element.innerText = finalText
+                .split("")
+                .map((letter, index) => {
+                    if(index < iterations) return finalText[index];
+                    return chars[Math.floor(Math.random() * chars.length)];
+                })
+                .join("");
+            
+            if(iterations >= finalText.length) clearInterval(interval);
+            iterations += 1/2; 
+        }, speed);
+    }
+
+    // Typewriter Effect (Description)
+    function typeWriter(element, text, speed = 5) {
+        element.innerHTML = "";
+        let i = 0;
+        const interval = setInterval(() => {
+            if(i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(interval);
+            }
+        }, speed);
+    }
+
     function openModal(index) {
         const data = personnelConfig[index];
         const fData = factionData[data.faction] || { color: "#333", quote: "Unknown", agenda: "Classified" };
         
-        document.getElementById('m-name').innerText = data.name;
+        // Scramble Name & Title
+        scrambleText(document.getElementById('m-name'), data.name);
         document.getElementById('m-title').innerText = data.title;
         document.getElementById('m-loc').innerText = data.location.toUpperCase();
         document.getElementById('m-loyalty').innerText = data.loyalty + "%";
@@ -1280,7 +1405,6 @@
         const graphCon = document.getElementById('loyalty-graph');
         let graphHtml = '';
         for(let i=0; i<15; i++) {
-            // Trend towards their actual loyalty
             const h = Math.max(10, Math.min(100, data.loyalty + (Math.random()*40 - 20))); 
             graphHtml += `<div class="l-bar" style="height:${h}%;"></div>`;
         }
@@ -1292,29 +1416,27 @@
         document.getElementById('m-faction-quote').innerText = `"${fData.quote}"`;
         document.getElementById('m-faction-agenda').innerText = fData.agenda;
 
-        // Image
+        // Image logic with Holo Scan
         const imgEl = document.getElementById('m-img');
         const svgContainer = document.getElementById('m-svg-container');
         const svgPath = document.getElementById('m-svg-path');
+        const scanLine = document.getElementById('scan-line');
         
         if (data.image && data.image.trim() !== "") {
             imgEl.style.display = 'block';
             svgContainer.style.display = 'none';
             imgEl.src = data.image;
-            imgEl.onerror = () => { imgEl.style.display='none'; svgContainer.style.display='flex'; svgPath.setAttribute('d', imperialCrestPath); };
+            scanLine.style.display = 'block'; // Activate Scan Line
+            imgEl.onerror = () => { imgEl.style.display='none'; svgContainer.style.display='flex'; svgPath.setAttribute('d', imperialCrestPath); scanLine.style.display='none'; };
         } else {
             imgEl.style.display = 'none';
             svgContainer.style.display = 'flex';
             svgPath.setAttribute('d', imperialCrestPath);
+            scanLine.style.display = 'none';
         }
 
-        // NO DECRYPT EFFECT - Plain Text
-        const descEl = document.getElementById('m-desc');
-        descEl.innerText = data.desc;
-
-        // Reset Transform for Dragging
-        const modal = document.getElementById('modal-container');
-        modal.style.transform = "translate(0,0)";
+        // Typewriter Effect for Bio
+        typeWriter(document.getElementById('m-desc'), data.desc);
 
         document.getElementById('modal-overlay').classList.add('active');
         addLog(`Accessing file: ${data.name} [SECURE]`);
@@ -1322,19 +1444,20 @@
 
     function closeModal() {
         document.getElementById('modal-overlay').classList.remove('active');
+        // Stop scan line
+        document.getElementById('scan-line').style.display = 'none';
     }
 
     // --- SYSTEM FX ---
     function startLogs() {
-        setInterval(() => addLog(), 2500);
+        setInterval(() => addLog(), 4000);
         for(let i=0; i<4; i++) addLog();
     }
 
     const logMsgs = [
         "Scanning Sector 4...", "Encrypted Transmission: VERIFIED", "Unit 774-A reporting in.",
-        "Holonet relay stabilized.", "Rebel activity detected in Sector 9.", "TIE Squadron deployed.",
-        "Background radiation: NORMAL", "Updating personnel manifest...", "Connection secured",
-        "Auth token refreshed.", "Compiling analytics...", "Hyperdrive diagnostic complete."
+        "Holonet relay stabilized.", "Background radiation: NORMAL", "Updating personnel manifest...", 
+        "Connection secured", "Auth token refreshed.", "Compiling analytics...", "Hyperdrive diagnostic complete."
     ];
 
     function addLog(specificText = null) {
@@ -1346,7 +1469,7 @@
         const time = new Date().toLocaleTimeString([], {hour12: false});
         entry.innerText = `[${time}] ${text}`;
         
-        if(!specificText && Math.random() > 0.85) {
+        if(!specificText && Math.random() > 0.9) {
             entry.className += ' alert';
             entry.innerText = `[${time}] ALERT: ${text.toUpperCase()}`;
         }
@@ -1355,6 +1478,21 @@
         con.scrollTop = con.scrollHeight;
         setTimeout(() => entry.classList.remove('new'), 500);
         if(con.children.length > 20) con.removeChild(con.firstChild);
+    }
+
+    function showToast(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right:10px; color:var(--iso-amber);"></i> ${msg}`;
+        toast.onclick = () => toast.remove();
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = "fadeOut 0.5s forwards";
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
     }
 
     function initTicker() {
@@ -1374,12 +1512,12 @@
         lines.forEach((line) => {
             line.style.display = 'none';
             setTimeout(() => { line.style.display = 'block'; }, delay);
-            delay += 800;
+            delay += 600;
         });
         setTimeout(() => {
             bootScreen.style.opacity = '0';
             setTimeout(() => { bootScreen.style.display = 'none'; }, 600);
-        }, delay + 1000);
+        }, delay + 800);
     }
 
     window.onload = init;
