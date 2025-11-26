@@ -305,9 +305,21 @@
             box-shadow: 5px 0 15px rgba(0,0,0,0.05);
             transition: transform 0.3s ease-in-out;
             height: 100vh; flex-shrink: 0;
+            overflow: hidden; /* Ensure flexbox controls scrolling, not parent overflow */
         }
         
-        .sidebar-section { padding: 1.5rem; border-bottom: 2px solid var(--iso-dark); }
+        /* UPDATED SIDEBAR SECTION FOR SCROLLING */
+        .sidebar-section { 
+            padding: 1.5rem; 
+            border-bottom: 2px solid var(--iso-dark); 
+            background: #e9e9e9; 
+            display: flex; 
+            flex-direction: column; 
+            flex-grow: 1;
+            overflow-y: auto; /* Enable vertical scrolling */
+            min-height: 150px; /* Adjusted to prevent layout breakage */
+        }
+        
         .sidebar-header {
             color: var(--iso-dark); font-size: 1.2rem; 
             text-transform: uppercase; letter-spacing: 1px;
@@ -318,6 +330,7 @@
         /* NAVIGATION MENU */
         .nav-menu {
             display: flex; flex-direction: column; margin-top: 10px; border-bottom: 2px solid var(--iso-dark);
+            flex-shrink: 0; /* Don't shrink the nav */
         }
         .nav-btn {
             background: #e0e0e0; border: none; padding: 15px; text-align: left;
@@ -347,17 +360,18 @@
         .filter-count { font-size: 0.7rem; opacity: 0.7; }
 
         .log-container { 
-            flex-grow: 1; overflow-y: auto; padding: 1rem; 
+            flex-grow: 0.5; overflow-y: auto; padding: 1rem; 
             background: #fcfcfc; border-top: 4px solid var(--iso-dark);
             font-family: 'Share Tech Mono';
             font-size: 0.75rem;
+            min-height: 120px;
         }
         .log-entry { margin-bottom: 4px; padding-left: 8px; color: #444; border-left: 2px solid #ddd; }
         .log-entry.new { color: var(--iso-dark); border-left-color: var(--iso-dark); font-weight: bold; }
         .log-entry.alert { color: var(--iso-alert); border-left-color: var(--iso-alert); font-weight: bold; background: rgba(204, 0, 0, 0.05); }
 
         .comms-input-container {
-            padding: 10px; background: #eee; border-top: 1px solid #ccc;
+            padding: 10px; background: #eee; border-top: 1px solid #ccc; flex-shrink: 0;
         }
         .comms-input {
             width: 100%; background: #fff; border: 1px solid #999; padding: 10px;
@@ -370,14 +384,15 @@
             font-family: 'Share Tech Mono'; font-size: 0.9rem; outline: none; color: var(--iso-dark); border-radius: 0;
         }
 
-        /* GLOBE CANVAS */
+        /* GLOBE CANVAS - UPDATED HEIGHT */
         .globe-container {
-            width: 100%; height: 180px; background: #000;
+            width: 100%; height: 240px; background: #000;
             display: flex; justify-content: center; align-items: center;
             border-bottom: 2px solid var(--iso-dark);
             position: relative;
             overflow: hidden;
             cursor: pointer;
+            flex-shrink: 0;
         }
         .globe-overlay {
             position: absolute; top: 10px; left: 10px;
@@ -871,7 +886,8 @@
                 SECTOR: <span id="map-sector-name">CORE</span><br>
                 STATUS: <span id="map-status-text">LOCKED DOWN</span>
             </div>
-            <canvas id="planet-canvas" width="300" height="180"></canvas>
+            <!-- Increased height to 240 -->
+            <canvas id="planet-canvas" width="300" height="240"></canvas>
             <div class="sys-monitor" id="sys-monitor">
                 <!-- JS generated bars -->
             </div>
@@ -893,7 +909,7 @@
             </button>
         </nav>
 
-        <div class="sidebar-section" style="background: #e9e9e9; display: flex; flex-direction: column; flex-grow: 1;">
+        <div class="sidebar-section">
             <div class="sidebar-header">
                 <span>SYSTEM FILTER</span>
                 <i class="fas fa-filter" style="font-size:0.8rem"></i>
@@ -927,6 +943,26 @@
                 </button>
                 <button class="filter-btn" onclick="filterData('org', this, 'Provincial')">
                     Provincial / Moffs <span class="filter-count" id="count-pro">0</span>
+                </button>
+            </div>
+            
+            <!-- ADDED FACTION FILTERS FOR SCROLLING -->
+            <div style="margin:15px 0 5px 0; color:#000; font-weight:bold; font-size:0.7rem; font-family:'Share Tech Mono'">FACTION</div>
+            <div class="filter-group">
+                <button class="filter-btn" onclick="filterData('faction', this, 'Ultranationalist')">
+                    Ultranationalist <span class="filter-count" id="count-fac-ultra">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Hardliner')">
+                    Hardliner <span class="filter-count" id="count-fac-hard">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Traditionalist')">
+                    Traditionalist <span class="filter-count" id="count-fac-trad">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Reformer')">
+                    Reformer <span class="filter-count" id="count-fac-ref">0</span>
+                </button>
+                <button class="filter-btn" onclick="filterData('faction', this, 'Progressive')">
+                    Progressive <span class="filter-count" id="count-fac-prog">0</span>
                 </button>
             </div>
         </div>
@@ -1241,17 +1277,6 @@
             image: "https://api.dicebear.com/7.x/initials/svg?seed=YI&backgroundColor=500",
             desc: "Head of the Ubiqtorate. Operates almost completely independently under the Ministry of War. Responsible for espionage.",
             status: "alert", location: "CLASSIFIED", loyalty: 60, influence: 88
-        },
-        {
-            id: "34370",
-            name: "Valen Krask",
-            title: "Director of the ISB",
-            org: "Security",
-            displayOrg: "SECURITY BUREAU",
-            faction: "Ultranationalist",
-            image: "https://api.dicebear.com/7.x/initials/svg?seed=VK&backgroundColor=000",
-            desc: "Safeguards loyalty, suppresses dissent, and roots out treason. Has authority to override almost any civilian or military authority.",
-            status: "active", location: "ISB CENTRAL", loyalty: 100, influence: 92
         },
         {
             id: "34370",
@@ -1863,6 +1888,13 @@
         document.getElementById('count-com').innerText = personnelConfig.filter(p => p.org === 'COMPNOR').length;
         document.getElementById('count-sec').innerText = personnelConfig.filter(p => p.org === 'Security').length;
         document.getElementById('count-pro').innerText = personnelConfig.filter(p => p.org === 'Provincial').length;
+
+        // Faction Counts
+        document.getElementById('count-fac-ultra').innerText = personnelConfig.filter(p => p.faction === 'Ultranationalist').length;
+        document.getElementById('count-fac-hard').innerText = personnelConfig.filter(p => p.faction === 'Hardliner').length;
+        document.getElementById('count-fac-trad').innerText = personnelConfig.filter(p => p.faction === 'Traditionalist').length;
+        document.getElementById('count-fac-ref').innerText = personnelConfig.filter(p => p.faction === 'Reformer').length;
+        document.getElementById('count-fac-prog').innerText = personnelConfig.filter(p => p.faction === 'Progressive').length;
     }
 
     // --- SIDEBAR TOGGLE (MOBILE) ---
