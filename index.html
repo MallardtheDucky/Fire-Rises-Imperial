@@ -7,6 +7,8 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;500;700&family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Antonio:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Models -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <style>
         :root {
@@ -318,6 +320,7 @@
             flex-grow: 1;
             overflow-y: auto; /* Enable vertical scrolling */
             min-height: 150px; /* Adjusted to prevent layout breakage */
+            -webkit-overflow-scrolling: touch;
         }
         
         .sidebar-header {
@@ -399,14 +402,23 @@
             color: #0f0; font-family: 'Share Tech Mono'; font-size: 0.7rem;
             pointer-events: none;
             text-shadow: 0 0 5px #0f0;
+            z-index: 10;
         }
         .sys-monitor {
             display: flex; gap: 2px; position: absolute; bottom: 10px; right: 10px;
             height: 20px;
+            z-index: 10;
         }
         .sys-bar {
             width: 4px; background: #0f0; opacity: 0.5;
             transition: height 0.1s;
+        }
+        
+        /* THREE JS CANVAS RESET */
+        #planet-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
         }
 
         /* --- MAIN CONTENT --- */
@@ -723,28 +735,44 @@
                 width: 85%; max-width: 320px;
                 box-shadow: 10px 0 50px rgba(0,0,0,0.5);
                 border-right: 4px solid var(--iso-dark);
+                z-index: 200; /* Ensure it stays on top of everything */
             }
             aside.open { transform: translateX(0); }
             
             /* Overlay when sidebar is open */
             .sidebar-overlay {
                 position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); 
-                z-index: 90; display:none; backdrop-filter: blur(2px);
+                z-index: 150; display:none; backdrop-filter: blur(2px);
             }
             .sidebar-overlay.active { display: block; }
 
             main { padding: 1rem; width: 100%; }
             
-            header { flex-direction: column; align-items: flex-start; gap: 15px; border-bottom-width: 2px; }
-            .header-title h1 { font-size: 2.5rem; }
-            .header-stats { width: 100%; border: none; padding: 0; justify-content: space-between; text-align: left; }
+            header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 10px; 
+                border-bottom-width: 2px; 
+                padding-bottom: 1rem;
+            }
+            
+            .header-title h1 { font-size: 2rem; }
+            .header-stats { 
+                width: 100%; 
+                border: none; 
+                padding: 0; 
+                justify-content: space-between; 
+                text-align: left; 
+                font-size: 0.8rem; /* Compact Text */
+            }
             
             .modal-container { 
                 flex-direction: column; height: 100%; width: 100%; max-width: none; border:none; 
             }
-            .modal-left { width: 100%; height: 200px; border-right: none; border-bottom: 2px solid #000; flex-shrink: 0;}
+            .modal-left { width: 100%; height: 250px; border-right: none; border-bottom: 2px solid #000; flex-shrink: 0;}
             .modal-right { width: 100%; padding: 1.5rem; height: auto; flex-grow: 1; }
             .modal-name { font-size: 2rem; }
+            .modal-close { top: 5px; right: 10px; font-size: 4rem; line-height: 0.6; padding: 10px; } /* Bigger hit target */
             
             .grid, .structure-grid { grid-template-columns: 1fr; }
             
@@ -754,6 +782,16 @@
             /* Ticker adjustment */
             .ticker-wrap { font-size: 0.75rem; }
             .ticker-item { padding: 0 1rem; }
+
+            /* Login Container Width Fix */
+            .login-container { width: 90%; margin: 0 auto; }
+
+            /* Prevent Input Zoom on iOS */
+            input, select, textarea { font-size: 16px !important; }
+            
+            /* Nav Buttons Touch Targets */
+            .nav-btn { padding: 20px; }
+            .filter-btn { padding: 15px; }
         }
 
         @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -886,7 +924,7 @@
                 SECTOR: <span id="map-sector-name">CORE</span><br>
                 STATUS: <span id="map-status-text">LOCKED DOWN</span>
             </div>
-            <!-- Increased height to 240 -->
+            <!-- Canvas for 3D Scene -->
             <canvas id="planet-canvas" width="300" height="240"></canvas>
             <div class="sys-monitor" id="sys-monitor">
                 <!-- JS generated bars -->
@@ -1341,7 +1379,7 @@
         }
     ];
 
-    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79-26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
+    const imperialCrestPath = "M256,504A248,248,0,1,1,504,256,248.28,248.28,0,0,1,256,504ZM256,46C140.23,46,46,140.23,46,256S140.23,466,256,466,466,371.77,466,256,371.77,46,256,46Zm-39.6,120.4a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,216.4,166.4Zm79.2,0a43.51,43.51,0,1,1,43.51-43.51A43.56,43.56,0,0,1,295.6,166.4ZM256,192.8a63.2,63.2,0,1,0,63.2,63.2A63.27,63.27,0,0,0,256,192.8ZM119.24,256a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,119.24,256Zm273.52,0a43.51,43.51,0,1,1,43.51,43.51A43.56,43.56,0,0,1,392.76,256ZM216.4,345.6a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,216.4,345.6Zm79.2,0a43.51,43.51,0,1,1-43.51-43.51A43.56,43.56,0,0,1,295.6,345.6ZM124,136.63l47.58,19.71a80,80,0,0,0,26.79-26.79L178.65,82A208.6,208.6,0,0,0,124,136.63ZM82,178.65l47.58,19.71a80,80,0,0,0-26.79,26.79L82,333.35A208.6,208.6,0,0,0,178.65,430l19.71-47.58a80,80,0,0,0,26.79,26.79L136.63,388A208.6,208.6,0,0,0,82,333.35ZM388,124l-47.58,19.71a80,80,0,0,0-26.79,26.79L333.35,82A208.6,208.6,0,0,0,388,124Zm42,54.65-47.58,19.71a80,80,0,0,0,26.79,26.79L333.35,178.65A208.6,208.6,0,0,0,430,178.65ZM333.35,430l-19.71-47.58a80,80,0,0,0-26.79,26.79L375.37,388A208.6,208.6,0,0,0,430,333.35Z";
 
     // HEADLINES FROM "AFTERMATH.PDF"
     const headlines = [
@@ -1367,7 +1405,7 @@
         initTicker();
         startLogs();
         updateStardate();
-        initGlobe();
+        initGlobe(); // Now invokes Three.js
         startSystemMonitor();
         setInterval(updateStardate, 1000);
         setInterval(triggerRandomGlitch, 5000);
@@ -1436,7 +1474,7 @@
         }
     }
 
-    // --- 3D GLOBE VISUALIZER ---
+    // --- 3D GLOBE VISUALIZER (THREE.JS) ---
     let mapMode = "normal"; // normal or conflict
     
     function toggleMapMode() {
@@ -1459,83 +1497,133 @@
     }
 
     function initGlobe() {
+        // Ensure Three.js is loaded
+        if (typeof THREE === 'undefined') {
+            console.warn('Three.js not loaded');
+            return;
+        }
+
         const canvas = document.getElementById('planet-canvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width;
-        let height = canvas.height;
-        let cx = width / 2;
-        let cy = height / 2;
-        let radius = 60;
-        let angle = 0;
+        const container = document.querySelector('.globe-container');
+        
+        // Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        camera.position.z = 60;
+        camera.position.y = 10;
+        camera.lookAt(0,0,0);
 
-        // Generate points for sphere
-        const points = [];
-        const numLat = 12;
-        const numLon = 16;
-        for (let lat = 0; lat <= numLat; lat++) {
-            const theta = (lat * Math.PI) / numLat;
-            const sinTheta = Math.sin(theta);
-            const cosTheta = Math.cos(theta);
-            for (let lon = 0; lon <= numLon; lon++) {
-                const phi = (lon * 2 * Math.PI) / numLon;
-                const x = radius * sinTheta * Math.cos(phi);
-                const y = radius * cosTheta;
-                const z = radius * sinTheta * Math.sin(phi);
-                points.push({x, y, z});
-            }
-        }
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
 
-        function draw() {
-            ctx.fillStyle = mapMode === "conflict" ? '#1a0000' : '#000';
-            ctx.fillRect(0, 0, width, height);
-            ctx.strokeStyle = mapMode === "conflict" ? '#cc0000' : '#0f0';
-            ctx.lineWidth = 0.5;
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(50, 20, 50);
+        scene.add(directionalLight);
 
-            angle += 0.005;
+        // --- CORUSCANT ---
+        // Inner dark sphere to block background lines
+        const planetGeo = new THREE.SphereGeometry(12, 32, 32);
+        const planetMat = new THREE.MeshPhongMaterial({ 
+            color: 0x050505, 
+            specular: 0x111111,
+            shininess: 10
+        }); 
+        const planet = new THREE.Mesh(planetGeo, planetMat);
+        scene.add(planet);
 
-            ctx.beginPath();
-            points.forEach(p => {
-                // Rotate around Y
-                const rx = p.x * Math.cos(angle) - p.z * Math.sin(angle);
-                const rz = p.x * Math.sin(angle) + p.z * Math.cos(angle);
-                
-                // Project
-                const scale = 200 / (200 + rz);
-                const px = cx + rx * scale;
-                const py = cy + p.y * scale;
-                
-                // Draw simple dots/lines
-                ctx.moveTo(px, py);
-                ctx.arc(px, py, 1, 0, Math.PI*2);
-            });
-            ctx.stroke();
+        // Tech Overlay (Wireframe)
+        const wireGeo = new THREE.WireframeGeometry(planetGeo);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.25 });
+        const wire = new THREE.LineSegments(wireGeo, wireMat);
+        planet.add(wire);
+
+        // --- STAR DESTROYER (Procedural Group) ---
+        const destroyerGroup = new THREE.Group();
+        
+        // Main Hull (Triangular Wedge)
+        const hullGeo = new THREE.ConeGeometry(1.5, 8, 3);
+        hullGeo.rotateX(Math.PI / 2); // Lay flat
+        hullGeo.rotateY(Math.PI); // Point forward relative to orbit
+        const shipMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, flatShading: true });
+        const hull = new THREE.Mesh(hullGeo, shipMat);
+        hull.scale.set(1, 0.2, 1); // Flatten the cone
+        destroyerGroup.add(hull);
+
+        // Superstructure (Block on top)
+        const bridgeGeo = new THREE.BoxGeometry(0.8, 0.4, 1);
+        const bridge = new THREE.Mesh(bridgeGeo, shipMat);
+        bridge.position.set(0, 0.3, 1.5); // Back of the ship
+        destroyerGroup.add(bridge);
+
+        // Command Tower
+        const towerGeo = new THREE.BoxGeometry(0.6, 0.3, 0.4);
+        const tower = new THREE.Mesh(towerGeo, shipMat);
+        tower.position.set(0, 0.6, 1.5);
+        destroyerGroup.add(tower);
+
+        // Shield Generators (2 spheres)
+        const shieldGeo = new THREE.SphereGeometry(0.15, 8, 8);
+        const s1 = new THREE.Mesh(shieldGeo, shipMat);
+        s1.position.set(0.3, 0.8, 1.5);
+        const s2 = new THREE.Mesh(shieldGeo, shipMat);
+        s2.position.set(-0.3, 0.8, 1.5);
+        destroyerGroup.add(s1);
+        destroyerGroup.add(s2);
+
+        // Engines (Glowing dots)
+        const engineGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.1, 8);
+        engineGeo.rotateX(Math.PI / 2);
+        const engineMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+        const e1 = new THREE.Mesh(engineGeo, engineMat); e1.position.set(0.3, 0, 3.8);
+        const e2 = new THREE.Mesh(engineGeo, engineMat); e2.position.set(-0.3, 0, 3.8);
+        const e3 = new THREE.Mesh(engineGeo, engineMat); e3.position.set(0, 0.1, 3.9);
+        destroyerGroup.add(e1); destroyerGroup.add(e2); destroyerGroup.add(e3);
+
+        // Position the Ship in Orbit
+        const orbitPivot = new THREE.Group();
+        scene.add(orbitPivot);
+        destroyerGroup.position.set(20, 0, 0); // Radius 20
+        destroyerGroup.rotation.y = -Math.PI / 2; // Face direction of travel
+        orbitPivot.add(destroyerGroup);
+
+        // Add Orbit Ring Line
+        const orbitCurve = new THREE.EllipseCurve(0, 0, 20, 20, 0, 2 * Math.PI, false, 0);
+        const orbitPoints = orbitCurve.getPoints(64);
+        const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+        const orbitMaterial = new THREE.LineBasicMaterial({ color: 0x004400, transparent: true, opacity: 0.3 });
+        const orbitRing = new THREE.Line(orbitGeometry, orbitMaterial);
+        orbitRing.rotation.x = Math.PI / 2;
+        scene.add(orbitRing);
+
+        // --- ANIMATION LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate Coruscant
+            planet.rotation.y += 0.002;
+
+            // Orbit Ship
+            orbitPivot.rotation.y += 0.005;
             
-            // Draw "Conflict" markers if in conflict mode
-            if(mapMode === "conflict") {
-                ctx.fillStyle = "red";
-                // Fake random conflict zones that rotate
-                const zones = [0, 2, 4];
-                zones.forEach(offset => {
-                    const zoneAngle = angle + offset;
-                    const zx = Math.cos(zoneAngle) * 40;
-                    const zz = Math.sin(zoneAngle) * 40;
-                     // Project
-                    const scale = 200 / (200 + zz);
-                    const px = cx + zx * scale;
-                    const py = cy + (Math.sin(angle*3)*20) * scale; // Bob up and down
-                    
-                    if(zz > -50) { // Only draw if not too far back
-                        ctx.beginPath();
-                        ctx.arc(px, py, 3, 0, Math.PI*2);
-                        ctx.fill();
-                        ctx.fillText("!", px+5, py-5);
-                    }
-                });
-            }
+            // Gentle ship rock
+            destroyerGroup.rotation.z = Math.sin(Date.now() * 0.001) * 0.05;
 
-            requestAnimationFrame(draw);
+            renderer.render(scene, camera);
         }
-        draw();
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            if(container) {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+        });
     }
 
     // --- SYSTEM MONITOR ---
